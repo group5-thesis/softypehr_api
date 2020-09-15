@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePositionTable extends Migration
+class CreateRemainingLeave extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreatePositionTable extends Migration
      */
     public function up()
     {
-        Schema::create('position', function (Blueprint $table) {
+        Schema::create('remaining_leave', function (Blueprint $table) {
             $table->id();
-            // $table->timestamps();
-            $table->string('title');
+            $table->Integer('employeeId');
+            $table->string('no_of_days');
         });
     }
 
@@ -27,6 +27,6 @@ class CreatePositionTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('position');
+        Schema::dropIfExists('remaining_leave');
     }
 }

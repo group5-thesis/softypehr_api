@@ -18,14 +18,15 @@ class CreateEmployeeTable extends Migration
             $table->string('firstname');
             $table->string('middlename');
             $table->string('lastname');
+            $table->string('mobileno');
             $table->string('birthdate');
             $table->string('email')->unique();
             $table->string('gender');
-            $table->string('image');
-            $table->string('address');
+            $table->string('profileImage');
             $table->string('street');
             $table->string('city');
-            $table->Integer('roleID');
+            $table->string('country');
+            $table->Integer('roleId');
         });
     }
 
