@@ -7,8 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 class Employee extends Model
 {
     //
-    protected $fillable = ['firstname', 'middlename', 'lastname', 'birthdate', 'email', 'gender', 'image', 'address', 'street','city', 'roleID'];
+    protected $fillable = [
+        'firstname',
+        'middlename',
+        'lastname' ,
+        'mobileno',
+        'birthdate',
+        'email',
+        'gender',
+        'profileImage',
+        'street',
+        'city',
+        'country',
+        'roleId'
+    ];
+
+    protected $table = 'employee';
 
     public $timestamps = false;
-
 }

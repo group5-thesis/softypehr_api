@@ -18,16 +18,36 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::group(['middleware' => 'api-header'], function () {
+    // The registration and login requests doesn't come with tokens
+    // as users at that point have not been authenticated yet
+    // Therefore the jwtMiddleware will be exclusive of them
+    Route::post('/login', 'AuthController@login');
+});
+
+
+// this routes are needed with jwt token, you need first to login before executing this routes
+Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
+
+     // all routes to protected resources are registered here
+     Route::get('/retrieve_users', 'UserController@retrieveUsers');
+
+});
+
 // User
-Route::post('/create', 'UserController@createUser');
+// Route::post('/create_user', 'AccountController@createUser');
+// Route::post('/retrieve_user', 'UserController@retrieveUser');
+// Route::post('/update_user', 'UserController@updateUser');
+// Route::post('/delete_user', 'UserController@deleteUser');
 
 // Employee
-// Route::post('/create_employee', 'EmployeeController@createEmployee');
+Route::post('/create_employee', 'EmployeeController@createEmployee');
+Route::post('/retrieve_employee_limited', 'EmployeeController@retrieveEmployeeLimited');
+Route::get('/retrieve_employees', 'EmployeeController@retrieveEmployees');
 // Route::post('/update_employee', 'EmployeeController@updateEmployee');
-// Route::post('/retrieve_employee', 'EmployeeController@retrieveEmployees');
 // Route::post('/delete_employee' , 'EmployeeController@deleteEmployee');
 
-// // Employee Leave 
+// // Employee Leave
 // Route::post('/create_request_leave', 'EmployeeLeaveController@createLeave');
 // Route::post('/retrieve_remaining_leave', 'EmployeeLeaveController@retrieveRemainingLeave');
 // Route::post('/retrieve_employees_on_leave', 'EmployeeLeaveController@retrieveEmployeesOnLeave');
