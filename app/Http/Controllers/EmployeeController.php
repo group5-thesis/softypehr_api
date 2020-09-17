@@ -9,56 +9,81 @@ use App\Models\Account;
 use Illuminate\Support\Str;
 use DB;
 use App\Http\Controllers\AccountController;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Hash;
 
 class EmployeeController extends Controller
 {
     public function createEmployee(Request $request)
     {
-        $employee = Employee::create(
-            [
-                'firstname' => $request->firstname,
-                'middlename' => $request->middlename,
-                'lastname' => $request->lastname,
-                'mobileno' => $request->mobileno,
-                'birthdate' => $request->birthdate,
-                'email' => $request->email,
-                'gender' => $request->gender,
-                'profileImage' => $request->profileImage,
-                'street' => $request->street,
-                'city' => $request->city,
-                'country' => $request->country,
-                'roleId' => $request->roleId,
-            ]
-        );
-        $firstName = '';
-        $lastName = '';
-        $firstName = $request->firstname;
-        $lastName = $request->lastname;
-        $firstLetter = $firstName[0];
-        $username = Str::lower($firstLetter . $lastName);
-        $defaultPassword = 'Softype@100';
-        $accountEmployee = [
-            'employeeId' => $employee->id,
-            'username' => $username,
-            'password' => $defaultPassword,
-            'qr_code' => 'code here',
-            'email' => $request->email
-        ];
+        $validator = Validator::make($request->all(), [
+            'firstname' => 'required',
+            'middlename' => 'required',
+            'lastname' => 'required',
+            'mobileno' => 'required',
+            'birthdate' => 'required',
+            'email' => 'required|unique:employee|email',
+            'gender' => 'required',
+            'street' => 'required',
+            'city' => 'required',
+            'country' => 'required',
+            'roleId' => 'required',
+        ]);
 
-        app('App\Http\Controllers\UserController')->createEmployeeAccount($accountEmployee);
+        if ($validator->fails()) {
+            $messages = $validator->messages();
+            $response = ['data' => ['error' => true, 'message' => $messages]];
+            return response()->json($response, 400);
+            // return Redirect::to('/create_employee')->with('message', 'Register Failed');
+        } else {
+            $employee = DB::select(
+                'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?,?)',
+                array(
+                    $request->firstname, $request->middlename, $request->lastname, $request->mobileno,
+                    $request->gender, $request->email, $request->birthdate, $request->profileImage,
+                    $request->street, $request->city, $request->country, $request->roleId
+                )
+            );
+            $result = collect($employee);
+            $employee_id = $result[0]->id;
 
-        return response()->json($employee, Response::HTTP_OK);
+            try {
+                if ($employee) {
+                    $firstName = '';
+                    $lastName = '';
+                    $firstName = $request->firstname;
+                    $lastName = $request->lastname;
+                    $username = Str::lower($firstName[0] . $lastName);
+                    $defaultPassword = Hash::make('Softype@100');
+
+                    $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
+                    $qrcode = \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
+                    $user = DB::select(
+                        'call CreateEmployeeAccount(?,?,?,?,?)',
+                        array($username, $request->email, $defaultPassword, $file, $employee_id)
+                    );
+
+                    $response = ['data' => ['account_information' => $result, 'error' => false, 'message' => 'success']];
+
+                    return response()->json($response, 200);
+                }
+            } catch (\Exception $e) {
+                return $e->getMessage();
+            }
+        }
     }
 
     public function retrieveEmployees()
     {
-        $employees = Employee::get();
+        $employees = Employee::RetrieveEmployees();
         return response()->json($employees, Response::HTTP_OK);
     }
 
     public function retrieveEmployeeLimited(Request $request)
     {
-        $employee = Employee::where('id', '=', $request->id)->get();
+        // $employee = Employee::where('id', '=', $request->id)->get();
+        $employee = Employee::select('call RetrieveLimitedEmployee()', array($request->id));
         return response()->json($employee, Response::HTTP_OK);
     }
 
@@ -70,7 +95,8 @@ class EmployeeController extends Controller
 
     public function deleteEmployee(Request $request)
     {
-        $employee = Employee::where('id', '=', $request->id)->delete();
+        // $employee = Employee::where('id', '=', $request->id)->delete();
+        $employee = Employee::select('call DeleteEmployee(?)', array($request->id));
         return response()->json($employee, Response::HTTP_OK);
     }
 
