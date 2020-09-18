@@ -72,5 +72,8 @@ Route::get('/retrieve_employees', 'EmployeeController@retrieveEmployees');
 // Route::post('/create_requisition_form', 'EmployeeRequisitionController@createRequisitionForm');
 // Route::post('/retrieve_requisition_forms', 'EmployeeRequisitionController@retrieveRequisitionForms');
 
+Route::get('sendbasicemail','MailController@basic_email');
+Route::get('sendhtmlemail','MailController@html_email');
+Route::get('sendattachmentemail','MailController@attachment_email');
 
 
