@@ -11,7 +11,7 @@ class MailController extends Controller {
    public function basic_email() {
       $data = array('name'=>"Softype");  
       Mail::send(['text'=>'mail'], $data, function($message) {
-         $message->to('11aresearchers@gmail.com', 'Tutorials Point')->subject
+         $message->to('11aresearchers@gmail.com', 'Softype')->subject
             ('Laravel Basic Testing Mail');
          $message->from('softypeapi@gmail.com','Softype');
       });
@@ -20,7 +20,7 @@ class MailController extends Controller {
    public function html_email() {
       $data = array('name'=>"Softype");
       Mail::send('mail', $data, function($message) {
-         $message->to('11aresearchers@gmail.com', 'Tutorials Point')->subject
+         $message->to('11aresearchers@gmail.com', 'Softype')->subject
             ('Test Email');
          $message->from('softypeapi@gmail.com','Softype');
       });
@@ -29,7 +29,7 @@ class MailController extends Controller {
    public function attachment_email() {
       $data = array('name'=>"Softype");
       Mail::send('mail', $data, function($message) {
-         $message->to('11aresearchers@gmail.com', 'Tutorials Point')->subject
+         $message->to('11aresearchers@gmail.com', 'Softype')->subject
             ('Softype Attachment');
          $message->attach('');
          $message->attach('');
