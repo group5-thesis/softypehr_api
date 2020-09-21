@@ -17,7 +17,7 @@ class CreateCompanyRepository extends Migration
             $table->id();
             $table->Integer('fileId');
             $table->string('url');
-            $table->Integer('employeeId');
+            $table->integer('employeeId');
             $table->timestamps();
         });
     }
