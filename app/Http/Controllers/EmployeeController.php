@@ -59,6 +59,7 @@ class EmployeeController extends Controller
 
                     $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
                     $qrcode = \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
+
                     $user = DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
                         array($username, $request->email, $defaultPassword, $file, $employee_id)

@@ -38,12 +38,12 @@ class UserController extends Controller
     public function updateUser(Request $request)
     {
         $user = User::where('id', '=', $request->id)->update(['password' => $request->updatePassword]);
-        return response()->json($User, Response::HTTP_OK);
+        return response()->json($user, Response::HTTP_OK);
     }
 
     public function deleteUser(Request $request)
     {
         $user = User::where('id', '=', $request->id)->delete();
-        return response()->json($User, Response::HTTP_OK);
+        return response()->json($user, Response::HTTP_OK);
     }
 }

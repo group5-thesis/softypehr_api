@@ -14,7 +14,7 @@ class CreateAddress extends Migration
     public function up()
     {
         Schema::create('address', function (Blueprint $table) {
-            $table->id();
+            $table->id()->autoIncrement()->primary();
             $table->string('street');
             $table->string('city');
             $table->string('country');

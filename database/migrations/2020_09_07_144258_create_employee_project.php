@@ -14,7 +14,7 @@ class CreateEmployeeProject extends Migration
     public function up()
     {
         Schema::create('employee_project', function (Blueprint $table) {
-            $table->id();
+             $table->id()->autoIncrement()->primary();
             $table->string('status');
             $table->integer('employeeId');
             $table->integer('projectId');
