@@ -1,0 +1,24 @@
+/sitecore/content/MNY/Maybelline_V3_LATAM/Site Content/Modules/Styled Text Element With Images/maybelline-mis-ojos-hablan/Styled Text Element With Images 1
+{588BB049-EF53-4D31-9635-53D292EE1726} - /sitecore/content/MNY/Maybelline_V3_LATAM/Home/Maybelline-Mis-Ojos-Hablan
+---------------------------------------------------------------
+<table class="enrich-foundation-3">
+    <tbody>
+       <tr>
+            <td class="enrich-foundation-3-text"><br>LINER BROW DEFINE<br>FILL & DUO</td>
+            <td class="enrich-foundation-3-text"><br>PALETA MINI DE<br>SOMBRAS DE OJOS</td>
+            <td class="enrich-foundation-3-text"><br>BASE FIT ME<br>MATTE + PORELESS</td>
+        </tr>
+        <tr>
+            <td class="enrich-foundation-3-left enrich-foundation-3-image"><img alt="" src="~/media/2A0D279A6FD74334A3040AC763EB61C1.ashx" style="width: 100%;"><a href="https://www.maybelline.com.ar/maquillaje-para-ojos/cejas/eyestudio-brow-define-and-fill-duo"><span style="background-color: #000000; padding: 10px; color: #ffffff;">COMPRAR AHORA</span></a></td>
+            <td class="enrich-foundation-3-mid"><img alt="" src="~/media/1ADDD9022E644C739E8001CE2AF6318B.ashx" style="width: 100%;"><a href="https://www.maybelline.com.ar/maquillaje-para-ojos/sombra-de-ojos/the-city-mini-palette"><span style="background-color: #000000; padding: 10px; color: #ffffff;">COMPRAR AHORA</span></a></td>
+            <td class="enrich-foundation-3-right enrich-foundation-3-image"><img alt="" src="~/media/5E734CCBFA034D9AB35523DF5A30298C.ashx" style="width: 100%;"><a href="https://www.maybelline.com.ar/maquillaje-para-rostro/base/fit-me-base-grasa"><span style="background-color: #000000; padding: 10px; color: #ffffff;">COMPRAR AHORA</span></a></td>
+        </tr>
+    </tbody>
+</table>
+  <tr>
+            <td class="enrich-foundation-3-left enrich-foundation-3-image"><img alt="" src="~/media/2A0D279A6FD74334A3040AC763EB61C1.ashx" style="width: 100%;"><a href="https://www.maybelline.com.ar/maquillaje-para-ojos/cejas/eyestudio-brow-define-and-fill-duo"><span style="background-color: #000000; padding: 10px; color: #ffffff;">COMPRAR AHORA</span></a></td>
+            <td class="enrich-foundation-3-mid"><img alt="" src="~/media/1ADDD9022E644C739E8001CE2AF6318B.ashx" style="width: 100%;"><a href="https://www.maybelline.com.ar/maquillaje-para-ojos/sombra-de-ojos/the-city-mini-palette"><span style="background-color: #000000; padding: 10px; color: #ffffff;">COMPRAR AHORA</span></a></td>
+            <td class="enrich-foundation-3-right enrich-foundation-3-image"><img alt="" src="~/media/5E734CCBFA034D9AB35523DF5A30298C.ashx" style="width: 100%;"><a href="https://www.maybelline.com.ar/maquillaje-para-rostro/base/fit-me-base-grasa"><span style="background-color: #000000; padding: 10px; color: #ffffff;">COMPRAR AHORA</span></a></td>
+        </tr>
+
+Styled Text Element With Images 5 - {1C61C243-9333-41C5-A47C-08364DFFF11D} 
