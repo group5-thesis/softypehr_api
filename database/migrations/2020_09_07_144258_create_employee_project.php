@@ -15,9 +15,9 @@ class CreateEmployeeProject extends Migration
     {
         Schema::create('employee_project', function (Blueprint $table) {
             $table->id();
+            $table->Integer('employeeId');
+            $table->Integer('projectId');
             $table->string('status');
-            $table->integer('employeeId');
-            $table->integer('projectId');
             $table->timestamps();
         });
     }

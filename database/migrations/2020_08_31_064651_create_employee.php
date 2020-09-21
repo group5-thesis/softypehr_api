@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEmployeeTable extends Migration
+class CreateEmployee extends Migration
 {
     /**
      * Run the migrations.
@@ -19,7 +19,7 @@ class CreateEmployeeTable extends Migration
             $table->string('middlename');
             $table->string('lastname');
             $table->string('mobileno');
-            $table->string('birthdate');
+            $table->date('birthdate');
             $table->string('email')->unique();
             $table->string('gender');
             $table->string('profileImage');

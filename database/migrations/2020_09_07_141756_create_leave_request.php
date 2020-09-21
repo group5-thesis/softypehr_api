@@ -15,15 +15,15 @@ class CreateLeaveRequest extends Migration
     {
         Schema::create('leave_request', function (Blueprint $table) {
             $table->id();
-            $table->integer('employeeId');
+            $table->Integer('employeeId');
+            $table->Integer('leave_categoryId');
             $table->date('date_from');
             $table->date('date_to');
             $table->string('reason');
-            $table->string('type');
             $table->string('status');
-            $table->integer('approver');
-            $table->date('date_approved')->nullable();
-            $table->string('remarks')->nullable();
+            $table->Integer('approver');
+            $table->string('date_approved')->nullable();
+            $table->string('remarks');
             $table->timestamps();
         });
     }

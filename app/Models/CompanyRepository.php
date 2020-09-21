@@ -8,8 +8,7 @@ class CompanyRepository extends Model
 {
     //
     protected $fillable = [
-        'name',
-        'description',
+        'fileId',
         'url',
         'employeeId'
     ];

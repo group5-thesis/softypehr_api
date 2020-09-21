@@ -9,9 +9,11 @@ class FormRequest extends Model
     //
     protected $fillable = [
         'employeeId',
-        'name',
+        'title',
         'item',
         'quantity',
+        'resolve_date',
+        'approver',
         'status',
     ];
 
