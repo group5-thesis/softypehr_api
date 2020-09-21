@@ -9,13 +9,18 @@ use App\Http\Controllers\Controller;
 
 class MailController extends Controller {
    public function basic_email() {
-      $data = array('name'=>"Softype");  
-      Mail::send(['text'=>'mail'], $data, function($message) {
-         $message->to('11aresearchers@gmail.com', 'Softype')->subject
-            ('Laravel Basic Testing Mail');
-         $message->from('softypeapi@gmail.com','Softype');
-      });
-      echo "Basic Email Sent. Check your inbox.";
+       try{
+
+           $data = array('name'=>"Softype");  
+           Mail::send(['text'=>'mail'], $data, function($message) {
+              $message->to('yoltorres24@gmail.com', 'Softype')->subject
+                 ('Laravel Basic Testing Mail');
+              $message->from('the.future2499@gmail.com','Softype');
+           });
+           echo "Basic Email Sent. Check your inbox.";
+       }catch(\Exception $e){
+          return "e";
+       }
    }
    public function html_email() {
       $data = array('name'=>"Softype");
