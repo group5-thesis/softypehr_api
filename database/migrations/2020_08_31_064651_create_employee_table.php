@@ -26,7 +26,7 @@ class CreateEmployeeTable extends Migration
             $table->string('street');
             $table->string('city');
             $table->string('country');
-            $table->Integer('roleId');
+            $table->integer('roleId');
         });
     }
 
