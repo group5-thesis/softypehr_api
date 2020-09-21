@@ -55,5 +55,7 @@ Route::post('/create', 'UserController@createUser');
 Route::get('sendbasicemail','MailController@basic_email');
 Route::get('sendhtmlemail','MailController@html_email');
 Route::get('sendattachmentemail','MailController@attachment_email');
+Route::get('uploadfile', 'PagesController@index'); // localhost:8000/
+Route::post('/uploadFile', 'PagesController@uploadFile');
 
 
