@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFormRequest extends Migration
+class CreateMeeting extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,14 @@ class CreateFormRequest extends Migration
      */
     public function up()
     {
-        Schema::create('form_request', function (Blueprint $table) {
+        Schema::create('meeting', function (Blueprint $table) {
             $table->id();
-            $table->Integer('employeeId');
             $table->string('title');
-            $table->string('item');
-            $table->string('quantity');
-            $table->date('resolve_date')->nullable();;
-            $table->Integer('approver');
+            $table->Integer('organizer');
+            $table->string('description')->nullable();;
+            $table->date('set_date');
+            $table->string('time_start');
+            $table->string('time_end');
             $table->string('status');
             $table->timestamps();
         });
@@ -33,6 +33,6 @@ class CreateFormRequest extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('form_request');
+        Schema::dropIfExists('meeting');
     }
 }

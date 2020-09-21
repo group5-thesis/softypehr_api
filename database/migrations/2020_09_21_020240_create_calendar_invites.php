@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCompanyRepository extends Migration
+class CreateCalendarInvites extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreateCompanyRepository extends Migration
      */
     public function up()
     {
-        Schema::create('company_repository', function (Blueprint $table) {
+        Schema::create('calendar_invites', function (Blueprint $table) {
             $table->id();
-            $table->Integer('fileId');
-            $table->string('url');
-            $table->Integer('employeeId');
+            $table->Integer('meetingId');
+            $table->Integer('members');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreateCompanyRepository extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('company_repository');
+        Schema::dropIfExists('calendar_invites');
     }
 }

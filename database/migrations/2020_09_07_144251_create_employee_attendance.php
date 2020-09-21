@@ -19,7 +19,7 @@ class CreateEmployeeAttendance extends Migration
             $table->string('time_in');
             $table->string('time_out');
             $table->string('no_of_hours');
-            $table->string('date');
+            $table->date('date');
         });
     }
 

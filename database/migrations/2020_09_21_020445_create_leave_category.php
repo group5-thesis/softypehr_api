@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCompanyRepository extends Migration
+class CreateLeaveCategory extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,9 @@ class CreateCompanyRepository extends Migration
      */
     public function up()
     {
-        Schema::create('company_repository', function (Blueprint $table) {
+        Schema::create('leave_category', function (Blueprint $table) {
             $table->id();
-            $table->Integer('fileId');
-            $table->string('url');
-            $table->Integer('employeeId');
-            $table->timestamps();
+            $table->string('type');
         });
     }
 
@@ -29,6 +26,6 @@ class CreateCompanyRepository extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('company_repository');
+        Schema::dropIfExists('leave_category');
     }
 }

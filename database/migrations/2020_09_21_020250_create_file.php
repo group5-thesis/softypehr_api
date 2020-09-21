@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAddress extends Migration
+class CreateFile extends Migration
 {
     /**
      * Run the migrations.
@@ -13,21 +13,21 @@ class CreateAddress extends Migration
      */
     public function up()
     {
-        Schema::create('address', function (Blueprint $table) {
+        Schema::create('file', function (Blueprint $table) {
             $table->id();
-            $table->string('street');
-            $table->string('city');
-            $table->string('country');
+            $table->string('name');
+            $table->string('data');
+            $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
-     *
+     *s
      * @return void
      */
     public function down()
     {
-        Schema::dropIfExists('address');
+        Schema::dropIfExists('file');
     }
 }
