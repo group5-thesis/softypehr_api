@@ -19,13 +19,16 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/image/{folder}/{file}','FileController@serve');
+Route::post('/test', function () {
+    return "Test";
+});
 
 Route::group(['middleware' => 'api-header'], function () {
     // The registration and login requests doesn't come with tokens
     // as users at that point have not been authenticated yet
     // Therefore the jwtMiddleware will be exclusive of them
     Route::post('/login', 'AuthController@login');
+    Route::get('/image/{folder}/{file}','FileController@serve');
 });
 
 
@@ -47,6 +50,7 @@ Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
 Route::post('/create_employee', 'EmployeeController@createEmployee');
 Route::post('/retrieve_employee_limited', 'EmployeeController@retrieveEmployeeLimited');
 Route::get('/retrieve_employees', 'EmployeeController@retrieveEmployees');
+Route::get('/getProfile', 'EmployeeController@retrieveEmployeeProfile');
 // Route::post('/update_employee', 'EmployeeController@updateEmployee');
 // Route::post('/delete_employee' , 'EmployeeController@deleteEmployee');
 

@@ -26,26 +26,12 @@ class AuthController extends Controller
                       $access_token = $token;
                       $user_email->save();
                       $temp = 'test';
-                      $employee = DB::select('call RetrieveLimitedEmployee(?)', array($user_email->employeeId));
+                      $employee = DB::select('call UserGetProfile(?)', array($user_email->id));
+                    //   $employee = DB::select('call UserGetProfile(?)', array($user_email->employeeId));
                       foreach ($employee as $key => $value) {
                           $response = ['data' => [
                               'access_token' => $access_token,
-                              'account_information' => [
-                                'employee_id' => $user_email->id, 
-                                'firstname' => $value->firstname, 
-                                'middlename' => $value->middlename, 
-                                'lastname' => $value->lastname, 
-                                'role' => $value->roleId, 
-                                'email' => $value->email,
-                                'mobile_no' => $value->mobileno, 
-                                'gender' => $value->gender, 
-                                'birthdate' => $value->birthdate, 
-                                'profileImage' => $value->profileImage, 
-                                'street' => $value->street, 
-                                'city' => $value->city, 
-                                'country' => $value->country,
-                                'qrCode' =>$user_email->qr_code
-                              ]
+                              'account_information' => $employee,
                           ], 'error' => false, 'message' => 'success'];
                       }
                       return response()->json($response, 200);

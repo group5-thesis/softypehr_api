@@ -83,8 +83,7 @@ class EmployeeController extends Controller
 
     public function retrieveEmployeeLimited(Request $request)
     {
-        // $employee = Employee::where('id', '=', $request->id)->get();
-        $employee = Employee::select('call RetrieveLimitedEmployee()', array($request->id));
+        $employee = DB::select('call RetrieveLimitedEmployee(?)', array($request->id));
         return response()->json($employee, Response::HTTP_OK);
     }
 
@@ -98,6 +97,11 @@ class EmployeeController extends Controller
     {
         // $employee = Employee::where('id', '=', $request->id)->delete();
         $employee = Employee::select('call DeleteEmployee(?)', array($request->id));
+        return response()->json($employee, Response::HTTP_OK);
+    }
+
+    public function retrieveEmployeeProfile(Request $request){
+        $employee = DB::select('call UserGetProfile(?)', array($request->userId));
         return response()->json($employee, Response::HTTP_OK);
     }
 
