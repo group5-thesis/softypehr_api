@@ -20,6 +20,7 @@ class EmployeeController extends Controller
         $validator = Validator::make($request->all(), [
             'firstname' => 'required',
             'middlename' => 'required',
+            'department'=>'required',
             'lastname' => 'required',
             'mobileno' => 'required',
             'birthdate' => 'required',
@@ -32,16 +33,16 @@ class EmployeeController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $messages = $validator->messages();
-            $response = ['data' => ['error' => true, 'message' => $messages]];
+            $messages =json_encode($validator->messages());
+            $response = ['data' => [] ,'error' => true, 'message' => $messages];
             return response()->json($response, 400);
             // return Redirect::to('/create_employee')->with('message', 'Register Failed');
         } else {
             $employee = DB::select(
-                'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?,?)',
+                'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?)',
                 array(
                     $request->firstname, $request->middlename, $request->lastname, $request->mobileno,
-                    $request->gender, $request->email, $request->birthdate, $request->profileImage,
+                    $request->gender, $request->email, $request->birthdate,
                     $request->street, $request->city, $request->country, $request->roleId
                 )
             );
@@ -50,8 +51,6 @@ class EmployeeController extends Controller
 
             try {
                 if ($employee) {
-                    $firstName = '';
-                    $lastName = '';
                     $firstName = $request->firstname;
                     $lastName = $request->lastname;
                     $username = Str::lower($firstName[0] . $lastName);
@@ -70,15 +69,24 @@ class EmployeeController extends Controller
                     return response()->json($response, 200);
                 }
             } catch (\Exception $e) {
-                return $e->getMessage();
+                $response = ['data' => [] ,  "error" =>true , "message" => $e->getMessage() ];
+                return response()->json($response, 500);
             }
         }
     }
 
     public function retrieveEmployees()
     {
-        $employees = Employee::RetrieveEmployees();
-        return response()->json($employees, Response::HTTP_OK);
+
+        try{
+            $employees = Employee::RetrieveEmployees();
+            return response()->json(["data"=>$employees , "error"=>false , "message"=>"ok"], Response::HTTP_OK);
+        }
+        catch (\Exception $e) {
+            $response = ['data' => [] ,  "error" =>true , "message" => $e->getMessage() ];
+            return response()->json($response, 500);
+        }
+      
     }
 
     public function retrieveEmployeeLimited(Request $request)
@@ -95,14 +103,27 @@ class EmployeeController extends Controller
 
     public function deleteEmployee(Request $request)
     {
+        try{
+            $employee = Employee::select('call DeleteEmployee(?)', array($request->id));
+            return response()->json(["data"=>$employees , "error"=>false , "message"=>"ok"], Response::HTTP_OK);
+        }
+        catch (\Exception $e) {
+            $response = ['data' => [] ,  "error" =>true , "message" => $e->getMessage() ];
+            return response()->json($response, 500);
+        }
         // $employee = Employee::where('id', '=', $request->id)->delete();
-        $employee = Employee::select('call DeleteEmployee(?)', array($request->id));
-        return response()->json($employee, Response::HTTP_OK);
+       
     }
 
     public function retrieveEmployeeProfile(Request $request){
-        $employee = DB::select('call UserGetProfile(?)', array($request->userId));
-        return response()->json($employee, Response::HTTP_OK);
+        try{
+            $employee = DB::select('call UserGetProfile(?)', array($request->userId));
+            return response()->json($employee, Response::HTTP_OK);
+        }
+        catch (\Exception $e) {
+            $response = ['data' => [] ,  "error" =>true , "message" => $e->getMessage() ];
+            return response()->json($response, 500);
+        }
     }
 
 }

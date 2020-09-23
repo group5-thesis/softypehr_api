@@ -75,7 +75,7 @@ class AuthController extends Controller
                                 'mobile_no' => $value->mobileno, 
                                 'gender' => $value->gender, 
                                 'birthdate' => $value->birthdate, 
-                                'profileImage' => $value->profileImage, 
+                                // 'profileImage' => $value->profileImage, 
                                 'street' => $value->street, 
                                 'city' => $value->city, 
                                 'country' => $value->country,
@@ -112,7 +112,7 @@ class AuthController extends Controller
                             'id' => $user_username->id, 'access_token' => $access_token,
                             'account_information' => [
                                 'firstname' => $value->firstname, 'middlename' => $value->middlename, 'lastname' => $value->lastname, 'role' => $value->roleId, 'email' => $value->email,
-                                'mobile_no' => $value->mobileno, 'gender' => $value->gender, 'birthdate' => $value->birthdate, 'profileImage' => $value->profileImage, 'street' => $value->street, 'city' => $value->city, 'country' => $value->country
+                                'mobile_no' => $value->mobileno, 'gender' => $value->gender, 'birthdate' => $value->birthdate, 'street' => $value->street, 'city' => $value->city, 'country' => $value->country
                             ]
                         ], 'error' => false, 'message' => 'success'];
                     }

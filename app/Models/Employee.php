@@ -15,7 +15,6 @@ class Employee extends Model
         'birthdate',
         'email',
         'gender',
-        'profileImage',
         'street',
         'city',
         'country',

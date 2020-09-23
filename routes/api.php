@@ -19,10 +19,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/test', function () {
-    return "Test";
-});
-
 Route::group(['middleware' => 'api-header'], function () {
     // The registration and login requests doesn't come with tokens
     // as users at that point have not been authenticated yet
@@ -33,12 +29,12 @@ Route::group(['middleware' => 'api-header'], function () {
 
 
 // this routes are needed with jwt token, you need first to login before executing this routes
-Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
+// Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
 
-     // all routes to protected resources are registered here
-     Route::get('/retrieve_users', 'UserController@retrieveUsers');
+//      // all routes to protected resources are registered here
+//      Route::get('/retrieve_users', 'UserController@retrieveUsers');
 
-});
+// });
 
 // User
 // Route::post('/create_user', 'AccountController@createUser');
@@ -55,7 +51,7 @@ Route::get('/getProfile', 'EmployeeController@retrieveEmployeeProfile');
 // Route::post('/delete_employee' , 'EmployeeController@deleteEmployee');
 
 // // Employee Leave
-// Route::post('/create_request_leave', 'EmployeeLeaveController@createLeave');
+Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
 // Route::post('/retrieve_remaining_leave', 'EmployeeLeaveController@retrieveRemainingLeave');
 // Route::post('/retrieve_employees_on_leave', 'EmployeeLeaveController@retrieveEmployeesOnLeave');
 // Route::post('/retrieve_employees_request_leave', 'EmployeeLeaveController@retrieveEmployeesRequestLeave');
