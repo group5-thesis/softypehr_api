@@ -59,6 +59,7 @@ class EmployeeController extends Controller
 
                     $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
                     $qrcode = \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
+
                     $user = DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
                         array($username, $request->email, $defaultPassword, $file, $employee_id)
@@ -82,8 +83,7 @@ class EmployeeController extends Controller
 
     public function retrieveEmployeeLimited(Request $request)
     {
-        // $employee = Employee::where('id', '=', $request->id)->get();
-        $employee = Employee::select('call RetrieveLimitedEmployee()', array($request->id));
+        $employee = DB::select('call RetrieveLimitedEmployee(?)', array($request->id));
         return response()->json($employee, Response::HTTP_OK);
     }
 
@@ -97,6 +97,11 @@ class EmployeeController extends Controller
     {
         // $employee = Employee::where('id', '=', $request->id)->delete();
         $employee = Employee::select('call DeleteEmployee(?)', array($request->id));
+        return response()->json($employee, Response::HTTP_OK);
+    }
+
+    public function retrieveEmployeeProfile(Request $request){
+        $employee = DB::select('call UserGetProfile(?)', array($request->userId));
         return response()->json($employee, Response::HTTP_OK);
     }
 

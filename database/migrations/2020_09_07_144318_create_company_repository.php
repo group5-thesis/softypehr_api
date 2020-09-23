@@ -14,8 +14,8 @@ class CreateCompanyRepository extends Migration
     public function up()
     {
         Schema::create('company_repository', function (Blueprint $table) {
-            $table->id();
-            $table->integer('fileId');
+            $table->id()->autoIncrement()->primary();
+            $table->Integer('fileId');
             $table->string('url');
             $table->integer('employeeId');
             $table->timestamps();

@@ -14,7 +14,7 @@ class CreateRemainingLeave extends Migration
     public function up()
     {
         Schema::create('remaining_leave', function (Blueprint $table) {
-            $table->id();
+             $table->id()->autoIncrement()->primary();
             $table->integer('employeeId');
             $table->string('no_of_days');
         });
