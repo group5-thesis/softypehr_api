@@ -15,7 +15,7 @@ class CreateAnnouncement extends Migration
     {
         Schema::create('announcement', function (Blueprint $table) {
             $table->id();
-            $table->Integer('employeeId');
+            $table->integer('employeeId');
             $table->string('title');
             $table->string('description');
             $table->timestamps();
