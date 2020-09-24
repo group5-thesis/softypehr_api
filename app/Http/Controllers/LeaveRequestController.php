@@ -33,7 +33,7 @@ class LeaveRequestController extends Controller
                 1
             );
            $leave_request =  DB::select("call UserCreateLeaveRequest(?,?,?,?,?,?)" ,$params);
-        return response()->json($leave_request, 200);
+        return response()->json(["data" =>$leave_request , "error"=>false , "message" =>"ok"], 200);
     }
     }
 
