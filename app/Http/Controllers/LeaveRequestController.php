@@ -9,31 +9,35 @@ use DB;
 class LeaveRequestController extends Controller
 {
     public function createLeaveRequest(Request $request)
-    {
-
+    {   
         $validator = Validator::make($request->all(), [
             'employeeID'=>'required',
             'date_from'=>'required',
             'date_to'=>'required',
             'reason'=>'required',
             'category'=>'required',
-            'approver'=>'required',
+            'approverId'=>'required',
         ]);
 
         if ($validator->fails()) {
             $messages =json_encode($validator->messages());
             return response()->json(['data' => null ,'error' => true, 'message' => $messages], 400);
         } else {
-            $params = array(
-                $request->employeeID,
-                $request->category,
-                $request->date_from,
-                $request->date_to,
-                $request->reason,
-                1
-            );
-           $leave_request =  DB::select("call UserCreateLeaveRequest(?,?,?,?,?,?)" ,$params);
-        return response()->json(["data" =>$leave_request , "error"=>false , "message" =>"ok"], 200);
+            try{
+                $params = array(
+                    $request->employeeID,
+                    $request->category,
+                    $request->date_from,
+                    $request->date_to,
+                    $request->reason,
+                    $request->approverId,
+                );
+                $leave_request =  DB::select("call UserCreateLeaveRequest(?,?,?,?,?,?)" ,$params);
+                return response()->json(["data" =>$leave_request , "error"=>false , "message" =>"ok"], 200);
+            }catch(\Exception $e){
+                return  response()->json(["data"=>$e ,  "error"=>true , "message"=>$e->getMessage() ],500);
+            }
+          
     }
     }
 

@@ -77,7 +77,6 @@ class EmployeeController extends Controller
 
     public function retrieveEmployees()
     {
-
         try{
             $employees = Employee::RetrieveEmployees();
             return response()->json(["data"=>$employees , "error"=>false , "message"=>"ok"], Response::HTTP_OK);
@@ -91,7 +90,7 @@ class EmployeeController extends Controller
 
     public function retrieveEmployeeLimited(Request $request)
     {
-        $employee = DB::select('call RetrieveLimitedEmployee(?)', array($request->id));
+        $employee = \DB::select('call RetrieveLimitedEmployee(?)', array($request->id));
         return response()->json($employee, Response::HTTP_OK);
     }
 
@@ -105,7 +104,7 @@ class EmployeeController extends Controller
     {
         try{
             $employee = Employee::select('call DeleteEmployee(?)', array($request->id));
-            return response()->json(["data"=>$employees , "error"=>false , "message"=>"ok"], Response::HTTP_OK);
+            return response()->json(["data"=>$employee , "error"=>false , "message"=>"ok"], Response::HTTP_OK);
         }
         catch (\Exception $e) {
             $response = ['data' => [] ,  "error" =>true , "message" => $e->getMessage() ];
