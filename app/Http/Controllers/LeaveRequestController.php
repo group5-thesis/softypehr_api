@@ -41,21 +41,38 @@ class LeaveRequestController extends Controller
     }
     }
 
-    public function retrieveLeaveRequests()
-    {
-        $leave_request = LeaveRequest::get();
-        return response()->json($leave_request, 200);
-    }
-
+    
     public function retrieveLeaveRequest_Limited(Request $request)
     {
         $leave_request = LeaveRequest::where('id', '=', $request->id)->get();
         return response()->json($leave_request, 200);
     }
-
+    
     public function deleteLeaveRequest(Request $request)
     {
         $leave_request = LeaveRequest::where('id', '=', $request->id)->delete();
         return response()->json($leave_request, Response::HTTP_OK);
+    }
+    public function getLeaveRequests(Request $request)
+    {
+        $employeeId = $request->employeeId;
+        $roleId = $request->roleId;
+        switch ($roleId) {
+            case 'value':
+                # code...
+                break;
+            case 'value':
+                # code...
+                break;
+            case 'value':
+                # code...
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        $leave_request = LeaveRequest::get();
+        return response()->json($leave_request, 200);
     }
 }

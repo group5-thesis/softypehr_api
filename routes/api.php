@@ -52,6 +52,7 @@ Route::get('/getProfile', 'EmployeeController@retrieveEmployeeProfile');
 
 // // Employee Leave
 Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
+Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
 // Route::post('/validateToken' ,)
 // Route::post('/retrieve_remaining_leave', 'EmployeeLeaveController@retrieveRemainingLeave');
 // Route::post('/retrieve_employees_on_leave', 'EmployeeLeaveController@retrieveEmployeesOnLeave');

@@ -15,5 +15,5 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
  */
 
 Route::get('/', function () {
-    return view('welcome');
+    return "Server is running...";
 });
