@@ -118,46 +118,29 @@ class MeetingController extends Controller
     {
         try {
             $meetings = DB::select('call retrieveMeetings()');
-
             $result_meeting = collect($meetings);
-
             $resp = [];
-            $member = [];
 
             foreach ($result_meeting as $key => $meeting) {
 
-                $resp[$key] = [
-                    "meeting id" => $meeting->meetingId,
-                    "title" => $meeting->title,
-                    "category" => $meeting->category,
-                    "organizer" => $meeting->organizer,
-                    "description" => $meeting->description,
-                    "set_date" => $meeting->set_date,
-                    "time_start" => $meeting->time_start,
-                    "time_end" => $meeting->time_end,
-                    "status" => $meeting->status,
-                    "members" => $member
-                ];
-                array_push($member, [
+                $meetingId = $meeting->meetingId;
+                $resp[$meetingId]["meetingId"] = $meeting->meetingId;
+                $resp[$meetingId]["title"] = $meeting->title;
+                $resp[$meetingId]["category"] = $meeting->category;
+                $resp[$meetingId]["organizer"] = $meeting->organizer;
+                $resp[$meetingId]["description"] = $meeting->description;
+                $resp[$meetingId]["set_date"] = $meeting->set_date;
+                $resp[$meetingId]["time_start"] = $meeting->time_start;
+                $resp[$meetingId]["time_end"] = $meeting->time_end;
+                $resp[$meetingId]["status"] = $meeting->status;
+
+                $resp[$meetingId]["members"][] = [
                     "id" => $meeting->memberId, "email" => $meeting->email,
                     "firstname" => $meeting->firstname, "middlename" => $meeting->middlename, "lastname" => $meeting->lastname
-                ]);
-
-                foreach ($resp[$key] as $index => $value) {
-                    // if (!$resp[$index]["members"]) {
-                    //     array_push($resp[$index]["members"], [
-                    //         "id" => $meeting->memberId, "email" => $meeting->email,
-                    //         "firstname" => $meeting->firstname, "middlename" => $meeting->middlename, "lastname" => $meeting->lastname
-                    //     ]);
-                    //     // $resp[$index]["members"] = $member;
-                    // }
-                    $resp[$key]["members"] = $member;
-                }
+                ];
             }
-
             $response = ['data' => ['meeting_information' => $resp], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
-
         } catch (\Exception $e) {
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
             return response()->json($response, 401);
