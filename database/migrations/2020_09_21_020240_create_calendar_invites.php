@@ -16,7 +16,7 @@ class CreateCalendarInvites extends Migration
         Schema::create('calendar_invites', function (Blueprint $table) {
             $table->id();
             $table->integer('meetingId');
-            $table->integer('members');
+            $table->integer('memberId');
             $table->timestamps();
         });
     }

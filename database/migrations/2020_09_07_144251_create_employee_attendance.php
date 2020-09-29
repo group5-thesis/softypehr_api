@@ -14,7 +14,7 @@ class CreateEmployeeAttendance extends Migration
     public function up()
     {
         Schema::create('employee_attendance', function (Blueprint $table) {
-            $table->id()->autoIncrement()->primary();
+            $table->id()->autoIncrement();
             $table->integer('employeeId');
             $table->string('time_in');
             $table->string('time_out');

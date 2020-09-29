@@ -14,7 +14,7 @@ class CreateLeaveRequest extends Migration
     public function up()
     {
         Schema::create('leave_request', function (Blueprint $table) {
-            $table->id()->autoIncrement()->primary();
+            $table->id()->autoIncrement();
             $table->integer('employeeId');
             $table->integer('leave_categoryId');
             $table->date('date_from');

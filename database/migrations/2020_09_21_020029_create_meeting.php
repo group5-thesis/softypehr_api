@@ -17,11 +17,12 @@ class CreateMeeting extends Migration
             $table->id();
             $table->string('title');
             $table->integer('organizer');
-            $table->string('description')->nullable();;
+            $table->string('category');
+            $table->string('description')->nullable();
             $table->date('set_date');
             $table->string('time_start');
             $table->string('time_end');
-            $table->string('status');
+            $table->integer('status');
             $table->timestamps();
         });
     }

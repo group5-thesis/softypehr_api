@@ -23,8 +23,15 @@ Route::group(['middleware' => 'api-header'], function () {
     // The registration and login requests doesn't come with tokens
     // as users at that point have not been authenticated yet
     // Therefore the jwtMiddleware will be exclusive of them
+    Route::post('/create_meeting','MeetingController@createMeeting');
+    Route::get('/retrieve_meetings','MeetingController@retrieveMeetings');
+    Route::get('/retrieve_limited_meeting/{id}','MeetingController@retrieveLimitedMeeting');
+    Route::post('/update_meeting','MeetingController@updateMeeting');
+    Route::get('/retrieve_meeting_now','MeetingController@retrieveMeetingByCurrentDate');
+    Route::post('/delete_meeting/{id}','MeetingController@deleteMeeting');
     Route::post('/login', 'AuthController@login');
     Route::get('/image/{folder}/{file}','FileController@serve');
+    Route::post('/create_employee', 'EmployeeController@createEmployee');
 });
 
 
@@ -43,7 +50,6 @@ Route::group(['middleware' => 'api-header'], function () {
 // Route::post('/delete_user', 'UserController@deleteUser');
 
 // Employee
-Route::post('/create_employee', 'EmployeeController@createEmployee');
 Route::post('/retrieve_employee_limited', 'EmployeeController@retrieveEmployeeLimited');
 Route::get('/retrieve_employees', 'EmployeeController@retrieveEmployees');
 Route::get('/getProfile', 'EmployeeController@retrieveEmployeeProfile');
