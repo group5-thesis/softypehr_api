@@ -14,7 +14,7 @@ class CreateProject extends Migration
     public function up()
     {
         Schema::create('project', function (Blueprint $table) {
-            $table->id()->autoIncrement()->primary();
+            $table->id()->autoIncrement();
             $table->string('name');
             $table->string('description')->nullable();;
             $table->string('deadline');

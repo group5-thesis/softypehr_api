@@ -8,7 +8,7 @@ class CalendarInvites extends Model
 {
     protected $fillable = [
         'meetingId',
-        'members'
+        'memberId'
     ];
 
     protected $table = 'calendar_invites';

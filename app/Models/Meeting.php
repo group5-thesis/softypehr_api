@@ -9,6 +9,7 @@ class Meeting extends Model
     protected $fillable = [
         'title',
         'organizer',
+        'category',
         'description',
         'set_date',
         'time_start',

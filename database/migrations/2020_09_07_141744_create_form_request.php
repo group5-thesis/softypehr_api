@@ -14,7 +14,7 @@ class CreateFormRequest extends Migration
     public function up()
     {
         Schema::create('form_request', function (Blueprint $table) {
-            $table->id()->autoIncrement()->primary();
+            $table->id()->autoIncrement();
             $table->integer('employeeId');
             $table->string('title');
             $table->string('item');
