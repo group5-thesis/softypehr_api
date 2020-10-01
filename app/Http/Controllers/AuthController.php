@@ -44,7 +44,7 @@ class AuthController extends Controller
                  // error: user not found
                  $response = ['data' => [] ,'error' => true, 'message' => 'User not found!'];
                   return response()->json($response, 405);
-              }  
+              }
     }
 
     public function login1(Request $request)
@@ -67,17 +67,17 @@ class AuthController extends Controller
                         $response = ['data' => [
                             'id' => $user_email->id, 'access_token' => $access_token,
                             'account_information' => [
-                                'firstname' => $value->firstname, 
-                                'middlename' => $value->middlename, 
-                                'lastname' => $value->lastname, 
-                                'role' => $value->roleId, 
+                                'firstname' => $value->firstname,
+                                'middlename' => $value->middlename,
+                                'lastname' => $value->lastname,
+                                'role' => $value->roleId,
                                 'email' => $value->email,
-                                'mobile_no' => $value->mobileno, 
-                                'gender' => $value->gender, 
-                                'birthdate' => $value->birthdate, 
-                                // 'profileImage' => $value->profileImage, 
-                                'street' => $value->street, 
-                                'city' => $value->city, 
+                                'mobile_no' => $value->mobileno,
+                                'gender' => $value->gender,
+                                'birthdate' => $value->birthdate,
+                                // 'profileImage' => $value->profileImage,
+                                'street' => $value->street,
+                                'city' => $value->city,
                                 'country' => $value->country,
                             ]
                         ], 'error' => false, 'message' => 'success'];
