@@ -14,7 +14,7 @@ class CreateCalendarInvites extends Migration
     public function up()
     {
         Schema::create('calendar_invites', function (Blueprint $table) {
-            $table->id();
+            $table->id()->autoIncrement();
             $table->integer('meetingId');
             $table->integer('memberId');
             $table->timestamps();

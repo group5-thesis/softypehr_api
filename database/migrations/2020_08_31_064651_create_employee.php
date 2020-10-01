@@ -22,10 +22,10 @@ class CreateEmployee extends Migration
             $table->date('birthdate');
             $table->string('email')->unique();
             $table->string('gender');
-            // $table->string('profileImage');
             $table->string('street');
             $table->string('city');
             $table->string('country');
+            $table->integer('account_typeId');
             $table->integer('roleId');
         });
     }
