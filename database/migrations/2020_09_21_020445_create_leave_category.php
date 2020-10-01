@@ -13,7 +13,7 @@ class CreateLeaveCategory extends Migration
      */
     public function up()
     {
-        Schema::create('address', function (Blueprint $table) {
+        Schema::create('leave_category', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string('street');
             $table->string('city');

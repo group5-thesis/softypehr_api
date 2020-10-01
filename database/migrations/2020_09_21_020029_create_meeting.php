@@ -14,7 +14,7 @@ class CreateMeeting extends Migration
     public function up()
     {
         Schema::create('meeting', function (Blueprint $table) {
-            $table->id();
+            $table->id()->autoIncrement();
             $table->string('title');
             $table->integer('organizer');
             $table->string('category');

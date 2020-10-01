@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFile extends Migration
+class CreateDepartment extends Migration
 {
     /**
      * Run the migrations.
@@ -13,21 +13,19 @@ class CreateFile extends Migration
      */
     public function up()
     {
-        Schema::create('file', function (Blueprint $table) {
+        Schema::create('department', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string('name');
-            $table->string('data');
-            $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
-     *s
+     *
      * @return void
      */
     public function down()
     {
-        Schema::dropIfExists('file');
+        Schema::dropIfExists('department');
     }
 }
