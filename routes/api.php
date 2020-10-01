@@ -32,6 +32,14 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/login', 'AuthController@login');
     Route::get('/image/{folder}/{file}','FileController@serve');
     Route::post('/create_employee', 'EmployeeController@createEmployee');
+    Route::post('/create_ticket','TicketController@createTicket');
+    Route::post('/update_ticket','TicketController@updateTicket');
+    Route::get('/retrieve_tickets','TicketController@retrieveTickets');
+    Route::get('/retrieve_tickets_by_year/{year}','TicketController@retrievesTicketsByYear');
+    Route::get('/retrieve_tickets_by_month/{month}','TicketController@retrievesTicketsByMonth');
+    Route::get('/retrieve_tickets_by_date','TicketController@retrievesTicketsByDate');
+    Route::post('/delete_ticket/{id}','TicketController@deleteTicket');
+    Route::post('/approve_ticket','TicketController@approveTicket');
 });
 
 

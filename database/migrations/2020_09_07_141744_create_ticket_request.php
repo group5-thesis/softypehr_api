@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFormRequest extends Migration
+class CreateTicketRequest extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,16 @@ class CreateFormRequest extends Migration
      */
     public function up()
     {
-        Schema::create('form_request', function (Blueprint $table) {
+        Schema::create('ticket', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->integer('employeeId');
             $table->string('title');
             $table->string('item');
-            $table->string('quantity');
-            $table->date('resolve_date')->nullable();;
-            $table->integer('approver');
-            $table->string('status');
+            $table->integer('quantity');
+            $table->date('resolve_date')->nullable();
+            $table->integer('approverId')->nullable();
+            $table->integer('status')->default(0);
+            $table->string('remarks')->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +34,6 @@ class CreateFormRequest extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('form_request');
+        Schema::dropIfExists('ticket');
     }
 }

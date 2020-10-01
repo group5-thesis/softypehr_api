@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Arr;
 
 class MeetingController extends Controller
 {

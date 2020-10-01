@@ -16,7 +16,6 @@ class UserController extends Controller
             [
                 'username' => $data['username'],
                 'password' => Hash::make($data['password']), // default password is Softype@100
-                'email' => $data['email'],
                 'qr_code' => $data['qr_code'],
                 'employeeId' => $data['employeeId']
             ]

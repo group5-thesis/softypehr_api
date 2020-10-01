@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class FormRequest extends Model
+class Ticket extends Model
 {
     //
     protected $fillable = [
@@ -13,10 +13,10 @@ class FormRequest extends Model
         'item',
         'quantity',
         'resolve_date',
-        'approver',
+        'approverId',
         'status',
+        'remarks'
     ];
 
-    protected $table = 'form_request';
-
+    protected $table = 'ticket';
 }
