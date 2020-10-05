@@ -18,6 +18,7 @@ class CreateUser extends Migration
             $table->string('username');
             $table->string('password');
             $table->string('qr_code')->unique();
+            $table->integer('account_type');
             $table->integer('employeeId')->unique();
         });
     }

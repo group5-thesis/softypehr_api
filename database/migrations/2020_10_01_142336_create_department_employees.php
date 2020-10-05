@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAccountType extends Migration
+class CreateDepartmentEmployees extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,11 @@ class CreateAccountType extends Migration
      */
     public function up()
     {
-        Schema::create('account_type', function (Blueprint $table) {
+        Schema::create('department_employees', function (Blueprint $table) {
             $table->id()->autoIncrement();
-            $table->string('type');
+            $table->integer('employeeId')->nullable();
+            $table->integer('department_managerId');
+            $table->integer('departmentId');
         });
     }
 
@@ -26,6 +28,6 @@ class CreateAccountType extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('account_type');
+        Schema::dropIfExists('department_employees');
     }
 }

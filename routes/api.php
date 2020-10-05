@@ -23,15 +23,16 @@ Route::group(['middleware' => 'api-header'], function () {
     // The registration and login requests doesn't come with tokens
     // as users at that point have not been authenticated yet
     // Therefore the jwtMiddleware will be exclusive of them
+
+    // Meeting
     Route::post('/create_meeting','MeetingController@createMeeting');
     Route::get('/retrieve_meetings','MeetingController@retrieveMeetings');
     Route::get('/retrieve_limited_meeting/{id}','MeetingController@retrieveLimitedMeeting');
     Route::post('/update_meeting','MeetingController@updateMeeting');
     Route::get('/retrieve_meeting_now','MeetingController@retrieveMeetingByCurrentDate');
     Route::post('/delete_meeting/{id}','MeetingController@deleteMeeting');
-    Route::post('/login', 'AuthController@login');
-    Route::get('/image/{folder}/{file}','FileController@serve');
-    Route::post('/create_employee', 'EmployeeController@createEmployee');
+
+    // Ticket
     Route::post('/create_ticket','TicketController@createTicket');
     Route::post('/update_ticket','TicketController@updateTicket');
     Route::get('/retrieve_tickets','TicketController@retrieveTickets');
@@ -40,6 +41,25 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_tickets_by_date','TicketController@retrievesTicketsByDate');
     Route::post('/delete_ticket/{id}','TicketController@deleteTicket');
     Route::post('/approve_ticket','TicketController@approveTicket');
+
+    // Login
+    Route::post('/login', 'AuthController@login');
+
+    // File upload
+    Route::get('/image/{folder}/{file}','FileController@serve');
+
+    // Employee
+    Route::post('/create_employee', 'EmployeeController@createEmployee');
+    Route::get('/retrieve_limited_employee/{id}','EmployeeController@retrieveLimitedEmployee');
+    Route::get('/retrieve_employee_by_department/{id}','EmployeeController@retrieveEmployeeByDepartment');
+    Route::get('/retrieve_employee_by_manager/{id}','EmployeeController@retrieveEmployeeByManager');
+    Route::get('/retrieveEmployees','EmployeeController@retrieveEmployees');
+
+    // Department
+    Route::post('/create_department', 'DepartmentController@createDepartment');
+    Route::post('/retrieve_limited_department/{id}', 'DepartmentController@retrieveLimitedDepartment');
+    Route::post('/update_department', 'DepartmentController@updateDepartment');
+
 });
 
 
