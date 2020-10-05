@@ -16,7 +16,7 @@ class CreateEmployee extends Migration
         Schema::create('employee', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string('firstname');
-            $table->string('middlename');
+            $table->string('middlename')->nullable();
             $table->string('lastname');
             $table->string('mobileno');
             $table->date('birthdate');
@@ -25,7 +25,6 @@ class CreateEmployee extends Migration
             $table->string('street');
             $table->string('city');
             $table->string('country');
-            $table->integer('account_typeId');
             $table->integer('roleId');
         });
     }

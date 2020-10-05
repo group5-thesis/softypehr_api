@@ -1,29 +1,31 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\LeaveRequest;
 use DB;
+
 class LeaveRequestController extends Controller
 {
     public function createLeaveRequest(Request $request)
-    {   
+    {
         $validator = Validator::make($request->all(), [
-            'employeeID'=>'required',
-            'date_from'=>'required',
-            'date_to'=>'required',
-            'reason'=>'required',
-            'category'=>'required',
-            'approverId'=>'required',
+            'employeeID' => 'required',
+            'date_from' => 'required',
+            'date_to' => 'required',
+            'reason' => 'required',
+            'category' => 'required',
+            'approverId' => 'required',
         ]);
 
         if ($validator->fails()) {
-            $messages =json_encode($validator->messages());
-            return response()->json(['data' => null ,'error' => true, 'message' => $messages], 400);
+            $messages = json_encode($validator->messages());
+            return response()->json(['data' => null, 'error' => true, 'message' => $messages], 400);
         } else {
-            try{
+            try {
                 $params = array(
                     $request->employeeID,
                     $request->category,
@@ -32,22 +34,22 @@ class LeaveRequestController extends Controller
                     $request->reason,
                     $request->approverId,
                 );
-                $leave_request =  DB::select("call UserCreateLeaveRequest(?,?,?,?,?,?)" ,$params);
-                return response()->json(["data" =>$leave_request , "error"=>false , "message" =>"ok"], 200);
-            }catch(\Exception $e){
-                return  response()->json(["data"=>$e ,  "error"=>true , "message"=>$e->getMessage() ],500);
+                $leave_request = DB::select("call UserCreateLeaveRequest(?,?,?,?,?,?)", $params);
+                return response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
+            } catch (\Exception $e) {
+                return response()->json(["data" => $e, "error" => true, "message" => $e->getMessage()], 500);
             }
-          
-    }
+
+        }
     }
 
-    
+
     public function retrieveLeaveRequest_Limited(Request $request)
     {
         $leave_request = LeaveRequest::where('id', '=', $request->id)->get();
         return response()->json($leave_request, 200);
     }
-    
+
     public function deleteLeaveRequest(Request $request)
     {
         $leave_request = LeaveRequest::where('id', '=', $request->id)->delete();
@@ -67,7 +69,7 @@ class LeaveRequestController extends Controller
             case 'value':
                 # code...
                 break;
-            
+
             default:
                 # code...
                 break;
