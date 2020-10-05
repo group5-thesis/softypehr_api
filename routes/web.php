@@ -14,6 +14,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 |
  */
 
+ 
 Route::get('/', function () {
     return "Server is running...";
 });

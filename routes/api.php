@@ -44,9 +44,11 @@ Route::group(['middleware' => 'api-header'], function () {
 
     // Login
     Route::post('/login', 'AuthController@login');
-
+    
+    
     // File upload
     Route::get('/image/{folder}/{file}','FileController@serve');
+    Route::post('/upload','FileController@store');
 
     // Employee
     Route::post('/create_employee', 'EmployeeController@createEmployee');
@@ -114,7 +116,5 @@ Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
 Route::get('sendbasicemail','MailController@basic_email');
 Route::get('sendhtmlemail','MailController@html_email');
 Route::get('sendattachmentemail','MailController@attachment_email');
-Route::get('uploadfile', 'PagesController@index'); // localhost:8000/
-Route::post('/uploadFile', 'PagesController@uploadFile');
 
 
