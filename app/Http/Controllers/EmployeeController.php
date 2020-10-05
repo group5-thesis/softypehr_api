@@ -19,8 +19,6 @@ class EmployeeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'firstname' => 'required',
-            'middlename' => 'required',
-            'department'=>'required',
             'lastname' => 'required',
             'mobileno' => 'required',
             'birthdate' => 'required',
@@ -29,18 +27,19 @@ class EmployeeController extends Controller
             'street' => 'required',
             'city' => 'required',
             'country' => 'required',
-            'roleId' => 'required|integer|numeric',
+            'roleId' => 'required'
+            // 'departmentId' => 'required'
         ]);
 
         if ($validator->fails()) {
-            $messages =json_encode($validator->messages());
-            $response = ['data' => [] ,'error' => true, 'message' => $messages];
+            $messages = json_encode($validator->messages());
+            $response = ['data' => [], 'error' => true, 'message' => $messages];
             return response()->json($response, 400);
         } else {
             DB::beginTransaction();
             try {
                 $employee = DB::select(
-                    'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?)',
+                    'call createEmployee(?,?,?,?,?,?,?,?,?,?,?)',
                     array(
                         $request->firstname, $request->middlename, $request->lastname, $request->mobileno,
                         $request->gender, $request->email, $request->birthdate,
@@ -49,47 +48,67 @@ class EmployeeController extends Controller
                 );
                 $result = collect($employee);
                 $employee_id = $result[0]->id;
-                    if ($employee) {
-                        $firstName = $request->firstname;
-                        $lastName = $request->lastname;
-                        $username = Str::lower($firstName[0] . $lastName);
-                        $defaultPassword = Hash::make('Softype@100');
 
-                        $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
-                        \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
-                         DB::select(
-                            'call CreateEmployeeAccount(?,?,?,?,?)',
-                            array($username, $request->email, $defaultPassword, $file, $employee_id)
-                        );                
-                        $response = ['data' => ['account_information' => $result] ,  'error' => false, 'message' => 'success'];
-                        DB::commit();
-                        return response()->json($response, 200);
-                    }
+                if ($employee) {
+                    $firstName = $request->firstname;
+                    $lastName = $request->lastname;
+                    $username = Str::lower($firstName[0] . $lastName);
+                    $defaultPassword = Hash::make('Softype@100');
+
+                    $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
+                    \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
+                    DB::select(
+                        'call createEmployeeAccount(?,?,?,?,?)',
+                        array($username, $defaultPassword, $file, $employee_id, $request->roleId)
+                    );
+                }
+                DB::commit();
+                $response = $this->retrieveLimitedEmployee($employee_id);
+                return $response;
             } catch (\Exception $e) {
                 DB::rollBack();
-                $response = ['data' => [] ,  "error" =>true , "message" => $e->getMessage() ];
+                $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
                 return response()->json($response, 500);
             }
         }
     }
 
-    public function retrieveEmployees() 
+    public function retrieveEmployees()
     {
-        try{
+        try {
             $employees = Employee::RetrieveEmployees();
-            return response()->json(["data"=>$employees , "error"=>false , "message"=>"ok"], Response::HTTP_OK);
-        }
-        catch (\Exception $e) {
-            $response = ['data' => [] ,  "error" =>true , "message" => $e->getMessage() ];
+            return response()->json(["data" => $employees, "error" => false, "message" => "ok"], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);
         }
-      
+
     }
 
-    public function retrieveEmployeeLimited(Request $request)
+    public function retrieveLimitedEmployee($id)
     {
-        $employee = \DB::select('call RetrieveLimitedEmployee(?)', array($request->id));
-        return response()->json($employee, Response::HTTP_OK);
+        try {
+            $employee = DB::select('call retrieveLimitedEmployee(?)', array($id));
+            $result = collect($employee);
+            $response = ['data' => ['account_information' => $result], 'error' => false, 'message' => 'success'];
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function retrieveEmployeeByDepartment($id)
+    {
+        try {
+            $department_employees = DB::select('call retrieveEmployeeByDepartment(?)', array($id));
+            $result = collect($department_employees);
+            $response = ['data' => ['account_information' => $result], 'error' => false, 'message' => 'success'];
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
+            return response()->json($response, 500);
+        }
     }
 
     public function updateEmployee(Request $request)
@@ -100,25 +119,22 @@ class EmployeeController extends Controller
 
     public function deleteEmployee(Request $request)
     {
-        try{
+        try {
             $employee = Employee::select('call DeleteEmployee(?)', array($request->id));
-            return response()->json(["data"=>$employee , "error"=>false , "message"=>"ok"], Response::HTTP_OK);
-        }
-        catch (\Exception $e) {
-            $response = ['data' => [] ,  "error" =>true , "message" => $e->getMessage() ];
+            return response()->json(["data" => $employee, "error" => false, "message" => "ok"], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);
         }
-        // $employee = Employee::where('id', '=', $request->id)->delete();
-       
     }
 
-    public function retrieveEmployeeProfile(Request $request){
-        try{
+    public function retrieveEmployeeProfile(Request $request)
+    {
+        try {
             $employee = DB::select('call UserGetProfile(?)', array($request->userId));
             return response()->json($employee, Response::HTTP_OK);
-        }
-        catch (\Exception $e) {
-            $response = ['data' => [] ,  "error" =>true , "message" => $e->getMessage() ];
+        } catch (\Exception $e) {
+            $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);
         }
     }

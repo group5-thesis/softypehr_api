@@ -15,19 +15,19 @@ use Illuminate\Support\Facades\DB;
 class AuthController extends Controller
 {
     public function login(Request $request){
-            $email_or_username = $request->input('username_email'); // this the input from front end
-              $isEmail = filter_var($email_or_username, FILTER_VALIDATE_EMAIL);
-              $user_email = User::where($isEmail?'email':'username', '=', $request->input('username_email'))->first();
-            //   dd($isEmail?'email':'username');
-              if ($user_email) { // email exists in database
-                  if (Auth::attempt([$isEmail?'email':'username' => $email_or_username, 'password' => $request->input('password')])) {
+        try{
+            $username = $request->input('username'); // this the input from front end 
+            $password =  $request->input('password');
+              $result = User::where('username', '=', $username)->first();   
+              if ($result) { // email exists in database
+                  if (Auth::attempt(['username' => $username, 'password' => $password])) {
                     // success
-                      $token = self::getToken($request->username_email, $request->password);
+                      $token = self::getToken($username, $password);
                       $access_token = $token;
-                      $user_email->save();
+                      $result->save();
                       $temp = 'test';
-                      $employee = DB::select('call UserGetProfile(?)', array($user_email->id));
-                    //   $employee = DB::select('call UserGetProfile(?)', array($user_email->employeeId));
+                    //   $employee = DB::select('call UserGetProfile(?)', array($result->id));
+                      $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
                       foreach ($employee as $key => $value) {
                           $response = ['data' => [
                               'access_token' => $access_token,
@@ -37,14 +37,18 @@ class AuthController extends Controller
                       return response()->json($response, 200);
                   } else {
                     // error password
-                    $response = ['data' => [],'error' => true, 'message' => "Password didn't matched!"];
+                    $response = ['data' => [],'error' => true, 'message' => "Invalid Credentials!"];
                     return response()->json($response, 405);
                   }
               } else {
                  // error: user not found
-                 $response = ['data' => [] ,'error' => true, 'message' => 'User not found!'];
+                 $response = ['data' => [] ,'error' => true, 'message' => "Invalid Credentials!"];
                   return response()->json($response, 405);
               }
+            }catch(\Exception $e){
+                $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
+                return response()->json($response, 500);
+            }
     }
 
     public function login1(Request $request)
@@ -134,7 +138,7 @@ class AuthController extends Controller
     {
         $token = null;
         try {
-            if (!$token = JWTAuth::attempt([filter_var($email_username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username' => $email_username, 'password' => $password])) {
+            if (!$token = JWTAuth::attempt(['username' => $email_username, 'password' => $password])) {
                 return response()->json([
                     'response' => 'error',
                     'message' => 'Password or email/username is invalid',
