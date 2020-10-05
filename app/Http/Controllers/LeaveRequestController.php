@@ -58,14 +58,16 @@ class LeaveRequestController extends Controller
         $employeeId = $request->employeeId;
         $roleId = $request->roleId;
         switch ($roleId) {
-            case 'value':
-                # code...
+            case 1:
+               return "admin";
                 break;
-            case 'value':
+            case 2:
                 # code...
+                return "manager";
                 break;
-            case 'value':
+            case 3:
                 # code...
+                return "regular";
                 break;
             
             default:

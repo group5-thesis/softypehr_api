@@ -29,7 +29,7 @@ class EmployeeController extends Controller
             'street' => 'required',
             'city' => 'required',
             'country' => 'required',
-            'roleId' => 'required',
+            'roleId' => 'required|integer|numeric',
         ]);
 
         if ($validator->fails()) {
