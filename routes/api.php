@@ -52,15 +52,32 @@ Route::group(['middleware' => 'api-header'], function () {
 
     // Employee
     Route::post('/create_employee', 'EmployeeController@createEmployee');
+    Route::get('/retrieve_employees','EmployeeController@retrieveEmployees');
     Route::get('/retrieve_limited_employee/{id}','EmployeeController@retrieveLimitedEmployee');
     Route::get('/retrieve_employee_by_department/{id}','EmployeeController@retrieveEmployeeByDepartment');
     Route::get('/retrieve_employee_by_manager/{id}','EmployeeController@retrieveEmployeeByManager');
-    Route::get('/retrieveEmployees','EmployeeController@retrieveEmployees');
+    Route::post('/delete_employee/{id}','EmployeeController@deleteEmpl  oyee');
+    Route::post('/update_employee','EmployeeController@updateEmployee');
+    Route::post('/retrieve_employee_profile','EmployeeController@retrieveEmployeeProfile');
 
     // Department
     Route::post('/create_department', 'DepartmentController@createDepartment');
-    Route::post('/retrieve_limited_department/{id}', 'DepartmentController@retrieveLimitedDepartment');
+    Route::post('/delete_department/{id}', 'DepartmentController@deleteDepartment');
     Route::post('/update_department', 'DepartmentController@updateDepartment');
+    Route::post('/retrieve_limited_department/{id}', 'DepartmentController@retrieveLimitedDepartment');
+    Route::post('/retrieve_departments', 'DepartmentController@retrieveDepartments');
+    Route::post('/retrieve_department_heads', 'DepartmentController@retrieveDepartmentHeads');
+    Route::post('/retrieve_departments_managers', 'DepartmentController@retrieveDepartmentManagers');
+
+
+    // Department Employee
+    Route::post('/add_department_employee', 'DepartmentEmployeeController@addDepartmentEmployee');
+    Route::post('/add_department_manager', 'DepartmentEmployeeController@addDepartmentManager');
+    Route::post('/delete_department_employee/{id}', 'DepartmentEmployeeController@deleteDepartmentEmployee');
+    Route::get('/retrieve_limited_department_employee/{id}', 'DepartmentEmployeeController@retrieveLimitedDepartmentEmployee');
+    Route::post('/retrieve_department_employees/{id}', 'DepartmentEmployeeController@retrieveDepartmentEmployees');
+    Route::post('/update_department_manager', 'DepartmentEmployeeController@changeDepartmentManager');
+
 
 });
 

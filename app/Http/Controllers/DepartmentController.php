@@ -18,13 +18,14 @@ class DepartmentController extends Controller
 
         if ($validator->fails()) {
             $messages = json_encode($validator->messages());
-            $response = ['data' => [], 'error' => true, 'message' => $messages];
+            $errors = $validator->errors();
+            $response = ['data' => $errors->all(), 'error' => true, 'message' => $messages];
             return response()->json($response, 400);
         } else {
             DB::beginTransaction();
             try {
                 $department = DB::select(
-                    'call createDepartment(?,?)',
+                    'call CreateDepartment(?,?)',
                     array($request->name, $request->department_headId)
                 );
                 $result = collect($department);
@@ -34,7 +35,7 @@ class DepartmentController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
+                $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
                 return response()->json($response, 500);
             }
         }
@@ -44,13 +45,13 @@ class DepartmentController extends Controller
     {
         DB::beginTransaction();
         try {
-            $department = DB::select('call deleteDepartment(?)', array($id));
+            $department = DB::select('call DeleteDepartment(?)', array($id));
             DB::commit();
-            $response = ['data' => [], 'error' => false, 'message' => 'success'];
+            $response = ['data' => $department, 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
+            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);
         }
     }
@@ -60,7 +61,7 @@ class DepartmentController extends Controller
         DB::beginTransaction();
         try {
             $department = DB::select(
-                'call updateDepartment(?,?,?)',
+                'call UpdateDepartment(?,?,?)',
                 array(
                     $request->departmentId, $request->name, $request->employeeId,
                 )
@@ -70,7 +71,7 @@ class DepartmentController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
+            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);
         }
     }
@@ -78,12 +79,12 @@ class DepartmentController extends Controller
     public function retrieveLimitedDepartment($id)
     {
         try {
-            $department = DB::select('call retrieveLimitedDepartment(?)', array($id));
+            $department = DB::select('call RetrieveLimitedDepartment(?)', array($id));
             $result = collect($department);
             $response = ['data' => ['department' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
         } catch (\Exception $e) {
-            $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
+            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);
         }
     }
@@ -91,14 +92,36 @@ class DepartmentController extends Controller
     public function retrieveDepartments()
     {
         try {
-            $department = DB::select('call retrieveDepartments()');
+            $department = DB::select('call RetrieveDepartments()');
             $result = collect($department);
             $response = ['data' => ['department' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
         } catch (\Exception $e) {
-            $response = ['data' => [], "error" => true, "message" => $e->getMessage()];
+            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);
         }
     }
+
+    public function retrieveDepartmentHeads() // Lacking
+    {
+        try {
+
+        } catch (\Exception $e) {
+            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function retrieveDepartmentManagers() // Lacking
+    {
+        try {
+
+        } catch (\Exception $e) {
+            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
+            return response()->json($response, 500);
+        }
+    }
+
+
 
 }
