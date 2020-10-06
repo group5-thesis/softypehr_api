@@ -16,7 +16,6 @@ class CreateDepartment extends Migration
         Schema::create('department', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string('name');
-            $table->integer('department_head');
         });
     }
 

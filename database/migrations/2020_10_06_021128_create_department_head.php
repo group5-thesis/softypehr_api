@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDepartmentEmployees extends Migration
+class CreateDepartmentHead extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateDepartmentEmployees extends Migration
      */
     public function up()
     {
-        Schema::create('department_employees', function (Blueprint $table) {
-            $table->id()->autoIncrement();
-            $table->integer('employeeId');
-            $table->integer('department_managerId');
-            $table->integer('department_headId');
+        Schema::create('department_head', function (Blueprint $table) {
+            $table->id();
+            $table->integer('departmentId');
+            $table->integer('department_head');
+            $table->timestamps();
         });
     }
 
@@ -28,6 +28,6 @@ class CreateDepartmentEmployees extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('department_employees');
+        Schema::dropIfExists('department_head');
     }
 }

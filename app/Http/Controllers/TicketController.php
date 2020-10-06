@@ -22,13 +22,14 @@ class TicketController extends Controller
 
         if ($validator->fails()) {
             $messages = $validator->messages();
-            $response = ['error' => true, 'message' => $messages];
+            $errors = $validator->errors();
+            $response = ['data' => $errors->all(), 'error' => true, 'message' => $messages];
             return response()->json($response, 401);
         } else {
             DB::beginTransaction();
             try {
                 $ticket = DB::select(
-                    'call createTicket(?, ?, ?, ?, ?)',
+                    'call CreateTicket(?, ?, ?, ?, ?)',
                     array(
                         $request->employeeId, $request->title, $request->item, $request->quantity, $request->status
                     )
@@ -47,7 +48,7 @@ class TicketController extends Controller
     public function retrieveLimitedTicket($id)
     {
         try {
-            $retrieveTicket = DB::select('call retrieveLimitedTicket(?)', array($id));
+            $retrieveTicket = DB::select('call RetrieveLimitedTicket(?)', array($id));
 
             $result = collect($retrieveTicket);
 
@@ -64,7 +65,7 @@ class TicketController extends Controller
         DB::beginTransaction();
         try {
             $ticket = DB::select(
-                'call updateTicket(?,?,?,?,?,?)',
+                'call UpdateTicket(?,?,?,?,?,?)',
                 array($request->ticketId, $request->employeeId, $request->title, $request->item, $request->quantity, $request->status)
             );
             $response = $this->retrieveLimitedTicket($request->ticketId);
@@ -98,7 +99,7 @@ class TicketController extends Controller
     public function retrieveTickets()
     {
         try {
-            $retrieveTicket = DB::select('call retrieveTickets()');
+            $retrieveTicket = DB::select('call RetrieveTickets()');
             $result = collect($retrieveTicket);
             $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
@@ -111,7 +112,7 @@ class TicketController extends Controller
     public function retrievesTicketsByDate()
     {
         try {
-            $ticket_date = DB::select('call retrieveTicketsByDate()');
+            $ticket_date = DB::select('call RetrieveTicketsByDate()');
             $result = collect($ticket_date);
             $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
@@ -124,7 +125,7 @@ class TicketController extends Controller
     public function retrievesTicketsByMonth($month)
     {
         try {
-            $ticket_month = DB::select('call retrieveTicketsByMonth(?)', array($month));
+            $ticket_month = DB::select('call RetrieveTicketsByMonth(?)', array($month));
             $result = collect($ticket_month);
             $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
@@ -137,7 +138,7 @@ class TicketController extends Controller
     public function retrievesTicketsByYear($year)
     {
         try {
-            $ticket_year = DB::select('call retrieveTicketsByYear(?)', array($year));
+            $ticket_year = DB::select('call RetrieveTicketsByYear(?)', array($year));
             $result = collect($ticket_year);
             $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
@@ -152,7 +153,7 @@ class TicketController extends Controller
         DB::beginTransaction();
         try {
             $approved_ticket = DB::select(
-                'call approveTicket(?,?,?)',
+                'call ApproveTicket(?,?,?)',
                 array($request->ticketId, $request->employeeId, $request->remarks)
             );
             DB::commit();

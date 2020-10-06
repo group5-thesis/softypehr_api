@@ -23,13 +23,14 @@ class MeetingController extends Controller
 
         if ($validator->fails()) {
             $messages = $validator->messages();
-            $response = ['error' => true, 'message' => $messages];
+            $errors = $validator->errors();
+            $response = ['data' => $errors->all(), 'error' => true, 'message' => $messages];
             return response()->json($response, 401);
         } else {
             DB::beginTransaction(); // begin the queries transaction
             try {
                 $meeting = DB::select(
-                    'call createMeeting(?,?,?,?,?,?,?,?)',
+                    'call CreateMeeting(?,?,?,?,?,?,?,?)',
                     array(
                         $request->title, $request->organizer, $request->category, $request->description, $request->set_date,
                         $request->time_start, $request->time_end, $request->status
@@ -40,7 +41,7 @@ class MeetingController extends Controller
 
                 foreach ($request->members as $key => $member) {
                     $members = DB::select(
-                        'call addMember(?,?)',
+                        'call AddMember(?,?)',
                         array($res_meeting[0]->id, $member)
                     );
                 }
@@ -64,7 +65,7 @@ class MeetingController extends Controller
             if ($request->addMember) {
                 foreach ($request->addMember as $key => $member) {
                     $added_members = DB::select(
-                        'call addMember(?,?)',
+                        'call AddMember(?,?)',
                         array($request->meetingId, $member)
                     );
                 }
@@ -73,14 +74,14 @@ class MeetingController extends Controller
             if ($request->deleteMember) {
                 foreach ($request->deleteMember as $key => $member) {
                     $deleted_member = DB::select(
-                        'call deleteMember(?)',
+                        'call DeleteMember(?)',
                         array($member)
                     );
                 }
             }
 
             $update_meeting = DB::select(
-                'call updateMeeting(?,?,?,?,?,?,?,?,?)',
+                'call UpdateMeeting(?,?,?,?,?,?,?,?,?)',
                 array(
                     $request->meetingId, $request->title, $request->organizer, $request->category, $request->description,
                     $request->set_date, $request->time_start, $request->time_end, $request->status
@@ -102,7 +103,7 @@ class MeetingController extends Controller
     {
         DB::beginTransaction();
         try {
-            $delete_meeting = DB::select('call deleteMeeting(?)', array($id));
+            $delete_meeting = DB::select('call DeleteMeeting(?)', array($id));
             DB::commit();
             $response = ['error' => false, 'message' => 'success'];
             return response()->json($response, 200);
@@ -116,7 +117,7 @@ class MeetingController extends Controller
     public function retrieveMeetings()
     {
         try {
-            $meetings = DB::select('call retrieveMeetings()');
+            $meetings = DB::select('call RetrieveMeetings()');
             $result_meeting = collect($meetings);
             $resp = [];
 
@@ -149,7 +150,7 @@ class MeetingController extends Controller
     public function retrieveLimitedMeeting($id)
     {
         try {
-            $retrieveMeeting = DB::select('call retrieveLimitedMeeting(?)', array($id));
+            $retrieveMeeting = DB::select('call RetrieveLimitedMeeting(?)', array($id));
 
             $result_meeting = collect($retrieveMeeting);
 
@@ -187,7 +188,7 @@ class MeetingController extends Controller
     public function retrieveMeetingByCurrentDate()
     {
         try {
-            $meeting_now = DB::select('call retrieveMeetingByCurrentDate()');
+            $meeting_now = DB::select('call RetrieveMeetingByCurrentDate()');
             $response = ['data' => ['meeting_information' => $meeting_now], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
         } catch (\Exception $e) {
