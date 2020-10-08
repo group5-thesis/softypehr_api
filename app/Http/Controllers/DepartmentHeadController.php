@@ -5,15 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class DepartmentEmployeeController extends Controller
+class DepartmentHeadController extends Controller
 {
-    public function addDepartmentEmployee(Request $request)
+    public function addDepartmentHead(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'employeeId' => 'required',
-            'department_managerId' => 'required',
-            'department_headId' => 'required'
+            'departmentId' => 'required',
+            'department_head' => 'required'
         ]);
+
         if ($validator->fails()) {
             $messages = json_encode($validator->messages());
             $errors = $validator->errors();
@@ -22,15 +22,10 @@ class DepartmentEmployeeController extends Controller
         } else {
             DB::beginTransaction();
             try {
-                $employee = DB::select(
-                    'call AddDepartmentEmployee(?,?,?)',
-                    array($request->employeeId, $request->department_managerId, $request->department_headId)
-                );
-                $result = collect($employee);
-                $department_employeeId = $result[0]->id;
+                $department_head = DB::select('call AddDepartmentHead(?,?)', array($request->departmentId, $request->department_head));
+                $result = collect($department_head);
+                $department_head_id = $result[0]->id;
                 DB::commit();
-                $response = $this->retrieveLimitedDepartmentEmployee($department_employeeId);
-                return $response;
             } catch (\Exception $e) {
                 DB::rollback();
                 $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
@@ -39,13 +34,13 @@ class DepartmentEmployeeController extends Controller
         }
     }
 
-    public function deleteDepartmentEmployee($id)
+    public function updateDepartmentHead(Request $request)
     {
         DB::beginTransaction();
         try {
-            $deleted_department_employee = DB::select(
-                'call DeleteDepartmentEmployee(?)',
-                array($id)
+            $updated_department_head = DB::select(
+                'call UpdateDepartmentHead(?,?,?)',
+                array($request->id, $request->departmentId, $request->employeeId)
             );
             DB::commit();
             $response = ['error' => false, 'message' => 'success'];
@@ -57,48 +52,50 @@ class DepartmentEmployeeController extends Controller
         }
     }
 
-    public function retrieveLimitedDepartmentEmployee($id)
-    {
-        try {
-            $department_employee = DB::select(
-                'call RetrieveLimitedDepartmentEmployee(?)',
-                array($id)
-            );
-            $result = collect($department_employee);
-            $response = ['data' => ['employee_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
-        } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
-        }
-    }
-
-    public function retrieveDepartmentEmployees($id)
-    {
-        try {
-            $department_employees = DB::select('call RetrieveDepartmentEmployees()');
-            $result = collect($department_employees);
-            $response = ['data' => ['employee_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
-        } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
-        }
-    }
-
-    public function updateDepartmentEmployee(Request $request)
+    public function deleteDepartmentHead($id)
     {
         DB::beginTransaction();
         try {
-            $deleted_department_employee = DB::select(
-                'call UpdateDepartmentEmployee(?,?,?,?)',
-                array($request->id, $request->employeeId, $request->department_headId, $request->department_managerId)
+            $delete_department_head = DB::select(
+                'call DeleteDepartmentHead(?)',
+                array($request->id)
             );
             DB::commit();
             $response = ['error' => false, 'message' => 'success'];
             return response()->json($response, 200);
         } catch (\Exception $e) {
             DB::rollback();
+            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function retrieveLimitedDepartmentHead($id)
+    {
+        try {
+            $department_head = DB::select(
+                'call RetrieveLimitedDepartmentHead(?)',
+                array($request->id)
+            );
+            $result = collect($department_head);
+            $response = ['data' => ['department_head_information' => $result], 'error' => false, 'message' => 'success'];
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function retrieveDepartmentHeads()
+    {
+        try {
+            $department_heads = DB::select(
+                'call RetrieveDepartmentHeads()'
+            );
+            $result = collect($department_heads);
+            $response = ['data' => ['department_head_information' => $result], 'error' => false, 'message' => 'success'];
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
             $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);
         }

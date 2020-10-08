@@ -8,12 +8,11 @@ use Illuminate\Support\Facades\Validator;
 
 class DepartmentController extends Controller
 {
-    // Department
-    public function createDepartment(Request $request)
+
+    public function addDepartment(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'department_headId' => 'required'
+            'name' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -25,8 +24,8 @@ class DepartmentController extends Controller
             DB::beginTransaction();
             try {
                 $department = DB::select(
-                    'call CreateDepartment(?,?)',
-                    array($request->name, $request->department_headId)
+                    'call AddDepartment(?)',
+                    array($request->name)
                 );
                 $result = collect($department);
                 $departmentId = $result[0]->id;
@@ -47,7 +46,7 @@ class DepartmentController extends Controller
         try {
             $department = DB::select('call DeleteDepartment(?)', array($id));
             DB::commit();
-            $response = ['data' => $department, 'error' => false, 'message' => 'success'];
+            $response = ['error' => false, 'message' => 'success'];
             return response()->json($response, 200);
         } catch (\Exception $e) {
             DB::rollback();
@@ -61,9 +60,9 @@ class DepartmentController extends Controller
         DB::beginTransaction();
         try {
             $department = DB::select(
-                'call UpdateDepartment(?,?,?)',
+                'call UpdateDepartment(?,?)',
                 array(
-                    $request->departmentId, $request->name, $request->employeeId,
+                    $request->departmentId, $request->name
                 )
             );
             DB::commit();
@@ -102,20 +101,26 @@ class DepartmentController extends Controller
         }
     }
 
-    public function retrieveDepartmentHeads() // Lacking
+    public function retrieveDepartmentHeads()
     {
         try {
-
+            $department_head = DB::select('call RetrieveDepartmentHeads()');
+            $result = collect($department_head);
+            $response = ['data' => ['department' => $result], 'error' => false, 'message' => 'success'];
+            return response()->json($response, 200);
         } catch (\Exception $e) {
             $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);
         }
     }
 
-    public function retrieveDepartmentManagers() // Lacking
+    public function retrieveDepartmentManagers()
     {
         try {
-
+            $department_managers = DB::select('call RetrieveDepartmentManagers()');
+            $result = collect($department_managers);
+            $response = ['data' => ['department' => $result], 'error' => false, 'message' => 'success'];
+            return response()->json($response, 200);
         } catch (\Exception $e) {
             $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
             return response()->json($response, 500);

@@ -18,6 +18,7 @@ class CreateDepartmentEmployees extends Migration
             $table->integer('employeeId');
             $table->integer('department_managerId');
             $table->integer('department_headId');
+            $table->timestamps();
         });
     }
 
