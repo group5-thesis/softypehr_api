@@ -59,7 +59,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/retrieve_employee_profile','EmployeeController@retrieveEmployeeProfile');
 
     // Department
-    Route::post('/create_department', 'DepartmentController@createDepartment');
+    Route::post('/add_department', 'DepartmentController@addDepartment');
     Route::post('/delete_department/{id}', 'DepartmentController@deleteDepartment');
     Route::post('/update_department', 'DepartmentController@updateDepartment');
     Route::post('/retrieve_limited_department/{id}', 'DepartmentController@retrieveLimitedDepartment');
