@@ -16,10 +16,10 @@ class CreateEmployeeAttendance extends Migration
         Schema::create('employee_attendance', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->integer('employeeId');
-            $table->string('time_in');
-            $table->string('time_out');
-            $table->string('no_of_hours');
+            $table->time('time_in');
+            $table->time('time_out');
             $table->date('date');
+            $table->integer('no_of_hours');
         });
     }
 

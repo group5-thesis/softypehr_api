@@ -11,8 +11,8 @@ class EmployeeAttendance extends Model
         'employeeId',
         'time_in',
         'time_out',
+        'date',
         'no_of_hours',
-        'date'
     ];
 
     public $timestamps = false;
