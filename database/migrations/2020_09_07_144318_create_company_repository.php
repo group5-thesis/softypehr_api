@@ -15,9 +15,11 @@ class CreateCompanyRepository extends Migration
     {
         Schema::create('company_repository', function (Blueprint $table) {
             $table->id()->autoIncrement();
-            $table->integer('fileId');
-            $table->string('url');
-            $table->integer('employeeId');
+            $table->integer('uploadedBy');
+            $table->string('filename');
+            $table->string('path');
+            $table->string('type');
+            $table->string('description');
             $table->timestamps();
         });
     }
