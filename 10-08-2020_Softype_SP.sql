@@ -39,6 +39,22 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddFile`(
+	IN _employeeId INT(11), 
+    IN _name VARCHAR(255), 
+	IN _path VARCHAR(255),
+    IN _type VARCHAR(255),
+    IN _description VARCHAR(255)
+)
+BEGIN
+	INSERT INTO company_repository(uploadedBy, filename, path, type, description, created_at)
+    VALUES(_employeeId, _name , _path, _type, _description, date(now()));
+    
+    SELECT last_insert_id();
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `AddMember`(IN _meetingId int(11), IN _memberId int(11))
 BEGIN
 	INSERT INTO calendar_invites(meetingId, memberId)
@@ -238,6 +254,14 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteFile`(IN _id INT(11))
+BEGIN
+	DELETE FROM company_repository
+    WHERE id = _id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteMeeting`(IN _id int(11))
 BEGIN
 	SET sql_safe_updates = 0;
@@ -292,6 +316,23 @@ BEGIN
         concat(emp.firstname, ' ', emp.lastname) as creator
     from softype.announcement as a
     JOIN softype.employee as emp ON a.employeeId = emp.id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveByFileType`(IN _type VARCHAR(255))
+BEGIN
+	SELECT 
+		cr.id as file_id,
+		cr.created_at as uploadedAt,
+        cr.filename as filename,
+        cr.path as path,
+        cr.type as type,
+        cr.description as description,
+        concat(emp.firstname, ' ', emp.lastname) as uploadedBy
+    FROM softype.company_repository as cr
+    JOIN softype.employee as emp ON emp.id = cr.employeeId
+    WHERE cr.type = _type;
 END$$
 DELIMITER ;
 
@@ -539,6 +580,22 @@ SELECT
     LEFT JOIN softype.employee as emp_m ON dem.department_manager = emp_m.id
     LEFT JOIN softype.employee as emp_h ON deh.department_head = emp_h.id
     LEFT JOIN softype.department as dept ON dem.departmentId = dept.id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveFiles`()
+BEGIN
+	SELECT 
+		cr.id as file_id,
+		cr.created_at as uploadedAt,
+        cr.filename as filename,
+        cr.path as path,
+		cr.type as type,
+        cr.description as description,
+        concat(emp.firstname, ' ', emp.lastname) as uploadedBy
+    FROM softype.company_repository as cr
+    JOIN softype.employee as emp ON emp.id = cr.employeeId;
 END$$
 DELIMITER ;
 
@@ -859,6 +916,16 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `TimeIn`(IN _employeeId INT(11), IN _timeIn TIME)
+BEGIN
+	INSERT INTO employee_attendance(employeeId, time_in, time_out, date, no_of_hours)
+    VALUES(_employeeId, _timeIn, '00:00:00', date(now()), 0);
+    
+    SELECT last_insert_id() as id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateAnnouncement`(IN _announcementId INT(11), IN _title VARCHAR(255), IN _description VARCHAR(255))
 BEGIN
 	SET sql_safe_updates = 0;
@@ -1146,37 +1213,38 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UserGetProfile`(
-	IN _userID int(11)
+IN _userID int(11)
 )
 BEGIN
-	declare _employeeID int(11);
-    declare _qrCode varchar(50);
-  
-  --  select employeeId, qr_code  into _employeeID , _qrCode from  softype.user where id = _userID;    
-   -- select * , _qrCode as qr_code from  softype.employee  emp where id = _employeeID ;
-    
-    select
-		emp.id as employeeId,
-        usr.id as userId,
-        firstname,
-        middlename,
-        lastname,
-        mobileno,
-        birthdate,
-        gender,
-        street,
-        city,
-        country,
-        roleId,
-        usr.email,
-        qr_code ,
-        position 
-    from 
-		softype.employee emp 
-	join softype.user usr 
-		on emp.id = usr.employeeId 
-    join softype.role rl 
-		on emp.roleId = rl.id
-    where usr.id = _userID;
+declare _employeeID int(11);
+   declare _qrCode varchar(50);
+ 
+ --  select employeeId, qr_code  into _employeeID , _qrCode from  softype.user where id = _userID;    
+  -- select * , _qrCode as qr_code from  softype.employee  emp where id = _employeeID ;
+   
+   select
+emp.id as employeeId,
+       usr.id as userId,
+       firstname,
+       middlename,
+       lastname,
+       mobileno,
+       birthdate,
+       gender,
+       street,
+       city,
+       country,
+       roleId,
+       email,
+       qr_code ,
+       position ,
+       account_type
+   from
+softype.employee emp
+join softype.user usr
+on emp.id = usr.employeeId
+   left join softype.role rl
+on emp.roleId = rl.id
+   where usr.id = _userID;
 END$$
 DELIMITER ;
