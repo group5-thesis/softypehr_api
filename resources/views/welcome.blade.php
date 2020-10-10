@@ -65,6 +65,7 @@
     </head>
     <body>
         <div class="flex-center position-ref full-height">
+        
             @if (Route::has('login'))
                 <div class="top-right links">
                     @auth
@@ -82,6 +83,7 @@
             <div class="content">
                 <div class="title m-b-md">
                     Laravel
+                    <img src="/qrcode/ytorres_3.svg" alt="">
                 </div>
 
                 <div class="links">

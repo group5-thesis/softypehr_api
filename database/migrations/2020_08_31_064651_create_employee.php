@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEmployeeTable extends Migration
+class CreateEmployee extends Migration
 {
     /**
      * Run the migrations.
@@ -14,18 +14,18 @@ class CreateEmployeeTable extends Migration
     public function up()
     {
         Schema::create('employee', function (Blueprint $table) {
-            $table->id();
+            $table->id()->autoIncrement();
             $table->string('firstname');
-            $table->string('middlename');
+            $table->string('middlename')->nullable();
             $table->string('lastname');
-            $table->string('birthdate');
+            $table->string('mobileno');
+            $table->date('birthdate');
             $table->string('email')->unique();
             $table->string('gender');
-            $table->string('image');
-            $table->string('address');
             $table->string('street');
             $table->string('city');
-            $table->Integer('roleID');
+            $table->string('country');
+            $table->integer('roleId');
         });
     }
 

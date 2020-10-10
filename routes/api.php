@@ -14,21 +14,99 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::group(['middleware' => 'api-header'], function () {
+    // The registration and login requests doesn't come with tokens
+    // as users at that point have not been authenticated yet
+    // Therefore the jwtMiddleware will be exclusive of them
+
+    // Meeting
+    Route::post('/create_meeting','MeetingController@createMeeting');
+    Route::get('/retrieve_meetings','MeetingController@retrieveMeetings');
+    Route::get('/retrieve_limited_meeting/{id}','MeetingController@retrieveLimitedMeeting');
+    Route::post('/update_meeting','MeetingController@updateMeeting');
+    Route::get('/retrieve_meeting_now','MeetingController@retrieveMeetingByCurrentDate');
+    Route::post('/delete_meeting/{id}','MeetingController@deleteMeeting');
+
+    // Ticket
+    Route::post('/create_ticket','TicketController@createTicket');
+    Route::post('/update_ticket','TicketController@updateTicket');
+    Route::get('/retrieve_tickets','TicketController@retrieveTickets');
+    Route::get('/retrieve_tickets_by_year/{year}','TicketController@retrievesTicketsByYear');
+    Route::get('/retrieve_tickets_by_month/{month}','TicketController@retrievesTicketsByMonth');
+    Route::get('/retrieve_tickets_by_date','TicketController@retrievesTicketsByDate');
+    Route::post('/delete_ticket/{id}','TicketController@deleteTicket');
+    Route::post('/approve_ticket','TicketController@approveTicket');
+
+    // Login
+    Route::post('/login', 'AuthController@login');
+    
+    
+    // File upload
+    Route::get('/image/{folder}/{file}','FileController@serve');
+    Route::post('/upload','FileController@store');
+
+    // Employee
+    Route::post('/create_employee', 'EmployeeController@createEmployee');
+    Route::get('/retrieve_employees','EmployeeController@retrieveEmployees');
+    Route::get('/retrieve_limited_employee/{id}','EmployeeController@retrieveLimitedEmployee');
+    Route::get('/retrieve_employee_by_department/{id}','EmployeeController@retrieveEmployeeByDepartment');
+    Route::get('/retrieve_employee_by_manager/{id}','EmployeeController@retrieveEmployeeByManager');
+    Route::post('/delete_employee/{id}','EmployeeController@deleteEmpl  oyee');
+    Route::post('/update_employee','EmployeeController@updateEmployee');
+    Route::post('/retrieve_employee_profile','EmployeeController@retrieveEmployeeProfile');
+
+    // Department
+    Route::post('/add_department', 'DepartmentController@addDepartment');
+    Route::post('/delete_department/{id}', 'DepartmentController@deleteDepartment');
+    Route::post('/update_department', 'DepartmentController@updateDepartment');
+    Route::post('/retrieve_limited_department/{id}', 'DepartmentController@retrieveLimitedDepartment');
+    Route::post('/retrieve_departments', 'DepartmentController@retrieveDepartments');
+    Route::post('/retrieve_department_heads', 'DepartmentController@retrieveDepartmentHeads');
+    Route::post('/retrieve_departments_managers', 'DepartmentController@retrieveDepartmentManagers');
+
+
+    // Department Employee
+    Route::post('/add_department_employee', 'DepartmentEmployeeController@addDepartmentEmployee');
+    Route::post('/add_department_manager', 'DepartmentEmployeeController@addDepartmentManager');
+    Route::post('/delete_department_employee/{id}', 'DepartmentEmployeeController@deleteDepartmentEmployee');
+    Route::get('/retrieve_limited_department_employee/{id}', 'DepartmentEmployeeController@retrieveLimitedDepartmentEmployee');
+    Route::post('/retrieve_department_employees/{id}', 'DepartmentEmployeeController@retrieveDepartmentEmployees');
+    Route::post('/update_department_manager', 'DepartmentEmployeeController@changeDepartmentManager');
+
+
+});
+
+
+// this routes are needed with jwt token, you need first to login before executing this routes
+// Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
+
+//      // all routes to protected resources are registered here
+//      Route::get('/retrieve_users', 'UserController@retrieveUsers');
+
+// });
+
 // User
-Route::post('/create', 'UserController@createUser');
+// Route::post('/create_user', 'AccountController@createUser');
+// Route::post('/retrieve_user', 'UserController@retrieveUser');
+// Route::post('/update_user', 'UserController@updateUser');
+// Route::post('/delete_user', 'UserController@deleteUser');
 
 // Employee
-// Route::post('/create_employee', 'EmployeeController@createEmployee');
+Route::post('/retrieve_employee_limited', 'EmployeeController@retrieveEmployeeLimited');
+Route::get('/retrieve_employees', 'EmployeeController@retrieveEmployees');
+Route::get('/getProfile', 'EmployeeController@retrieveEmployeeProfile');
 // Route::post('/update_employee', 'EmployeeController@updateEmployee');
-// Route::post('/retrieve_employee', 'EmployeeController@retrieveEmployees');
 // Route::post('/delete_employee' , 'EmployeeController@deleteEmployee');
 
-// // Employee Leave 
-// Route::post('/create_request_leave', 'EmployeeLeaveController@createLeave');
+// // Employee Leave
+Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
+Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
+// Route::post('/validateToken' ,)
 // Route::post('/retrieve_remaining_leave', 'EmployeeLeaveController@retrieveRemainingLeave');
 // Route::post('/retrieve_employees_on_leave', 'EmployeeLeaveController@retrieveEmployeesOnLeave');
 // Route::post('/retrieve_employees_request_leave', 'EmployeeLeaveController@retrieveEmployeesRequestLeave');
@@ -55,7 +133,5 @@ Route::post('/create', 'UserController@createUser');
 Route::get('sendbasicemail','MailController@basic_email');
 Route::get('sendhtmlemail','MailController@html_email');
 Route::get('sendattachmentemail','MailController@attachment_email');
-Route::get('/uploadFile', 'PagesController@index'); // localhost:8000/
-Route::post('/upload', 'PagesController@uploadFile');
 
 
