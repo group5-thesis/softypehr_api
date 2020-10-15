@@ -34,7 +34,7 @@ class EmployeeController extends Controller
             $messages = json_encode($validator->messages());
             $errors = $validator->errors();
             $response = ['data' => $errors->all(), 'error' => true, 'message' => $messages];
-            return response()->json($response, 400);
+            return response()->json($response, 401);
         } else {
             DB::beginTransaction();
             try {

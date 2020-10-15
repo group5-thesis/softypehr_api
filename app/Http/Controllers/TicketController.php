@@ -31,7 +31,7 @@ class TicketController extends Controller
                 $ticket = DB::select(
                     'call CreateTicket(?,?,?,?,?)',
                     array(
-                        Helpers::createTransactionNo("tkt" . $request->employeeId . "_"), $request->employeeId, $request->item, $request->quantity, $request->description
+                        Helpers::createTransactionNo("SOFTYPETKT" . $request->employeeId . "_"), $request->employeeId, $request->item, $request->quantity, $request->description
                     )
                 );
                 $response = $this->retrieveLimitedTicket($ticket[0]->id);
@@ -40,7 +40,7 @@ class TicketController extends Controller
             } catch (\Exception $e) {
                 DB::rollback();
                 $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-                return response()->json($response, 401);
+                return response()->json($response, 500);
             }
         }
     }
@@ -56,7 +56,7 @@ class TicketController extends Controller
             return response()->json($response, 200);
         } catch (\Exception $e) {
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
@@ -74,7 +74,7 @@ class TicketController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
@@ -92,7 +92,7 @@ class TicketController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
@@ -105,7 +105,7 @@ class TicketController extends Controller
             return response()->json($response, 200);
         } catch (\Exception $e) {
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
@@ -118,7 +118,7 @@ class TicketController extends Controller
             return response()->json($response, 200);
         } catch (\Exception $e) {
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
@@ -131,7 +131,7 @@ class TicketController extends Controller
             return response()->json($response, 200);
         } catch (\Exception $e) {
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
@@ -144,7 +144,7 @@ class TicketController extends Controller
             return response()->json($response, 200);
         } catch (\Exception $e) {
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
@@ -157,7 +157,7 @@ class TicketController extends Controller
             return response()->json($response, 200);
         } catch (\Exception $e) {
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
@@ -177,7 +177,7 @@ class TicketController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
@@ -190,7 +190,7 @@ class TicketController extends Controller
             return response()->json($response, 200);
         } catch (\Exception $e) {
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return response()->json($response, 500);
         }
     }
 
