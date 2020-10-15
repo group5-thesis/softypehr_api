@@ -49,8 +49,13 @@ Route::group(['middleware' => 'api-header'], function () {
 
 
     // File upload
-    Route::get('/image/{folder}/{file}','FileController@serve');
-    Route::post('/upload','FileController@store');
+    // Route::get('/image/{folder}/{file}','FileController@serve');
+    // Route::post('/upload','FileController@store');
+    Route::post('/add_file','FileController@addFile');
+    Route::get('/retrieve_files','FileController@retrieveFiles');
+    Route::get('/retrieveLimitedFiles/{id}','FileController@retrieveLimitedFile');
+    Route::post('/retrieveFilesByType','FileController@retrieveFilesByType');
+    Route::post('/delete_file','FileController@deleteFile');
 
     // Employee
     Route::post('/create_employee', 'EmployeeController@createEmployee');

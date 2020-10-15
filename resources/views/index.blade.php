@@ -10,7 +10,7 @@
     @endif
 
     <!-- Form -->
-    <form method='post' action='/api/uploadFile' enctype='multipart/form-data' >
+    <form method='post' action='/api/upload' enctype='multipart/form-data' >
       {{ csrf_field() }}
       <input type='file' name='file' >
       <input type='submit' name='submit' value='Upload File'>
