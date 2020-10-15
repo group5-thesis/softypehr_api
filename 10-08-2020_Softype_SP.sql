@@ -50,7 +50,7 @@ BEGIN
 	INSERT INTO company_repository(uploadedBy, filename, path, type, description, created_at)
     VALUES(_employeeId, _name , _path, _type, _description, date(now()));
     
-    SELECT last_insert_id();
+    SELECT last_insert_id() as id;
 END$$
 DELIMITER ;
 
@@ -63,18 +63,21 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `ApproveTicket`(IN _ticketId INT(11) ,IN _approverId INT(11), IN _remarks VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CloseTicketRequest`(IN _ticketId INT(11) , IN _approverId INT(11), IN _indicator INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
+    IF _indicator = 1 THEN
     UPDATE ticket
-    SET approverId = _approverId, status = 1, resolve_date = date(now()), remarks = _remarks
+    SET approverId = _approverId, status = 0, resolve_date = date(now()), remarks = "Request Approved"
     WHERE id = _ticketId;
-
-	SELECT t.id, emp.firstname, emp.middlename, emp.lastname, emp.email, t.title, 
-    t.item, t.quantity, t.approverId, t.resolve_date ,t.status,t.remarks, t.created_at, t.updated_at
-    FROM ticket as t
-    INNER JOIN employee as emp ON t.employeeId = emp.id
-    WHERE t.id = _ticketId AND t.approverId = _approverId AND t.status = 1;
+    END IF;	
+    IF _indicator = 0 THEN
+	UPDATE ticket
+    SET approverId = _approverId, status = 0, resolve_date = date(now()), remarks = "Request Rejected"
+    WHERE id = _ticketId;
+    END IF;
+    
+    SELECT _ticketId as id;
 END$$
 DELIMITER ;
 
@@ -184,15 +187,15 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateTicket`(IN _employeeId INT(11), IN _title VARCHAR(255), IN _item VARCHAR(255), 
-		IN _quantity INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateTicket`(IN _transac VARCHAR(255),IN _employeeId INT(11), IN _item VARCHAR(255), 
+		IN _quantity INT(11), IN _description VARCHAR(255))
 BEGIN
+    DECLARE _approver INT(11);
+    
+	INSERT INTO ticket(transaction_no, employeeId, item, quantity, approverId, description)
+	VALUES (_transac, _employeeId, _item, _quantity, GetAdmin(),_description);
 
-	INSERT INTO ticket(employeeId, title, item, quantity,created_at)
-	VALUES (_employeeId, _title, _item, _quantity, date(now()));
-	
 	SELECT LAST_INSERT_ID() as id;
-
 END$$
 DELIMITER ;
 
@@ -834,10 +837,22 @@ DELIMITER ;
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedTicket`(IN _ticketId INT(11))
 BEGIN
-	SELECT t.id, emp.firstname, emp.middlename, emp.lastname, emp.email, t.title, 
-    t.item, t.quantity, t.approverId, t.resolve_date ,t.status,t.remarks, t.created_at, t.updated_at
+	SELECT 
+		t.id, 
+        t.transaction_no as transaction_no,
+        concat(emp.firstname , ' ', emp.lastname) as name, 
+        emp.email,
+        t.description as description,
+        t.item as item,
+		t.quantity as quantity,
+        concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
+        t.resolve_date as resolved_date,
+        t.status as status,
+        t.remarks as remarks,
+        t.created_at as date_requested
     FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
+    INNER JOIN employee as emp_app ON t.approverId = emp_app.id
     WHERE t.id = _ticketId;
 END$$
 DELIMITER ;
@@ -868,42 +883,137 @@ DELIMITER ;
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTickets`()
 BEGIN
-	SELECT t.id, emp.firstname, emp.middlename, emp.lastname, emp.email, t.title, t.item, 
-    t.quantity, t.approverId, t.resolve_date, t.status, t.remarks, t.created_at, t.updated_at
+	SELECT 
+		t.id, 
+        t.transaction_no as transaction_no,
+        concat(emp.firstname , ' ', emp.lastname) as name, 
+        emp.email,
+        t.description as description,
+        t.item as item,
+		t.quantity as quantity,
+        concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
+        t.resolve_date as resolved_date,
+        t.status as status,
+        t.remarks as remarks,
+        t.created_at as date_requested
     FROM ticket as t
-    INNER JOIN employee as emp ON t.employeeId = emp.id;
+    INNER JOIN employee as emp ON t.employeeId = emp.id
+    INNER JOIN employee as emp_app ON t.approverId = emp_app.id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByDate`()
 BEGIN
-	SELECT t.id, emp.firstname, emp.middlename, emp.lastname, emp.email, t.title, 
-    t.item, t.quantity, t.approverId, t.resolve_date ,t.status, t.remarks, t.created_at, t.updated_at
+	SELECT 
+		t.id, 
+        t.transaction_no as transaction_no,
+        concat(emp.firstname , ' ', emp.lastname) as name, 
+        emp.email,
+        t.description as description,
+        t.item as item,
+		t.quantity as quantity,
+        concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
+        t.resolve_date as resolved_date,
+        t.status as status,
+        t.remarks as remarks,
+        t.created_at as date_requested
     FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
-    WHERE date(t.created_at) = date(now());
+    INNER JOIN employee as emp_app ON t.approverId = emp_app.id
+    WHERE t.created_at = date(now());
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByEmployee`(IN _employeeId INT(11))
+BEGIN
+	SELECT 
+		emp.id as employeeId,
+		t.id as ticketId,
+        t.transaction_no as transaction_no,
+        concat(emp.firstname , ' ', emp.lastname) as name, 
+        emp.email,
+        t.description as description,
+        t.item as item,
+		t.quantity as quantity,
+        concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
+        t.resolve_date as resolved_date,
+        t.status as status,
+        t.remarks as remarks,
+        t.created_at as date_requested
+    FROM ticket as t
+    INNER JOIN employee as emp ON t.employeeId = emp.id
+    INNER JOIN employee as emp_app ON t.approverId = emp_app.id
+    WHERE t.employeeId = _employeeId;
 END$$
 DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByMonth`(IN _month VARCHAR(255))
 BEGIN
-	SELECT t.id, emp.firstname, emp.middlename, emp.lastname, emp.email, t.title, 
-    t.item, t.quantity, t.approverId, t.resolve_date ,t.status,t.remarks, t.created_at, t.updated_at
+	SELECT 
+		t.id, 
+        t.transaction_no as transaction_no,
+        concat(emp.firstname , ' ', emp.lastname) as name, 
+        emp.email,
+        t.description as description,
+        t.item as item,
+		t.quantity as quantity,
+        concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
+        t.resolve_date as resolved_date,
+        t.status as status,
+        t.remarks as remarks,
+        t.created_at as date_requested
     FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
+    INNER JOIN employee as emp_app ON t.approverId = emp_app.id
     WHERE MONTH(t.created_at) = _month;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByStatus`(IN _status INT(11))
+BEGIN
+	SELECT 
+		t.id, 
+        t.transaction_no as transaction_no,
+        concat(emp.firstname , ' ', emp.lastname) as name, 
+        emp.email,
+        t.description as description,
+        t.item as item,
+		t.quantity as quantity,
+        concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
+        t.resolve_date as resolved_date,
+        t.status as status,
+        t.remarks as remarks,
+        t.created_at as date_requested
+    FROM ticket as t
+    INNER JOIN employee as emp ON t.employeeId = emp.id
+    INNER JOIN employee as emp_app ON t.approverId = emp_app.id
+    WHERE t.status = _status;
 END$$
 DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByYear`(IN _year VARCHAR(255))
 BEGIN
-	SELECT t.id, emp.firstname, emp.middlename, emp.lastname, emp.email, t.title, 
-    t.item, t.quantity, t.approverId, t.resolve_date , t.status,t.remarks, t.created_at, t.updated_at
+	SELECT 
+		t.id, 
+        t.transaction_no as transaction_no,
+        concat(emp.firstname , ' ', emp.lastname) as name, 
+        emp.email,
+        t.description as description,
+        t.item as item,
+		t.quantity as quantity,
+        concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
+        t.resolve_date as resolved_date,
+        t.status as status,
+        t.remarks as remarks,
+        t.created_at as date_requested
     FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
+    INNER JOIN employee as emp_app ON t.approverId = emp_app.id
     WHERE YEAR(t.created_at) = _year;
 END$$
 DELIMITER ;
@@ -1146,13 +1256,13 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateTicket`(IN _ticketId INT(11), IN _employeeId INT(11), IN _title VARCHAR(255), IN _item VARCHAR(255), 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateTicket`(IN _ticketId INT(11), IN _employeeId INT(11), IN _description VARCHAR(255), IN _item VARCHAR(255), 
 		IN _quantity INT(11), IN _status INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
-    IF _title IS NOT NULL then
+    IF _description IS NOT NULL then
     UPDATE ticket
-    SET title = _title WHERE id = _ticketId AND employeeId = _employeeId;
+    SET description = _description WHERE id = _ticketId AND employeeId = _employeeId;
     END IF;
     IF _item IS NOT NULL then
     UPDATE ticket
@@ -1162,8 +1272,6 @@ BEGIN
     UPDATE ticket
     SET quantity = _quantity WHERE id = _ticketId AND employeeId = _employeeId;
     END IF;
-    UPDATE ticket
-    SET updated_at = date(now()) WHERE id = _ticketId AND employeeId = _employeeId;
     
 END$$
 DELIMITER ;
