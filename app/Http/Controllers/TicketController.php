@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Validator;
+use App\Helpers\Helpers;
 use DB;
 
 
@@ -14,10 +15,9 @@ class TicketController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'employeeId' => 'required',
-            'title' => 'required',
+            'description' => 'required',
             'item' => 'required',
-            'quantity' => 'required',
-            'status' => 'required'
+            'quantity' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -29,9 +29,9 @@ class TicketController extends Controller
             DB::beginTransaction();
             try {
                 $ticket = DB::select(
-                    'call CreateTicket(?, ?, ?, ?, ?)',
+                    'call CreateTicket(?,?,?,?,?)',
                     array(
-                        $request->employeeId, $request->title, $request->item, $request->quantity, $request->status
+                        Helpers::createTransactionNo("tkt" . $request->employeeId . "_"), $request->employeeId, $request->item, $request->quantity, $request->description
                     )
                 );
                 $response = $this->retrieveLimitedTicket($ticket[0]->id);
@@ -66,7 +66,7 @@ class TicketController extends Controller
         try {
             $ticket = DB::select(
                 'call UpdateTicket(?,?,?,?,?,?)',
-                array($request->ticketId, $request->employeeId, $request->title, $request->item, $request->quantity, $request->status)
+                array($request->ticketId, $request->employeeId, $request->description, $request->item, $request->quantity, $request->status)
             );
             $response = $this->retrieveLimitedTicket($request->ticketId);
             DB::commit();
@@ -109,7 +109,7 @@ class TicketController extends Controller
         }
     }
 
-    public function retrievesTicketsByDate()
+    public function retrieveTicketsByDate()
     {
         try {
             $ticket_date = DB::select('call RetrieveTicketsByDate()');
@@ -122,11 +122,24 @@ class TicketController extends Controller
         }
     }
 
-    public function retrievesTicketsByMonth($month)
+    public function retrieveTicketsByMonth($month)
     {
         try {
             $ticket_month = DB::select('call RetrieveTicketsByMonth(?)', array($month));
             $result = collect($ticket_month);
+            $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
+            return response()->json($response, 401);
+        }
+    }
+
+    public function retrieveTicketsByStatus($status)
+    {
+        try {
+            $ticket = DB::select('call RetrieveTicketsByStatus(?)', array($status));
+            $result = collect($ticket);
             $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
         } catch (\Exception $e) {
@@ -148,20 +161,34 @@ class TicketController extends Controller
         }
     }
 
-    public function approveTicket(Request $request)
+    public function closeTicketRequest(Request $request)
     {
         DB::beginTransaction();
         try {
             $approved_ticket = DB::select(
-                'call ApproveTicket(?,?,?)',
-                array($request->ticketId, $request->employeeId, $request->remarks)
+                'call CloseTicketRequest(?,?,?)',
+                array($request->ticketId, $request->employeeId, $request->indicator)
             );
             DB::commit();
             $result = collect($approved_ticket);
-            $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            $response = $this->retrieveLimitedTicket($result[0]->id);
+            // $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
+            return $response;
         } catch (\Exception $e) {
             DB::rollback();
+            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
+            return response()->json($response, 401);
+        }
+    }
+
+    public function retrieveTicketsByEmployee($id)
+    {
+        try {
+            $employee_tickets = DB::select('call RetrieveTicketsByEmployee(?)', array($id));
+            $result = collect($employee_tickets);
+            $response = ['data' => ['employee_ticket_information' => $result], 'error' => false, 'message' => 'success'];
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
             $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
             return response()->json($response, 401);
         }
