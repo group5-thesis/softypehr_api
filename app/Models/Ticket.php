@@ -8,14 +8,16 @@ class Ticket extends Model
 {
     //
     protected $fillable = [
+        'transaction_no',
         'employeeId',
-        'title',
         'item',
         'quantity',
+        'description',
         'resolve_date',
         'approverId',
         'status',
-        'remarks'
+        'remarks',
+        'date'
     ];
 
     protected $table = 'ticket';
