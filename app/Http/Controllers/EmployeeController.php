@@ -12,6 +12,7 @@ use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
+// use QrCode;
 
 class EmployeeController extends Controller
 {

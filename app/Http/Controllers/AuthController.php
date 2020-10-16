@@ -16,9 +16,9 @@ class AuthController extends Controller
 {
     public function login(Request $request){
         try{
-            $username = $request->input('username'); // this the input from front end 
+            $username = $request->input('username'); // this the input from front end
             $password =  $request->input('password');
-              $result = User::where('username', '=', $username)->first();   
+              $result = User::where('username', '=', $username)->first();
               if ($result) { // email exists in database
                   if (Auth::attempt(['username' => $username, 'password' => $password])) {
                     // success
@@ -79,7 +79,6 @@ class AuthController extends Controller
                                 'mobile_no' => $value->mobileno,
                                 'gender' => $value->gender,
                                 'birthdate' => $value->birthdate,
-                                // 'profileImage' => $value->profileImage,
                                 'street' => $value->street,
                                 'city' => $value->city,
                                 'country' => $value->country,

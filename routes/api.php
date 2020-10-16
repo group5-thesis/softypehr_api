@@ -36,19 +36,26 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/create_ticket','TicketController@createTicket');
     Route::post('/update_ticket','TicketController@updateTicket');
     Route::get('/retrieve_tickets','TicketController@retrieveTickets');
-    Route::get('/retrieve_tickets_by_year/{year}','TicketController@retrievesTicketsByYear');
-    Route::get('/retrieve_tickets_by_month/{month}','TicketController@retrievesTicketsByMonth');
-    Route::get('/retrieve_tickets_by_date','TicketController@retrievesTicketsByDate');
+    Route::get('/retrieve_tickets_by_year/{year}','TicketController@retrieveTicketsByYear');
+    Route::get('/retrieve_tickets_by_month/{month}','TicketController@retrieveTicketsByMonth');
+    Route::get('/retrieve_tickets_by_date','TicketController@retrieveTicketsByDate');
     Route::post('/delete_ticket/{id}','TicketController@deleteTicket');
-    Route::post('/approve_ticket','TicketController@approveTicket');
+    Route::post('/close_ticket','TicketController@closeTicketRequest');
+    Route::get('/retrieve_tickets_by_status/{status}','TicketController@retrieveTicketsByStatus');
+    Route::get('/retrieve_tickets_by_employee/{id}','TicketController@retrieveTicketsByEmployee');
 
     // Login
     Route::post('/login', 'AuthController@login');
-    
-    
+
+
     // File upload
-    Route::get('/image/{folder}/{file}','FileController@serve');
-    Route::post('/upload','FileController@store');
+    // Route::get('/image/{folder}/{file}','FileController@serve');
+    // Route::post('/upload','FileController@store');
+    Route::post('/add_file','FileController@addFile');
+    Route::get('/retrieve_files','FileController@retrieveFiles');
+    Route::get('/retrieveLimitedFiles/{id}','FileController@retrieveLimitedFile');
+    Route::post('/retrieveFilesByType','FileController@retrieveFilesByType');
+    Route::post('/delete_file','FileController@deleteFile');
 
     // Employee
     Route::post('/create_employee', 'EmployeeController@createEmployee');
@@ -77,7 +84,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_limited_department_employee/{id}', 'DepartmentEmployeeController@retrieveLimitedDepartmentEmployee');
     Route::post('/retrieve_department_employees/{id}', 'DepartmentEmployeeController@retrieveDepartmentEmployees');
     Route::post('/update_department_manager', 'DepartmentEmployeeController@changeDepartmentManager');
-
+    Route::post('/retrieve_employees', 'DepartmentEmployeeController@changeDepartmentManager');
 
 });
 
