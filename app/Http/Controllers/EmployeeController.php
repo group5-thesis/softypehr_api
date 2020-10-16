@@ -52,9 +52,8 @@ class EmployeeController extends Controller
                 if ($employee) {
                     $firstName = $request->firstname;
                     $lastName = $request->lastname;
-                    $username = Str::lower($firstName[0] . $lastName);
+                    $username = Str::lower($firstName[0] . $lastName . $employee_id);
                     $defaultPassword = Hash::make('Softype@100');
-
                     $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
                     \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
                     DB::select(
@@ -76,7 +75,7 @@ class EmployeeController extends Controller
     public function retrieveEmployees()
     {
         try {
-            $employees = DB::select('call RetrieveEmployees');
+            $employees = DB::select('call RetrieveEmployees()');
             $result = collect($employees);
             $response = ['data' => ['employee_information' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
