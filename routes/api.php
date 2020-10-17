@@ -63,7 +63,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_limited_employee/{id}','EmployeeController@retrieveLimitedEmployee');
     Route::get('/retrieve_employee_by_department/{id}','EmployeeController@retrieveEmployeeByDepartment');
     Route::get('/retrieve_employee_by_manager/{id}','EmployeeController@retrieveEmployeeByManager');
-    Route::post('/delete_employee/{id}','EmployeeController@deleteEmpl  oyee');
+    Route::post('/delete_employee/{id}','EmployeeController@deleteEmployee');
     Route::post('/update_employee','EmployeeController@updateEmployee');
     Route::post('/retrieve_employee_profile','EmployeeController@retrieveEmployeeProfile');
 

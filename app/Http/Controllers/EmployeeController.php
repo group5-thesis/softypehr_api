@@ -12,6 +12,8 @@ use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Result;
+
 // use QrCode;
 
 class EmployeeController extends Controller
@@ -33,9 +35,7 @@ class EmployeeController extends Controller
 
         if ($validator->fails()) {
             $messages = json_encode($validator->messages());
-            $errors = $validator->errors();
-            $response = ['data' => $errors->all(), 'error' => true, 'message' => $messages];
-            return response()->json($response, 400);
+            return Result::setError($messages  , 401);
         } else {
             DB::beginTransaction();
             try {
@@ -53,9 +53,8 @@ class EmployeeController extends Controller
                 if ($employee) {
                     $firstName = $request->firstname;
                     $lastName = $request->lastname;
-                    $username = Str::lower($firstName[0] . $lastName);
+                    $username = Str::lower($firstName[0] . $lastName . $employee_id);
                     $defaultPassword = Hash::make('Softype@100');
-
                     $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
                     \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
                     DB::select(
@@ -68,8 +67,7 @@ class EmployeeController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollBack();
-                $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-                return response()->json($response, 500);
+                return Result::setError( "Something went wrong" , 500) ;             
             }
         }
     }
@@ -77,13 +75,11 @@ class EmployeeController extends Controller
     public function retrieveEmployees()
     {
         try {
-            $employees = DB::select('call RetrieveEmployees');
+            $employees = DB::select('call RetrieveEmployees()');
             $result = collect($employees);
-            $response = ['data' => ['employee_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
 
     }
@@ -93,11 +89,9 @@ class EmployeeController extends Controller
         try {
             $employee = DB::select('call RetrieveLimitedEmployee(?)', array($id));
             $result = collect($employee);
-            $response = ['data' => ['employee_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -106,11 +100,9 @@ class EmployeeController extends Controller
         try {
             $employees = DB::select('call RetrieveEmployeeByDepartment(?)', array($id));
             $result = collect($employees);
-            $response = ['data' => ['employee_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;                    
         }
     }
 
@@ -119,11 +111,9 @@ class EmployeeController extends Controller
         try {
             $employees = DB::select('call RetrieveEmployeeByManager(?)', array($id));
             $result = collect($employees);
-            $response = ['data' => ['employee_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return response()->json( ['employee_information' => $result], 200);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;                       
         }
     }
 
@@ -149,12 +139,13 @@ class EmployeeController extends Controller
                 )
             );
             $result = collect($updated_employee);
+            $employee_id = $result[0]->id;
+            $response = $this->retrieveLimitedEmployee($employee_id);
             DB::commit();
-            dd($result);
+            return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;             
         }
     }
 
@@ -165,10 +156,10 @@ class EmployeeController extends Controller
             $deleted_employee = DB::select('call DeleteEmployee(?)', array($id));
             $response = ['error' => false, 'message' => 'success'];
             DB::commit();
+            return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;             
         }
     }
 
@@ -176,10 +167,10 @@ class EmployeeController extends Controller
     {
         try {
             $employee = DB::select('call UserGetProfile(?)', array($request->userId));
-            return response()->json($employee, Response::HTTP_OK);
+            return Result::setData($employee);
+
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;          
         }
     }
 

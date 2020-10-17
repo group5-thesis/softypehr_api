@@ -6,10 +6,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\LeaveRequest;
+use App\Models\Result;
 use DB;
 
 class LeaveRequestController extends Controller
 {
+    private $error_message = "Something went wrong.";
     public function createLeaveRequest(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -23,7 +25,7 @@ class LeaveRequestController extends Controller
 
         if ($validator->fails()) {
             $messages = json_encode($validator->messages());
-            return response()->json(['data' => null, 'error' => true, 'message' => $messages], 400);
+            return Result::setError($messages  , 401);
         } else {
             try {
                 $params = array(
@@ -35,9 +37,9 @@ class LeaveRequestController extends Controller
                     $request->approverId,
                 );
                 $leave_request = DB::select("call UserCreateLeaveRequest(?,?,?,?,?,?)", $params);
-                return response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
+                return Result::setData($leave_request);// response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
             } catch (\Exception $e) {
-                return response()->json(["data" => $e, "error" => true, "message" => $e->getMessage()], 500);
+                return  Result::setError( "Something went wrong" , 500) ;//response()->json(["data" => $e, "error" => true, "message" =>$error_message], 500);
             }
 
         }
@@ -57,26 +59,16 @@ class LeaveRequestController extends Controller
     }
     public function getLeaveRequests(Request $request)
     {
-        $employeeId = $request->employeeId;
-        $roleId = $request->roleId;
-        switch ($roleId) {
-            case 1:
-               return "admin";
-                break;
-            case 2:
-                # code...
-                return "manager";
-                break;
-            case 3:
-                # code...
-                return "regular";
-                break;
-
-            default:
-                # code...
-                break;
+        try{
+            $employeeId = $request->employeeId;
+            $roleId = $request->roleId;
+            $leave_request = DB::select("call RetrieveLeaveRequests(?,?)", [$roleId, $employeeId] );
+            return Result::setData($leave_request);
+        }catch(\Exception $e){
+            return  Result::setError( "Something went wrong" , 500);
         }
-        $leave_request = LeaveRequest::get();
-        return response()->json($leave_request, 200);
+     
+        
+        // $leave_request = LeaveRequest::get();
     }
 }
