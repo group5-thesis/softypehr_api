@@ -86,6 +86,12 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/update_department_manager', 'DepartmentEmployeeController@changeDepartmentManager');
     Route::post('/retrieve_employees', 'DepartmentEmployeeController@changeDepartmentManager');
 
+
+    // Performance Review
+    Route::post('/create_performance_review','PerformanceReviewController@createPerformanceReview');
+    Route::get('/retrieve_performance_reviews','PerformanceReviewController@retrievePerformanceReviews');
+    Route::get('/retrieve_performance_review/{id}','PerformanceReviewController@retrieveLimitedPerformanceReview');
+    Route::get('/retrieve_performance_review_by_employee/{id}','PerformanceReviewController@retrieveLimitedPerformanceReviewByEmployee');
 });
 
 
