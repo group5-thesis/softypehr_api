@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class CreatePerformanceReviewTable extends Migration
 {
@@ -19,7 +20,7 @@ class CreatePerformanceReviewTable extends Migration
             $table->string("criteria");
             $table->integer("employee_reviewed");
             $table->integer("reviewer");
-            $table->double("ratings");
+            $table->integer("ratings");
         });
     }
 

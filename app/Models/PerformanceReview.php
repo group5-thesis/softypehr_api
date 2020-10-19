@@ -12,7 +12,7 @@ class PerformanceReview extends Model
         "criteria",
         "employee_reviewed",
         "reviewer",
-        "rating"
+        "ratings"
     ];
 
     protected $table = "performance_review";
