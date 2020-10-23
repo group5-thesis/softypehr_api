@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use DB;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\DepartmentHeadController;
+use App\Models\Result;
 
 class DepartmentController extends Controller
 {
@@ -12,7 +14,8 @@ class DepartmentController extends Controller
     public function addDepartment(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required'
+            'name' => 'required',
+            'department_head' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -29,29 +32,28 @@ class DepartmentController extends Controller
                 );
                 $result = collect($department);
                 $departmentId = $result[0]->id;
+                DepartmentHeadController::addDepartmentHead($departmentId, $request->department_head);
                 DB::commit();
                 $response = $this->retrieveLimitedDepartment($departmentId);
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-                return response()->json($response, 500);
+                return Result::setError("Something went wrong", 500);
             }
         }
     }
 
-    public function deleteDepartment($id)
+    public function deleteDepartment(Request $request)
     {
         DB::beginTransaction();
         try {
-            $department = DB::select('call DeleteDepartment(?)', array($id));
-            DB::commit();
+            $department = DB::select('call DeleteDepartment(?)', array($request->id));
             $response = ['error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            DB::commit();
+            return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -65,13 +67,14 @@ class DepartmentController extends Controller
                     $request->departmentId, $request->name
                 )
             );
+            $result = collect($department);
+            $department_id = $result[0]->id;
             DB::commit();
-            $response = $this->retrieveLimitedDepartment($request->departmentId);
+            $response = $this->retrieveLimitedDepartment($department_id);
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -80,11 +83,9 @@ class DepartmentController extends Controller
         try {
             $department = DB::select('call RetrieveLimitedDepartment(?)', array($id));
             $result = collect($department);
-            $response = ['data' => ['department' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(["department" => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -93,11 +94,9 @@ class DepartmentController extends Controller
         try {
             $department = DB::select('call RetrieveDepartments()');
             $result = collect($department);
-            $response = ['data' => ['department' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(["departments" => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -106,11 +105,9 @@ class DepartmentController extends Controller
         try {
             $department_head = DB::select('call RetrieveDepartmentHeads()');
             $result = collect($department_head);
-            $response = ['data' => ['department' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(["department_heads" => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -119,14 +116,9 @@ class DepartmentController extends Controller
         try {
             $department_managers = DB::select('call RetrieveDepartmentManagers()');
             $result = collect($department_managers);
-            $response = ['data' => ['department' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(["department_managers" => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError("Something went wrong", 500);
         }
     }
-
-
-
 }

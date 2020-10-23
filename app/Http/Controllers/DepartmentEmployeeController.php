@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use DB;
 
 class DepartmentEmployeeController extends Controller
 {
@@ -33,27 +34,25 @@ class DepartmentEmployeeController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-                return response()->json($response, 500);
+                return Result::setError( "Something went wrong" , 500) ;
             }
         }
     }
 
-    public function deleteDepartmentEmployee($id)
+    public function deleteDepartmentEmployee(Request $request)
     {
         DB::beginTransaction();
         try {
             $deleted_department_employee = DB::select(
                 'call DeleteDepartmentEmployee(?)',
-                array($id)
+                array($request->id)
             );
-            DB::commit();
             $response = ['error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            DB::commit();
+            return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -65,24 +64,20 @@ class DepartmentEmployeeController extends Controller
                 array($id)
             );
             $result = collect($department_employee);
-            $response = ['data' => ['employee_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(["employee_information" => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
-    public function retrieveDepartmentEmployees($id)
+    public function retrieveDepartmentEmployees()
     {
         try {
             $department_employees = DB::select('call RetrieveDepartmentEmployees()');
             $result = collect($department_employees);
-            $response = ['data' => ['employee_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(["employee_information" => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -90,17 +85,18 @@ class DepartmentEmployeeController extends Controller
     {
         DB::beginTransaction();
         try {
-            $deleted_department_employee = DB::select(
+            $updated_department_employee = DB::select(
                 'call UpdateDepartmentEmployee(?,?,?,?)',
                 array($request->id, $request->employeeId, $request->department_headId, $request->department_managerId)
             );
             DB::commit();
-            $response = ['error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            $result = collect($updated_department_employee);
+            $department_employeeId = $result[0]->id;
+            $response = $this->retrieveLimitedDepartmentEmployee($department_employeeId);
+            return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 }

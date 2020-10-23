@@ -67,7 +67,7 @@ class EmployeeController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollBack();
-                return Result::setError( "Something went wrong" , 500) ;             
+                return Result::setError( "Something went wrong" , 500) ;
             }
         }
     }
@@ -102,7 +102,7 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;                    
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -111,9 +111,9 @@ class EmployeeController extends Controller
         try {
             $employees = DB::select('call RetrieveEmployeeByManager(?)', array($id));
             $result = collect($employees);
-            return response()->json( ['employee_information' => $result], 200);
+            return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;                       
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -145,7 +145,7 @@ class EmployeeController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;             
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -159,7 +159,7 @@ class EmployeeController extends Controller
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;             
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -170,7 +170,7 @@ class EmployeeController extends Controller
             return Result::setData($employee);
 
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;          
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 

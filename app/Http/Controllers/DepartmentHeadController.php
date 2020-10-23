@@ -4,33 +4,22 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use DB;
+use App\Models\Result;
 
 class DepartmentHeadController extends Controller
 {
-    public function addDepartmentHead(Request $request)
+    public static function addDepartmentHead($department_id, $department_headId)
     {
-        $validator = Validator::make($request->all(), [
-            'departmentId' => 'required',
-            'department_head' => 'required'
-        ]);
-
-        if ($validator->fails()) {
-            $messages = json_encode($validator->messages());
-            $errors = $validator->errors();
-            $response = ['data' => $errors->all(), 'error' => true, 'message' => $messages];
-            return response()->json($response, 400);
-        } else {
-            DB::beginTransaction();
-            try {
-                $department_head = DB::select('call AddDepartmentHead(?,?)', array($request->departmentId, $request->department_head));
-                $result = collect($department_head);
-                $department_head_id = $result[0]->id;
-                DB::commit();
-            } catch (\Exception $e) {
-                DB::rollback();
-                $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-                return response()->json($response, 500);
-            }
+        DB::beginTransaction();
+        try {
+            $department_head = DB::select('call AddDepartmentHead(?,?)', array($department_id, $department_headId));
+            $result = collect($department_head);
+            $department_head_id = $result[0]->id;
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -42,17 +31,19 @@ class DepartmentHeadController extends Controller
                 'call UpdateDepartmentHead(?,?,?)',
                 array($request->id, $request->departmentId, $request->employeeId)
             );
+
+            $result = collect($updated_department_head);
+            $employee_id = $result[0]->id;
             DB::commit();
-            $response = ['error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            $response = $this->retrieveLimitedDepartmentHead($employee_id);
+            return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
-    public function deleteDepartmentHead($id)
+    public function deleteDepartmentHead(Request $request)
     {
         DB::beginTransaction();
         try {
@@ -60,13 +51,12 @@ class DepartmentHeadController extends Controller
                 'call DeleteDepartmentHead(?)',
                 array($request->id)
             );
-            DB::commit();
             $response = ['error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            DB::commit();
+            return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -75,14 +65,12 @@ class DepartmentHeadController extends Controller
         try {
             $department_head = DB::select(
                 'call RetrieveLimitedDepartmentHead(?)',
-                array($request->id)
+                array($id)
             );
             $result = collect($department_head);
-            $response = ['data' => ['department_head_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(["department_head_information" => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -93,11 +81,9 @@ class DepartmentHeadController extends Controller
                 'call RetrieveDepartmentHeads()'
             );
             $result = collect($department_heads);
-            $response = ['data' => ['department_head_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(["department_head_information" => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 }
