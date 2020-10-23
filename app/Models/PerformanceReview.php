@@ -6,5 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class PerformanceReview extends Model
 {
-    // not finalized
+    //
+    protected $fillable = [
+        "date_reviewed",
+        "criteria",
+        "employee_reviewed",
+        "reviewer",
+        "ratings"
+    ];
+
+    protected $table = "performance_review";
 }

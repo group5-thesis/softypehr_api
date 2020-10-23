@@ -15,6 +15,6 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
  */
 
  
-Route::get('/', function () {
+Route::get('/test', function () {
     return "Server is running...";
 });

@@ -39,7 +39,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_tickets_by_year/{year}','TicketController@retrieveTicketsByYear');
     Route::get('/retrieve_tickets_by_month/{month}','TicketController@retrieveTicketsByMonth');
     Route::get('/retrieve_tickets_by_date','TicketController@retrieveTicketsByDate');
-    Route::post('/delete_ticket/{id}','TicketController@deleteTicket');
+    Route::post('/delete_ticket','TicketController@deleteTicket');
     Route::post('/close_ticket','TicketController@closeTicketRequest');
     Route::get('/retrieve_tickets_by_status/{status}','TicketController@retrieveTicketsByStatus');
     Route::get('/retrieve_tickets_by_employee/{id}','TicketController@retrieveTicketsByEmployee');
@@ -47,15 +47,16 @@ Route::group(['middleware' => 'api-header'], function () {
     // Login
     Route::post('/login', 'AuthController@login');
 
-
     // File upload
     // Route::get('/image/{folder}/{file}','FileController@serve');
     // Route::post('/upload','FileController@store');
+    // Route::get('/retrieveLimitedFiles/{id}','FileController@retrieveLimitedFile');
     Route::post('/add_file','FileController@addFile');
     Route::get('/retrieve_files','FileController@retrieveFiles');
-    Route::get('/retrieveLimitedFiles/{id}','FileController@retrieveLimitedFile');
-    Route::post('/retrieveFilesByType','FileController@retrieveFilesByType');
-    Route::post('/delete_file','FileController@deleteFile');
+    Route::get('/retrieve_files_by_type/{id}','FileController@retrieveFilesByType');
+    Route::post('/delete_file/{id}','FileController@deleteFile');
+    Route::post('/update_file','FileController@updateFile');
+
 
     // Employee
     Route::post('/create_employee', 'EmployeeController@createEmployee');
@@ -63,29 +64,46 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_limited_employee/{id}','EmployeeController@retrieveLimitedEmployee');
     Route::get('/retrieve_employee_by_department/{id}','EmployeeController@retrieveEmployeeByDepartment');
     Route::get('/retrieve_employee_by_manager/{id}','EmployeeController@retrieveEmployeeByManager');
-    Route::post('/delete_employee/{id}','EmployeeController@deleteEmpl  oyee');
+    Route::post('/delete_employee/{id}','EmployeeController@deleteEmployee');
     Route::post('/update_employee','EmployeeController@updateEmployee');
     Route::post('/retrieve_employee_profile','EmployeeController@retrieveEmployeeProfile');
 
     // Department
-    Route::post('/add_department', 'DepartmentController@addDepartment');
-    Route::post('/delete_department/{id}', 'DepartmentController@deleteDepartment');
+    Route::post('/add_department', 'DepartmentController@addDepartment'); // in adding the department, dept_head also added
+    Route::post('/delete_department', 'DepartmentController@deleteDepartment');
     Route::post('/update_department', 'DepartmentController@updateDepartment');
-    Route::post('/retrieve_limited_department/{id}', 'DepartmentController@retrieveLimitedDepartment');
-    Route::post('/retrieve_departments', 'DepartmentController@retrieveDepartments');
-    Route::post('/retrieve_department_heads', 'DepartmentController@retrieveDepartmentHeads');
-    Route::post('/retrieve_departments_managers', 'DepartmentController@retrieveDepartmentManagers');
+    Route::get('/retrieve_limited_department/{id}', 'DepartmentController@retrieveLimitedDepartment');
+    Route::get('/retrieve_departments', 'DepartmentController@retrieveDepartments');
+    Route::get('/retrieve_department_heads_v1', 'DepartmentController@retrieveDepartmentHeads');
+    Route::post('/retrieve_departments_managers_v1', 'DepartmentController@retrieveDepartmentManagers');
 
 
     // Department Employee
     Route::post('/add_department_employee', 'DepartmentEmployeeController@addDepartmentEmployee');
-    Route::post('/add_department_manager', 'DepartmentEmployeeController@addDepartmentManager');
-    Route::post('/delete_department_employee/{id}', 'DepartmentEmployeeController@deleteDepartmentEmployee');
+    Route::post('/delete_department_employee', 'DepartmentEmployeeController@deleteDepartmentEmployee');
     Route::get('/retrieve_limited_department_employee/{id}', 'DepartmentEmployeeController@retrieveLimitedDepartmentEmployee');
-    Route::post('/retrieve_department_employees/{id}', 'DepartmentEmployeeController@retrieveDepartmentEmployees');
-    Route::post('/update_department_manager', 'DepartmentEmployeeController@changeDepartmentManager');
-    Route::post('/retrieve_employees', 'DepartmentEmployeeController@changeDepartmentManager');
+    Route::get('/retrieve_department_employees', 'DepartmentEmployeeController@retrieveDepartmentEmployees');
+    Route::post('/update_department_employee', 'DepartmentEmployeeController@updateDepartmentEmployee');
 
+    // Department Manager
+    Route::post('/add_department_manager', 'DepartmentManagerController@addDepartmentManager');
+    Route::get('/retrieve_department_managers', 'DepartmentManagerController@retrieveDepartmentManagers');
+    Route::get('/retrieve_limited_department_manager/{id}', 'DepartmentManagerController@retrieveLimitedDepartmentManager');
+    Route::post('/update_department_manager', 'DepartmentManagerController@updateDepartmentManager');
+    Route::post('/delete_department_manager', 'DepartmentManagerController@deleteDepartmentManager');
+
+    // Department Head
+    Route::post('/update_department_head', 'DepartmentHeadController@updateDepartmentHead');
+    Route::get('/retrieve_department_heads', 'DepartmentHeadController@retrieveDepartmentHeads');
+    Route::get('/retrieve_limited_department_head/{id}', 'DepartmentHeadController@retrieveLimitedDepartmentHead');
+    Route::post('/delete_department_head', 'DepartmentHeadController@deleteDepartmentHead');
+
+
+    // Performance Review
+    Route::post('/create_performance_review','PerformanceReviewController@createPerformanceReview');
+    Route::get('/retrieve_performance_reviews','PerformanceReviewController@retrievePerformanceReviews');
+    Route::get('/retrieve_performance_review/{id}','PerformanceReviewController@retrieveLimitedPerformanceReview');
+    Route::get('/retrieve_performance_review_by_employee/{id}','PerformanceReviewController@retrieveLimitedPerformanceReviewByEmployee');
 });
 
 

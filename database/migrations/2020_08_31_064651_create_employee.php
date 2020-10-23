@@ -20,7 +20,7 @@ class CreateEmployee extends Migration
             $table->string('lastname');
             $table->string('mobileno');
             $table->date('birthdate');
-            $table->string('email')->unique();
+            $table->string('email', 191)->unique();
             $table->string('gender');
             $table->string('street');
             $table->string('city');
