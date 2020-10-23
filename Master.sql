@@ -1060,16 +1060,6 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `test`(IN `_name` VARCHAR(255))
-BEGIN
-	INSERT INTO softype.department(name)
-    VALUES(_name);
-    
-    SELECT last_insert_id() as id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `TimeIn`(IN `_employeeId` INT(11), IN `_timeIn` TIME)
 BEGIN
 	INSERT INTO employee_attendance(employeeId, time_in, time_out, date, no_of_hours)
