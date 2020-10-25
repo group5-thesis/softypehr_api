@@ -26,9 +26,9 @@ class CreateEmployee extends Migration
             $table->string('city');
             $table->string('country');
             $table->integer('roleId');
+            $table->string('profile_img', 191)->nullable();
         });
     }
-
     /**
      * Reverse the migrations.
      *

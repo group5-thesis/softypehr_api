@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use App\Http\Controllers\Controller;
+use App\Models\Result;
 use DB;
 
 class FileController extends Controller
@@ -17,31 +18,28 @@ class FileController extends Controller
         $path = public_path()."/".$dir;
         return File::get($path);
     }
-
-    public function store(Request $request)
-    {
-        
-        // $validator = Validator::make($request->all(), [
-        //     'price' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-        //     'productCategory' => 'required|string|max:255',
-        //     'productName' => 'required|string|max:255',
-        // ]);
-        // if($validator->fails()){
-        //     return response()->json($validator->errors()->toJson(), 400);
-        // }
-
-        try{
-            $imageName = time().'.'.$request->file->getClientOriginalExtension();
-            $request->file->move(public_path('images'), $imageName);
-            $response = ['data' => [],'error' => false, 'message' => "Success!"];
-            return response()->json($response, 200);
-        }catch(\Exception $e){
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+    public function serveImage($filename){
+        $path = public_path('images').'/'.$filename;
+        if (!File::exists($path)) {
+           abort(404);
         }
-       
+        $file = File::get($path);
+        $type = File::mimeType($path);
+        $response = Response::make($file, 200);
+        $response->header("Content-Type", $type);
         
-        return response()->json(['success'=>'You have successfully upload image.']);
+        return $response;
+    }
+
+    public static function store($file)
+    {
+        try{
+            $imageName = 'uploads_'.time().".".$file->getClientOriginalExtension();
+            $file->move(public_path('images'), $imageName);
+            return $imageName;
+        }catch(\Exception $e){
+            throw $e;
+        }
     }
 
     // public function addFile(Request $request)
@@ -99,7 +97,7 @@ class FileController extends Controller
             }elseif (in_array($extension,$docs)){
                 $request->file->move(public_path('documents'), $imageName);
                 $path = public_path('documents');
-                $type = "dodocuments";
+                $type = "documents";
             }else{
                 $request->file->move(public_path('others'), $imageName);
                 $path = public_path('others');

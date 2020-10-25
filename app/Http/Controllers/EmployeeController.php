@@ -8,7 +8,9 @@ use App\Models\Employee;
 use App\Models\Account;
 use Illuminate\Support\Str;
 use DB;
+use Exception;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
@@ -171,6 +173,27 @@ class EmployeeController extends Controller
 
         } catch (\Exception $e) {
             return Result::setError( "Something went wrong" , 500) ;          
+        }
+    }
+
+    public function updateProfilePicture(Request $request){
+        try{
+            DB::beginTransaction();
+            $file = $request->file; 
+            $employee_id= $request->employee_id;
+            $imageName = FileController::store($file);
+            $query = DB::select("call UpdateProfileImage(?,?)",array($employee_id , $imageName));
+            $result = collect($query);
+            if ($result[0]->completed > 0) {
+                DB::commit();
+               return  $this->retrieveLimitedEmployee($employee_id);
+            } else {
+                DB::rollback();
+                return Result::setError( "Update failed" , 500) ;
+            }
+        }catch(\Exception $e){
+            return Result::setError( $e->getMessage().": Something went wrong" , 500) ;          
+            DB::rollback();
         }
     }
 
