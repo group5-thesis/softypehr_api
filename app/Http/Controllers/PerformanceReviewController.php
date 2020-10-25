@@ -12,7 +12,7 @@ class PerformanceReviewController extends Controller
     public function createPerformanceReview(Request $request)
     {
         /**
-         *  "date_reviewed",
+        *  "date_reviewed",
         *"criteria",
         *"employee_reviewed",
         *"reviewer",
@@ -40,14 +40,13 @@ class PerformanceReviewController extends Controller
                     ));
                 $result = collect($performance_review);
                 $performance_review_id = $result[0]->id;
-                
+
                 DB::commit();
                 $response = $this->retrieveLimitedPerformanceReview($performance_review_id);
                 return $response;
-                // return Result::setData(["performance_review_information" => $response]);
             }catch(\Exception $e){
                 DB::rollBack();
-                return Result::setError( $e->getMessage() , 500) ;   
+                return Result::setError( $e->getMessage() , 500) ;
             }
         }
     }

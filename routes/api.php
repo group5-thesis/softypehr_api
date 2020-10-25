@@ -39,14 +39,13 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_tickets_by_year/{year}','TicketController@retrieveTicketsByYear');
     Route::get('/retrieve_tickets_by_month/{month}','TicketController@retrieveTicketsByMonth');
     Route::get('/retrieve_tickets_by_date','TicketController@retrieveTicketsByDate');
-    Route::post('/delete_ticket/{id}','TicketController@deleteTicket');
+    Route::post('/delete_ticket','TicketController@deleteTicket');
     Route::post('/close_ticket','TicketController@closeTicketRequest');
     Route::get('/retrieve_tickets_by_status/{status}','TicketController@retrieveTicketsByStatus');
     Route::get('/retrieve_tickets_by_employee/{id}','TicketController@retrieveTicketsByEmployee');
 
     // Login
     Route::post('/login', 'AuthController@login');
-
 
     // File upload
     Route::get('/image/{folder}/{file}','FileController@serve');
@@ -71,23 +70,34 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/retrieve_employee_profile','EmployeeController@retrieveEmployeeProfile');
 
     // Department
-    Route::post('/add_department', 'DepartmentController@addDepartment');
-    Route::post('/delete_department/{id}', 'DepartmentController@deleteDepartment');
+    Route::post('/add_department', 'DepartmentController@addDepartment'); // in adding the department, dept_head also added
+    Route::post('/delete_department', 'DepartmentController@deleteDepartment');
     Route::post('/update_department', 'DepartmentController@updateDepartment');
-    Route::post('/retrieve_limited_department/{id}', 'DepartmentController@retrieveLimitedDepartment');
-    Route::post('/retrieve_departments', 'DepartmentController@retrieveDepartments');
-    Route::post('/retrieve_department_heads', 'DepartmentController@retrieveDepartmentHeads');
-    Route::post('/retrieve_departments_managers', 'DepartmentController@retrieveDepartmentManagers');
+    Route::get('/retrieve_limited_department/{id}', 'DepartmentController@retrieveLimitedDepartment');
+    Route::get('/retrieve_departments', 'DepartmentController@retrieveDepartments');
+    Route::get('/retrieve_department_heads_v1', 'DepartmentController@retrieveDepartmentHeads');
+    Route::post('/retrieve_departments_managers_v1', 'DepartmentController@retrieveDepartmentManagers');
 
 
     // Department Employee
     Route::post('/add_department_employee', 'DepartmentEmployeeController@addDepartmentEmployee');
-    Route::post('/add_department_manager', 'DepartmentEmployeeController@addDepartmentManager');
-    Route::post('/delete_department_employee/{id}', 'DepartmentEmployeeController@deleteDepartmentEmployee');
+    Route::post('/delete_department_employee', 'DepartmentEmployeeController@deleteDepartmentEmployee');
     Route::get('/retrieve_limited_department_employee/{id}', 'DepartmentEmployeeController@retrieveLimitedDepartmentEmployee');
-    Route::post('/retrieve_department_employees/{id}', 'DepartmentEmployeeController@retrieveDepartmentEmployees');
-    Route::post('/update_department_manager', 'DepartmentEmployeeController@changeDepartmentManager');
-    Route::post('/retrieve_employees', 'DepartmentEmployeeController@changeDepartmentManager');
+    Route::get('/retrieve_department_employees', 'DepartmentEmployeeController@retrieveDepartmentEmployees');
+    Route::post('/update_department_employee', 'DepartmentEmployeeController@updateDepartmentEmployee');
+
+    // Department Manager
+    Route::post('/add_department_manager', 'DepartmentManagerController@addDepartmentManager');
+    Route::get('/retrieve_department_managers', 'DepartmentManagerController@retrieveDepartmentManagers');
+    Route::get('/retrieve_limited_department_manager/{id}', 'DepartmentManagerController@retrieveLimitedDepartmentManager');
+    Route::post('/update_department_manager', 'DepartmentManagerController@updateDepartmentManager');
+    Route::post('/delete_department_manager', 'DepartmentManagerController@deleteDepartmentManager');
+
+    // Department Head
+    Route::post('/update_department_head', 'DepartmentHeadController@updateDepartmentHead');
+    Route::get('/retrieve_department_heads', 'DepartmentHeadController@retrieveDepartmentHeads');
+    Route::get('/retrieve_limited_department_head/{id}', 'DepartmentHeadController@retrieveLimitedDepartmentHead');
+    Route::post('/delete_department_head', 'DepartmentHeadController@deleteDepartmentHead');
 
 
     // Performance Review

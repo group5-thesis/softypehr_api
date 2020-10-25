@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use DB;
+use App\Models\Result;
 
 class DepartmentManagerController extends Controller
 {
@@ -24,7 +26,7 @@ class DepartmentManagerController extends Controller
             try {
                 $employee = DB::select(
                     'call AddDepartmentManager(?,?)',
-                    array($request->department_manager, $request->departmentId, )
+                    array($request->departmentId, $request->department_manager)
                 );
                 $result = collect($employee);
                 $employee_id = $result[0]->id;
@@ -33,8 +35,7 @@ class DepartmentManagerController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-                return response()->json($response, 500);
+                return Result::setError( "Something went wrong" , 500) ;
             }
         }
     }
@@ -47,28 +48,28 @@ class DepartmentManagerController extends Controller
                 'call UpdateDepartmentManager(?,?,?)',
                 array($request->id, $request->departmentId, $request->employeeId)
             );
+            $result = collect($updated_manager);
+            $employee_id = $result[0]->id;
             DB::commit();
-            $response = ['error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            $response = $this->retrieveLimitedDepartmentManager($employee_id);
+            return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
-    public function deleteDepartmentManager($id)
+    public function deleteDepartmentManager(Request $request)
     {
         DB::beginTransaction();
         try {
-            $deleted_manager = DB::select('call DeleteDepartmentManager(?)', array($id));
-            DB::commit();
+            $deleted_manager = DB::select('call DeleteDepartmentManager(?)', array($request->id));
             $response = ['error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            DB::commit();
+            return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -80,11 +81,9 @@ class DepartmentManagerController extends Controller
                 array($id)
             );
             $result = collect($department_manager);
-            $response = ['data' => ['manager_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['department_manager_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 
@@ -95,11 +94,9 @@ class DepartmentManagerController extends Controller
                 'call RetrieveDepartmentManagers()'
             );
             $result = collect($department_managers);
-            $response = ['data' => ['manager_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['department_manager_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( "Something went wrong" , 500) ;
         }
     }
 }

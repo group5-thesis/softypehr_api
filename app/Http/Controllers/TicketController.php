@@ -7,6 +7,7 @@ use App\Models\Ticket;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\Helpers;
 use DB;
+use App\Models\Result;
 
 
 class TicketController extends Controller
@@ -31,7 +32,7 @@ class TicketController extends Controller
                 $ticket = DB::select(
                     'call CreateTicket(?,?,?,?,?)',
                     array(
-                        Helpers::createTransactionNo("tkt" . $request->employeeId . "_"), $request->employeeId, $request->item, $request->quantity, $request->description
+                        Helpers::createTransactionNo("SOFTYPETKT" . $request->employeeId . "_"), $request->employeeId, $request->item, $request->quantity, $request->description
                     )
                 );
                 $response = $this->retrieveLimitedTicket($ticket[0]->id);
@@ -39,8 +40,7 @@ class TicketController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-                return response()->json($response, 401);
+                return Result::setError("Something went wrong", 500);
             }
         }
     }
@@ -49,14 +49,10 @@ class TicketController extends Controller
     {
         try {
             $retrieveTicket = DB::select('call RetrieveLimitedTicket(?)', array($id));
-
             $result = collect($retrieveTicket);
-
-            $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['ticket_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -68,31 +64,31 @@ class TicketController extends Controller
                 'call UpdateTicket(?,?,?,?,?,?)',
                 array($request->ticketId, $request->employeeId, $request->description, $request->item, $request->quantity, $request->status)
             );
-            $response = $this->retrieveLimitedTicket($request->ticketId);
+            $result = collect($ticket);
+            $ticket_id = $result[0]->id;
             DB::commit();
+            $response = $this->retrieveLimitedTicket($request->ticket_id);
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
-    public function deleteTicket($id)
+    public function deleteTicket(Request $request)
     {
         DB::beginTransaction();
         try {
             $ticket = DB::select(
                 'call deleteTicket(?)',
-                array($id)
+                array($request->id)
             );
+            $response = ['error' => false, 'message' => 'success'];
             DB::commit();
-            $response = $this . retrieveTickets();
-            return $response;
+            return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -101,11 +97,9 @@ class TicketController extends Controller
         try {
             $retrieveTicket = DB::select('call RetrieveTickets()');
             $result = collect($retrieveTicket);
-            $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['ticket_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -114,11 +108,9 @@ class TicketController extends Controller
         try {
             $ticket_date = DB::select('call RetrieveTicketsByDate()');
             $result = collect($ticket_date);
-            $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['ticket_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -127,11 +119,9 @@ class TicketController extends Controller
         try {
             $ticket_month = DB::select('call RetrieveTicketsByMonth(?)', array($month));
             $result = collect($ticket_month);
-            $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['ticket_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -140,11 +130,9 @@ class TicketController extends Controller
         try {
             $ticket = DB::select('call RetrieveTicketsByStatus(?)', array($status));
             $result = collect($ticket);
-            $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['ticket_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -153,11 +141,9 @@ class TicketController extends Controller
         try {
             $ticket_year = DB::select('call RetrieveTicketsByYear(?)', array($year));
             $result = collect($ticket_year);
-            $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['ticket_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -172,12 +158,10 @@ class TicketController extends Controller
             DB::commit();
             $result = collect($approved_ticket);
             $response = $this->retrieveLimitedTicket($result[0]->id);
-            // $response = ['data' => ['ticket_information' => $result], 'error' => false, 'message' => 'success'];
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -186,11 +170,9 @@ class TicketController extends Controller
         try {
             $employee_tickets = DB::select('call RetrieveTicketsByEmployee(?)', array($id));
             $result = collect($employee_tickets);
-            $response = ['data' => ['employee_ticket_information' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['employee_ticket_information' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, 'error' => true, 'message' => $e->getMessage()];
-            return response()->json($response, 401);
+            return Result::setError("Something went wrong", 500);
         }
     }
 
