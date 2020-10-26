@@ -32,7 +32,7 @@ class EmployeeController extends Controller
             'street' => 'required',
             'city' => 'required',
             'country' => 'required',
-            'roleId' => 'required'
+            'role' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -46,7 +46,7 @@ class EmployeeController extends Controller
                     array(
                         $request->firstname, $request->middlename, $request->lastname, $request->mobileno,
                         $request->gender, $request->email, $request->birthdate,
-                        $request->street, $request->city, $request->country, $request->roleId
+                        $request->street, $request->city, $request->country, $request->role
                     )
                 );
                 $result = collect($employee);
@@ -61,7 +61,7 @@ class EmployeeController extends Controller
                     \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
-                        array($username, $defaultPassword, $file, $employee_id, $request->roleId)
+                        array($username, $defaultPassword, $file, $employee_id, $request->accountType)
                     );
                 }
                 DB::commit();

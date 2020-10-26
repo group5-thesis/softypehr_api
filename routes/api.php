@@ -124,7 +124,6 @@ Route::group(['middleware' => 'api-header'], function () {
 
 // Employee
 Route::post('/retrieve_employee_limited', 'EmployeeController@retrieveEmployeeLimited');
-Route::get('/retrieve_employees', 'EmployeeController@retrieveEmployees');
 Route::get('/getProfile', 'EmployeeController@retrieveEmployeeProfile');
 // Route::post('/update_employee', 'EmployeeController@updateEmployee');
 // Route::post('/delete_employee' , 'EmployeeController@deleteEmployee');
