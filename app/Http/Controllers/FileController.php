@@ -145,7 +145,7 @@ class FileController extends Controller
             $response = ['data' => ['files' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
         } catch (\Exception $e) {
-            return Result::setError( $e->getMessage()) ;);
+            return Result::setError( $e->getMessage());
         }
     }
 
