@@ -16,21 +16,22 @@ use App\Models\Result;
 
 class AuthController extends Controller
 {
-    public function login(Request $request){
-        try{
+    public function login(Request $request)
+    {
+        try {
             $username = $request->input('username'); // this the input from front end
-            $password =  $request->input('password');
-              $result = User::where('username', '=', $username)->first();
-              if ($result) { // email exists in database
-                  if (Auth::attempt(['username' => $username, 'password' => $password])) {
+            $password = $request->input('password');
+            $result = User::where('username', '=', $username)->first();
+            if ($result) { // email exists in database
+                if (Auth::attempt(['username' => $username, 'password' => $password])) {
                     // success
-                      $token = self::getToken($username, $password);
-                      $access_token = $token;
-                      $result->save();
-                      $temp = 'test';
-                      $employee = DB::select('call UserGetProfile(?)', array($result->id));
+                    $token = self::getToken($username, $password);
+                    $access_token = $token;
+                    $result->save();
+                    $temp = 'test';
+                    $employee = DB::select('call UserGetProfile(?)', array($result->id));
                     //   $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
-                    $response=[]; 
+                    $response=[];
                       foreach ($employee as $key => $value) {
                           $response =  [
                               'access_token' => $access_token,
@@ -40,16 +41,16 @@ class AuthController extends Controller
                       return Result::setData($response);
                   } else {
                     // error password
-                    return Result::setError($e->getMessage() , "Invalid Credentials!" ,401);
-                  }
-              } else {
+                    return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
+                }
+            } else {
                  // error: user not found
-                return Result::setError($e->getMessage() , "Invalid Credentials!" ,401 );
-              }
-            // response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
-            } catch (\Exception $e) {
-                return  Result::setError($e->getMessage()) ;//response()->json(["data" => $e, "error" => true, "message" =>$error_message], 500);
+                return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
             }
+            // response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage());//response()->json(["data" => $e, "error" => true, "message" =>$error_message], 500);
+        }
 
     }
 

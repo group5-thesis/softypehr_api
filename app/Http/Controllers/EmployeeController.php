@@ -137,6 +137,10 @@ class EmployeeController extends Controller
                     $request->street,
                     $request->city,
                     $request->country,
+                    $request->phil_health_no,
+                    $request->sss_no,
+                    $request->pag_ibig_no,
+                    $request->isActive,
                     $request->roleId
                 )
             );
@@ -179,7 +183,7 @@ class EmployeeController extends Controller
     public function updateProfilePicture(Request $request){
         try{
             DB::beginTransaction();
-            $file = $request->file; 
+            $file = $request->file;
             $employee_id= $request->employee_id;
             $imageName = FileController::store($file);
             $query = DB::select("call UpdateProfileImage(?,?)",array($employee_id , $imageName));
@@ -192,7 +196,7 @@ class EmployeeController extends Controller
                 return Result::setError( null, 401, "Update failed" ) ;
             }
         }catch(\Exception $e){
-            return Result::setError($e->getMessage()) ;          
+            return Result::setError($e->getMessage()) ;
             DB::rollback();
         }
     }

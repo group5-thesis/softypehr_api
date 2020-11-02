@@ -4,21 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Ticket extends Model
+class OfficeRequest extends Model
 {
     //
     protected $fillable = [
-        'transaction_no',
         'employeeId',
+        'approverId',
+        'transaction_no',
         'item',
         'quantity',
-        'description',
         'resolve_date',
-        'approverId',
+        'price',
+        'total_price',
         'status',
-        'remarks',
-        'date'
+        'date_needed',
+        'remarks'
     ];
-
-    protected $table = 'ticket';
+    protected $table = 'office_request';
 }

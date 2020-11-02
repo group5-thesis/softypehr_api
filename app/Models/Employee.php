@@ -17,8 +17,12 @@ class Employee extends Model
         'street',
         'city',
         'country',
-        'roleId',
-        'profile_img'
+        'profile_img',
+        'phil_health_no',
+        'sss_no',
+        'pag_ibig_no',
+        'isActive',
+        'roleId'
     ];
 
     protected $table = 'employee';
