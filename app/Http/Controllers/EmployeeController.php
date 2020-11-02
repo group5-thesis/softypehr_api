@@ -37,7 +37,7 @@ class EmployeeController extends Controller
 
         if ($validator->fails()) {
             $messages = json_encode($validator->messages());
-            return Result::setError($messages  , 401);
+            return Result::setError($messages, 401);
         } else {
             DB::beginTransaction();
             try {
@@ -69,7 +69,7 @@ class EmployeeController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollBack();
-                return Result::setError( "Something went wrong" , 500) ;
+                return Result::setError("Something went wrong : " . $e->getMessage(), 500);
             }
         }
     }
@@ -81,7 +81,7 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError("Something went wrong", 500);
         }
 
     }
@@ -93,7 +93,7 @@ class EmployeeController extends Controller
             $result = collect($employee);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -104,7 +104,7 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -115,7 +115,7 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -147,7 +147,7 @@ class EmployeeController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -161,7 +161,7 @@ class EmployeeController extends Controller
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError("Something went wrong", 500);
         }
     }
 
@@ -172,27 +172,28 @@ class EmployeeController extends Controller
             return Result::setData($employee);
 
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError("Something went wrong", 500);
         }
     }
 
-    public function updateProfilePicture(Request $request){
-        try{
+    public function updateProfilePicture(Request $request)
+    {
+        try {
             DB::beginTransaction();
-            $file = $request->file; 
-            $employee_id= $request->employee_id;
+            $file = $request->file;
+            $employee_id = $request->employee_id;
             $imageName = FileController::store($file);
-            $query = DB::select("call UpdateProfileImage(?,?)",array($employee_id , $imageName));
+            $query = DB::select("call UpdateProfileImage(?,?)", array($employee_id, $imageName));
             $result = collect($query);
             if ($result[0]->completed > 0) {
                 DB::commit();
-               return  $this->retrieveLimitedEmployee($employee_id);
+                return $this->retrieveLimitedEmployee($employee_id);
             } else {
                 DB::rollback();
-                return Result::setError( "Update failed" , 500) ;
+                return Result::setError("Update failed", 500);
             }
-        }catch(\Exception $e){
-            return Result::setError( $e->getMessage().": Something went wrong" , 500) ;          
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage() . ": Something went wrong", 500);
             DB::rollback();
         }
     }
