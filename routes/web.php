@@ -18,3 +18,5 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 Route::get('/test', function () {
     return "Server is running...";
 });
+
+Route::get('/file/{dir}/{path}','FileController@downloadFile');
