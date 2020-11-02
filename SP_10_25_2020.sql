@@ -1,3 +1,5 @@
+
+DROP PROCEDURE if EXISTS `CreateEmployee`
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateEmployee`(
 		IN `_firstname` VARCHAR(255),
@@ -40,6 +42,7 @@ BEGIN
     
 END$$
 DELIMITER ;
+DROP PROCEDURE if EXISTS `CreateEmployeeAccount`
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateEmployeeAccount`(
