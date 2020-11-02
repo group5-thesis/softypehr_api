@@ -102,8 +102,17 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateEmployee`(
         IN `_street` VARCHAR(255),
         IN `_city` VARCHAR(255),
         IN `_country` VARCHAR(255),
-        IN `_roleId` INT(11))
+        IN `_role` VARCHAR(255))
 BEGIN
+	DECLARE _roleId int(11);
+    IF NOT EXISTS(SELECT id FROM softype.`role` WHERE position = _role)
+	THEN
+		INSERT INTO softype.`role` (position) VALUES (_role);
+		SELECT last_insert_id() into _roleID;
+	ELSE
+		SELECT id FROM softype.`role` WHERE position = _role into _roleID;
+	END If;
+    
 	INSERT INTO 
 		employee(
 			firstname,
@@ -118,7 +127,7 @@ BEGIN
 			country,
 			roleId
 		)
-	VALUES (_firstname, _middlename, _lastname, _mobileno, _gender, _email, _birthdate, _street, _city, _country, _roleId);
+	VALUES (_firstname, _middlename, _lastname, _mobileno, _gender, _email, _birthdate, _street, _city, _country, _roleID);
     SELECT last_insert_id() as id;
     
 END$$
@@ -131,20 +140,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateEmployeeAccount`(
     IN `_qrcode` VARCHAR(255), 
     IN `_employeeId` INT(11), 
     IN `_roleId` INT(11))
-BEGIN
-    DECLARE _accountType INT;
-	
-	CASE
-    WHEN _roleId IN(1, 2 , 3 , 4) THEN
-	SET _accountType = 3; # SUPERVISOR
-
-	WHEN _roleId IN(5, 6 , 7 , 8) THEN
-	SET _accountType = 2;  # EMPLOYEE
-
-	ELSE SET _accountType = 1; # ADMIN
-
-	END CASE;  
-    
+BEGIN	
 	INSERT INTO `user` 
     (
 		`username`, 
@@ -158,7 +154,7 @@ BEGIN
 		_username, 
         _password, 
         _qrcode,
-        _accountType,
+        _roleId,
         _employeeId
 	);
     SELECT * FROM `user` WHERE id = (SELECT LAST_INSERT_ID());
@@ -323,19 +319,19 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveByFileType`(IN _type VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveByFileType`(IN `_type` VARCHAR(255))
 BEGIN
-	SELECT 
-		cr.id as file_id,
-		cr.created_at as uploadedAt,
-        cr.filename as filename,
-        cr.path as path,
-        cr.type as type,
-        cr.description as description,
-        concat(emp.firstname, ' ', emp.lastname) as uploadedBy
-    FROM softype.company_repository as cr
-    JOIN softype.employee as emp ON emp.id = cr.employeeId
-    WHERE cr.type = _type;
+SELECT
+cr.id as file_id,
+cr.created_at as uploadedAt,
+       cr.filename as filename,
+       cr.path as path,
+       cr.type as type,
+       cr.description as description,
+       concat(emp.firstname, ' ', emp.lastname) as uploadedBy
+   FROM softype.company_repository as cr
+   JOIN softype.employee as emp ON emp.id = cr.uploadedBy
+   WHERE cr.type = _type;
 END$$
 DELIMITER ;
 
@@ -601,7 +597,7 @@ BEGIN
         cr.description as description,
         concat(emp.firstname, ' ', emp.lastname) as uploadedBy
     FROM softype.company_repository as cr
-    JOIN softype.employee as emp ON emp.id = cr.employeeId;
+    JOIN softype.employee as emp ON emp.id = cr.uploadedBy;
 END$$
 DELIMITER ;
 
