@@ -58,6 +58,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/update_file', 'FileController@updateFile');
     Route::get('/image/{filename}', 'FileController@serveImage');
 
+
     // Employee
     Route::post('/create_employee', 'EmployeeController@createEmployee');
     Route::get('/retrieve_employees', 'EmployeeController@retrieveEmployees');

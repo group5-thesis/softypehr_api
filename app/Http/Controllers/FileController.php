@@ -30,6 +30,15 @@ class FileController extends Controller
         return $response;
     }
 
+    public function downloadFile($dir , $path)
+    {
+        try{
+            return response()->file(public_path("$dir/$path"));
+        }catch(Exception $e){
+            return Result::setError($e->getMessage());
+        }
+    }
+
     public static function store($file)
     {
         try{
@@ -117,8 +126,7 @@ class FileController extends Controller
         try {
             $files = DB::select('call RetrieveFiles()');
             $result = collect($files);
-            $response = ['data' => ['files' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['files' => $result]);
         } catch (\Exception $e) {
             return Result::setError( $e->getMessage()) ;
         }
