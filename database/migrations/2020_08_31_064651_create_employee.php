@@ -26,9 +26,13 @@ class CreateEmployee extends Migration
             $table->string('city');
             $table->string('country');
             $table->integer('roleId');
+            $table->integer('phil_health_no')->nullable();
+            $table->integer('sss_no')->nullable();
+            $table->integer('pag_ibig_no')->nullable();
+            $table->integer('isActive')->default(1);
+            $table->string('profile_img', 191)->nullable();
         });
     }
-
     /**
      * Reverse the migrations.
      *

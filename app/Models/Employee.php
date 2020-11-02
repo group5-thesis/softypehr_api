@@ -17,6 +17,11 @@ class Employee extends Model
         'street',
         'city',
         'country',
+        'profile_img',
+        'phil_health_no',
+        'sss_no',
+        'pag_ibig_no',
+        'isActive',
         'roleId'
     ];
 

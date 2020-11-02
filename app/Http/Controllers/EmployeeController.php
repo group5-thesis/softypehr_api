@@ -8,7 +8,9 @@ use App\Models\Employee;
 use App\Models\Account;
 use Illuminate\Support\Str;
 use DB;
+use Exception;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +32,7 @@ class EmployeeController extends Controller
             'street' => 'required',
             'city' => 'required',
             'country' => 'required',
-            'roleId' => 'required'
+            'role' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -44,7 +46,7 @@ class EmployeeController extends Controller
                     array(
                         $request->firstname, $request->middlename, $request->lastname, $request->mobileno,
                         $request->gender, $request->email, $request->birthdate,
-                        $request->street, $request->city, $request->country, $request->roleId
+                        $request->street, $request->city, $request->country, $request->role
                     )
                 );
                 $result = collect($employee);
@@ -59,7 +61,7 @@ class EmployeeController extends Controller
                     \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
-                        array($username, $defaultPassword, $file, $employee_id, $request->roleId)
+                        array($username, $defaultPassword, $file, $employee_id, $request->accountType)
                     );
                 }
                 DB::commit();
@@ -67,7 +69,7 @@ class EmployeeController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollBack();
-                return Result::setError( "Something went wrong" , 500) ;
+                return Result::setError( $e->getMessage()) ;
             }
         }
     }
@@ -79,7 +81,7 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage()) ;
         }
 
     }
@@ -91,7 +93,7 @@ class EmployeeController extends Controller
             $result = collect($employee);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage()) ;
         }
     }
 
@@ -102,7 +104,7 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage()) ;
         }
     }
 
@@ -113,7 +115,7 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage()) ;
         }
     }
 
@@ -135,6 +137,10 @@ class EmployeeController extends Controller
                     $request->street,
                     $request->city,
                     $request->country,
+                    $request->phil_health_no,
+                    $request->sss_no,
+                    $request->pag_ibig_no,
+                    $request->isActive,
                     $request->roleId
                 )
             );
@@ -145,7 +151,7 @@ class EmployeeController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage()) ;
         }
     }
 
@@ -159,7 +165,7 @@ class EmployeeController extends Controller
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage()) ;
         }
     }
 
@@ -170,7 +176,28 @@ class EmployeeController extends Controller
             return Result::setData($employee);
 
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage()) ;
+        }
+    }
+
+    public function updateProfilePicture(Request $request){
+        try{
+            DB::beginTransaction();
+            $file = $request->file;
+            $employee_id= $request->employee_id;
+            $imageName = FileController::store($file);
+            $query = DB::select("call UpdateProfileImage(?,?)",array($employee_id , $imageName));
+            $result = collect($query);
+            if ($result[0]->completed > 0) {
+                DB::commit();
+               return  $this->retrieveLimitedEmployee($employee_id);
+            } else {
+                DB::rollback();
+                return Result::setError( null, 401, "Update failed" ) ;
+            }
+        }catch(\Exception $e){
+            return Result::setError($e->getMessage()) ;
+            DB::rollback();
         }
     }
 

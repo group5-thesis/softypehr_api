@@ -11,126 +11,48 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\Console\Input\Input;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Result;
+
 
 class AuthController extends Controller
 {
-    public function login(Request $request){
-        try{
-            $username = $request->input('username'); // this the input from front end
-            $password =  $request->input('password');
-              $result = User::where('username', '=', $username)->first();
-              if ($result) { // email exists in database
-                  if (Auth::attempt(['username' => $username, 'password' => $password])) {
-                    // success
-                      $token = self::getToken($username, $password);
-                      $access_token = $token;
-                      $result->save();
-                      $temp = 'test';
-                    //   $employee = DB::select('call UserGetProfile(?)', array($result->id));
-                      $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
-                      foreach ($employee as $key => $value) {
-                          $response = ['data' => [
-                              'access_token' => $access_token,
-                              'account_information' => $employee,
-                          ], 'error' => false, 'message' => 'success'];
-                      }
-                      return response()->json($response, 200);
-                  } else {
-                    // error password
-                    $response = ['data' => [],'error' => true, 'message' => "Invalid Credentials!"];
-                    return response()->json($response, 405);
-                  }
-              } else {
-                 // error: user not found
-                 $response = ['data' => [] ,'error' => true, 'message' => "Invalid Credentials!"];
-                  return response()->json($response, 405);
-              }
-            }catch(\Exception $e){
-                $response = ['data' => null, "error" => true, "message" => "Something went wrong"];
-                return response()->json($response, 500);
-            }
-    }
-
-    public function login1(Request $request)
+    public function login(Request $request)
     {
-        $email_or_username = $request->input('username_email'); // this the input from front end
-
-        if (filter_var($email_or_username, FILTER_VALIDATE_EMAIL)) { // user sent his email
-            // check if user email exists in database
-            $user_email = User::where('email', '=', $request->input('username_email'))->first();
-
-            if ($user_email) { // email exists in database
-                if (Auth::attempt(['email' => $email_or_username, 'password' => $request->input('password')])) {
-                  // success
-                    $token = self::getToken($request->username_email, $request->password);
+        try {
+            $username = $request->input('username'); // this the input from front end
+            $password = $request->input('password');
+            $result = User::where('username', '=', $username)->first();
+            if ($result) { // email exists in database
+                if (Auth::attempt(['username' => $username, 'password' => $password])) {
+                    // success
+                    $token = self::getToken($username, $password);
                     $access_token = $token;
-                    $user_email->save();
+                    $result->save();
                     $temp = 'test';
-                    $employee = DB::select('call RetrieveLimitedEmployee(?)', array($user_email->employeeId));
+                    $employee = DB::select('call UserGetProfile(?)', array($result->id));
+                    //   $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
+                    $response = [];
                     foreach ($employee as $key => $value) {
-                        $response = ['data' => [
-                            'id' => $user_email->id, 'access_token' => $access_token,
-                            'account_information' => [
-                                'firstname' => $value->firstname,
-                                'middlename' => $value->middlename,
-                                'lastname' => $value->lastname,
-                                'role' => $value->roleId,
-                                'email' => $value->email,
-                                'mobile_no' => $value->mobileno,
-                                'gender' => $value->gender,
-                                'birthdate' => $value->birthdate,
-                                'street' => $value->street,
-                                'city' => $value->city,
-                                'country' => $value->country,
-                            ]
-                        ], 'error' => false, 'message' => 'success'];
+                        $response = [
+                            'access_token' => $access_token,
+                            'account_information' => $employee,
+                            'error' => false, 'message' => 'success'
+                        ];
                     }
-                    return response()->json($response, 200);
+                    return Result::setData($response);
                 } else {
-                  // error password
-                  $response = ['data' => [],'error' => true, 'message' => "Password didn't matched!"];
-                  return response()->json($response, 405);
+                    // error password
+                    return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
                 }
             } else {
-               // error: user not found
-               $response = ['data' => [] ,'error' => true, 'message' => 'User not found!'];
-                return response()->json($response, 405);
+                 // error: user not found
+                return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
             }
-
-        } else { // user sent username
-
-            // check if username exists in database
-            $user_username = User::where('username', '=', $request->input('username_email'))->first();
-
-            if ($user_username) { // username exists in database
-                if (Auth::attempt(['username' => $email_or_username, 'password' => $request->input('password')])) {
-                  // success
-                    $token = self::getToken($request->username_email, $request->password);
-                    $access_token = $token;
-                    $user_username->save();
-                    $temp = 'test';
-                    $employee = DB::select('call RetrieveLimitedEmployee(?)', array($user_username->employeeId));
-                    foreach ($employee as $key => $value) {
-                        $response = ['data' => [
-                            'id' => $user_username->id, 'access_token' => $access_token,
-                            'account_information' => [
-                                'firstname' => $value->firstname, 'middlename' => $value->middlename, 'lastname' => $value->lastname, 'role' => $value->roleId, 'email' => $value->email,
-                                'mobile_no' => $value->mobileno, 'gender' => $value->gender, 'birthdate' => $value->birthdate, 'street' => $value->street, 'city' => $value->city, 'country' => $value->country
-                            ]
-                        ], 'error' => false, 'message' => 'success'];
-                    }
-                    return response()->json($response, 200);
-                } else {
-                  // error password
-                    $response = ['data' => [],'error' => true, 'message' => "Password didn't matched!"];
-                    return response()->json($response, 405);
-                }
-            } else {
-               // error: user not found
-                $response = ['data' => [] ,'error' => true, 'message' => 'User not found!'];
-                return response()->json($response, 405);
-            }
+            // response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage());//response()->json(["data" => $e, "error" => true, "message" =>$error_message], 500);
         }
+
     }
 
     private function getToken($email_username, $password)
