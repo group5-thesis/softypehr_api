@@ -184,25 +184,6 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateOfficeRequest`(
-	IN `_transac` VARCHAR(255), 
-    IN `_employeeId` INT(11), 
-    IN `_item` VARCHAR(255), 
-    IN `_quantity` INT(11),
-    IN `_price` DOUBLE,
-    IN `_total_price` DOUBLE,
-    IN `_date_needed` DATE)
-BEGIN
-    DECLARE _approver INT(11);
-    
-	INSERT INTO office_request(transaction_no, employeeId, item, quantity, approverId, price, total_price, date_needed)
-	VALUES (_transac, _employeeId, _item, _quantity, GetAdmin(), _price, _total_price, _date_needed );
-
-	SELECT LAST_INSERT_ID() as id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreatePerformanceReview`(
 		IN `_c1` INT(11), 
         IN `_c2` INT(11), 
@@ -224,6 +205,25 @@ DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateRoleType`(IN `_position` VARCHAR(255))
 BEGIN
 	INSERT INTO softype.role(position) VALUES(_position);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateOfficeRequest`(
+	IN `_transac` VARCHAR(255), 
+    IN `_employeeId` INT(11), 
+    IN `_item` VARCHAR(255), 
+    IN `_quantity` INT(11),
+    IN `_price` DOUBLE,
+    IN `_total_price` DOUBLE,
+    IN `_date_needed` DATE)
+BEGIN
+    DECLARE _approver INT(11);
+    
+	INSERT INTO office_request(transaction_no, employeeId, item, quantity, approverId, price, total_price, date_needed)
+	VALUES (_transac, _employeeId, _item, _quantity, GetAdmin(), _price, _total_price, _date_needed );
+
+	SELECT LAST_INSERT_ID() as id;
 END$$
 DELIMITER ;
 
@@ -391,10 +391,6 @@ BEGIN
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss_no,
-        emp.pag_ibig_no as pag_ibig_no,
-        emp.isActive as isActive,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
     JOIN softype.role as r ON r.id = emp.roleId
@@ -448,10 +444,6 @@ BEGIN
 		emp_h.street as department_head_street,
 		emp_h.city as department_head_city,
 		emp_h.country as department_head_country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss_no,
-        emp.pag_ibig_no as pag_ibig_no,
-        emp_h.isActive as isActive,
 		u.qr_code as department_head_qrcode
 	from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
@@ -484,10 +476,6 @@ BEGIN
 		emp_m.street as manager_street,
 		emp_m.city as manager_city,
 		emp_m.country as manager_country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss_no,
-        emp.pag_ibig_no as pag_ibig_no,
-        emp_m.isActive as isActive,
 		u.qr_code as manager_qrcode
 	from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
@@ -547,10 +535,6 @@ BEGIN
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss_no,
-        emp.pag_ibig_no as pag_ibig_no,
-        emp.isActive as isActive,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
     LEFT JOIN softype.role as r ON r.id = emp.roleId
@@ -591,10 +575,6 @@ SELECT
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss_no,
-        emp.pag_ibig_no as pag_ibig_no,
-        emp.isActive as isActive,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
     JOIN softype.role as r ON r.id = emp.roleId
@@ -682,10 +662,6 @@ SELECT
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss_no,
-        emp.pag_ibig_no as pag_ibig_no,
-        emp.isActive as isActive,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
 	JOIN softype.role as r ON r.id = emp.roleId
@@ -946,6 +922,28 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedPerformanceReview`(IN `_id` INT(11))
+BEGIN
+	SELECT 
+    	pr.id as performance_review_id,
+        emp_reviewed.id as employee_reviewedId, 
+        emp_reviewer.id as reviewerId, 
+        pr.c1 as criteria_1,
+        pr.c2 as criteria_2,
+        pr.c3 as criteria_3,
+        pr.c4 as criteria_4,
+        pr.c5 as criteria_5,
+		concat(emp_reviewed.firstname,' ', emp_reviewed.lastname) as employee_reviewed,
+        concat(emp_reviewer.firstname,' ', emp_reviewer.lastname) as employee_reviewer,
+        pr.date_reviewed as date_reviewed
+	FROM softype.performance_review as pr
+	JOIN softype.employee as emp_reviewed on emp_reviewed.id = pr.employee_reviewed
+	JOIN softype.employee as emp_reviewer ON emp_reviewer.id = pr.reviewer
+	WHERE pr.id = _id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedOfficeRequest`(IN `_officeRequestId` INT(11))
 BEGIN
 	SELECT 
@@ -971,28 +969,6 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedPerformanceReview`(IN `_id` INT(11))
-BEGIN
-	SELECT 
-    	pr.id as performance_review_id,
-        emp_reviewed.id as employee_reviewedId, 
-        emp_reviewer.id as reviewerId, 
-        pr.c1 as criteria_1,
-        pr.c2 as criteria_2,
-        pr.c3 as criteria_3,
-        pr.c4 as criteria_4,
-        pr.c5 as criteria_5,
-		concat(emp_reviewed.firstname,' ', emp_reviewed.lastname) as employee_reviewed,
-        concat(emp_reviewer.firstname,' ', emp_reviewer.lastname) as employee_reviewer,
-        pr.date_reviewed as date_reviewed
-	FROM softype.performance_review as pr
-	JOIN softype.employee as emp_reviewed on emp_reviewed.id = pr.employee_reviewed
-	JOIN softype.employee as emp_reviewer ON emp_reviewer.id = pr.reviewer
-	WHERE pr.id = _id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveMeetingByCurrentDate`()
 BEGIN
 	SELECT ci.meetingId, m.organizer, ci.memberId, emp.firstname, emp.middlename, emp.lastname, emp.email,
@@ -1012,6 +988,96 @@ BEGIN
     FROM meeting as m
     INNER JOIN calendar_invites as ci ON m.id = ci.meetingId
     INNER JOIN employee  as emp ON ci.memberId = emp.id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByEmployee`(IN `_id` INT(11))
+BEGIN
+	SELECT
+		pr_emp.id as performance_reviewId,
+		emp.id as employee_reviewedId,
+        emp_r.id as reviewerId,
+        pr_emp.c1 as criteria_1,
+        pr_emp.c2 as criteria_2,
+        pr_emp.c3 as criteria_3,
+        pr_emp.c4 as criteria_4,
+        pr_emp.c5 as criteria_5,
+        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
+        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
+        pr_emp.date_reviewed as date_reviewed
+    FROM softype.employee as emp
+    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
+    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
+    WHERE pr_emp.employee_reviewed = _id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByMonth`()
+BEGIN
+	SELECT
+		MONTH(pr_emp.date_reviewed) as month_reviewed,
+		pr_emp.id as performance_reviewId,
+		emp.id as employee_reviewedId,
+        emp_r.id as reviewerId,
+        pr_emp.c1 as criteria_1,
+        pr_emp.c2 as criteria_2,
+        pr_emp.c3 as criteria_3,
+        pr_emp.c4 as criteria_4,
+        pr_emp.c5 as criteria_5,
+        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
+        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
+        pr_emp.date_reviewed as date_reviewed
+    FROM softype.employee as emp
+    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
+    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
+    GROUP BY MONTH(pr_emp.date_reviewed);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByReviewer`(IN _reviewer INT(11))
+BEGIN
+	SELECT
+		pr_emp.id as performance_reviewId,
+		emp.id as employee_reviewedId,
+        emp_r.id as reviewerId,
+        pr_emp.c1 as criteria_1,
+        pr_emp.c2 as criteria_2,
+        pr_emp.c3 as criteria_3,
+        pr_emp.c4 as criteria_4,
+        pr_emp.c5 as criteria_5,
+        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
+        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
+        pr_emp.date_reviewed as date_reviewed
+    FROM softype.employee as emp
+    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
+    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
+    WHERE pr_emp.reviewer = _reviewer;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByYear`()
+BEGIN
+	SELECT
+		Year(pr_emp.date_reviewed) as year_reviewed,
+		pr_emp.id as performance_reviewId,
+		emp.id as employee_reviewedId,
+        emp_r.id as reviewerId,
+        pr_emp.c1 as criteria_1,
+        pr_emp.c2 as criteria_2,
+        pr_emp.c3 as criteria_3,
+        pr_emp.c4 as criteria_4,
+        pr_emp.c5 as criteria_5,
+        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
+        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
+        pr_emp.date_reviewed as date_reviewed
+    FROM softype.employee as emp
+    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
+    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
+    GROUP BY YEAR(pr_emp.date_reviewed);
 END$$
 DELIMITER ;
 
@@ -1162,96 +1228,6 @@ BEGIN
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
     WHERE YEAR(t.created_at) = _year;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByEmployee`(IN `_id` INT(11))
-BEGIN
-	SELECT
-		pr_emp.id as performance_reviewId,
-		emp.id as employee_reviewedId,
-        emp_r.id as reviewerId,
-        pr_emp.c1 as criteria_1,
-        pr_emp.c2 as criteria_2,
-        pr_emp.c3 as criteria_3,
-        pr_emp.c4 as criteria_4,
-        pr_emp.c5 as criteria_5,
-        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.employee as emp
-    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
-    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    WHERE pr_emp.employee_reviewed = _id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByMonth`()
-BEGIN
-	SELECT
-		MONTH(pr_emp.date_reviewed) as month_reviewed,
-		pr_emp.id as performance_reviewId,
-		emp.id as employee_reviewedId,
-        emp_r.id as reviewerId,
-        pr_emp.c1 as criteria_1,
-        pr_emp.c2 as criteria_2,
-        pr_emp.c3 as criteria_3,
-        pr_emp.c4 as criteria_4,
-        pr_emp.c5 as criteria_5,
-        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.employee as emp
-    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
-    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    GROUP BY MONTH(pr_emp.date_reviewed);
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByReviewer`(IN _reviewer INT(11))
-BEGIN
-	SELECT
-		pr_emp.id as performance_reviewId,
-		emp.id as employee_reviewedId,
-        emp_r.id as reviewerId,
-        pr_emp.c1 as criteria_1,
-        pr_emp.c2 as criteria_2,
-        pr_emp.c3 as criteria_3,
-        pr_emp.c4 as criteria_4,
-        pr_emp.c5 as criteria_5,
-        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.employee as emp
-    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
-    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    WHERE pr_emp.reviewer = _reviewer;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByYear`()
-BEGIN
-	SELECT
-		Year(pr_emp.date_reviewed) as year_reviewed,
-		pr_emp.id as performance_reviewId,
-		emp.id as employee_reviewedId,
-        emp_r.id as reviewerId,
-        pr_emp.c1 as criteria_1,
-        pr_emp.c2 as criteria_2,
-        pr_emp.c3 as criteria_3,
-        pr_emp.c4 as criteria_4,
-        pr_emp.c5 as criteria_5,
-        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.employee as emp
-    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
-    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    GROUP BY YEAR(pr_emp.date_reviewed);
 END$$
 DELIMITER ;
 
