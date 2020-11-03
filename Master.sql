@@ -83,22 +83,30 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateEmployee`(
-	IN `_firstname` VARCHAR(255), 
-    IN `_middlename` VARCHAR(255), 
-    IN `_lastname` VARCHAR(255), 
-    IN `_mobileno` VARCHAR(255), 
-    IN `_gender` VARCHAR(255), 
-    IN `_email` VARCHAR(255), 
-    IN `_birthdate` VARCHAR(255), 
-    IN `_street` VARCHAR(255), 
-    IN `_city` VARCHAR(255), 
-    IN `_country` VARCHAR(255), 
-    IN `_phil_health_no` VARCHAR(255),
-    IN `_sss_no` VARCHAR(255),
-    IN `_pag_ibig_no` VARCHAR(255),
-    IN `_isActive` INT(11),
-    IN `_roleId` INT(11))
+		IN `_firstname` VARCHAR(255),
+        IN `_middlename` VARCHAR(255),
+        IN `_lastname` VARCHAR(255),
+        IN `_mobileno` VARCHAR(255),
+        IN `_gender` VARCHAR(255),
+        IN `_email` VARCHAR(255),
+        IN `_birthdate` VARCHAR(255),
+        IN `_street` VARCHAR(255),
+        IN `_city` VARCHAR(255),
+        IN `_country` VARCHAR(255),
+        IN `_phil_health_no` VARCHAR(255),
+        IN `_sss_no` VARCHAR(255),
+        IN `_pag_ibig_no` VARCHAR(255),
+        IN `_role` VARCHAR(255))
 BEGIN
+	DECLARE _roleId int(11);
+    IF NOT EXISTS(SELECT id FROM softype.`role` WHERE position = _role)
+	THEN
+		INSERT INTO softype.`role` (position) VALUES (_role);
+		SELECT last_insert_id() into _roleId;
+	ELSE
+		SELECT id FROM softype.`role` WHERE position = _role into _roleId;
+	END If;
+    
 	INSERT INTO 
 		employee(
 			firstname,
@@ -111,48 +119,26 @@ BEGIN
 			street,
 			city,
 			country,
+			roleId,
             phil_health_no,
             sss_no,
-            pag_ibig_no,
-			roleId
+            pag_ibig_no
 		)
-	VALUES (
-		_firstname, 
-        _middlename, 
-        _lastname, 
-        _mobileno, 
-        _gender, 
-        _email, 
-        _birthdate, 
-        _street, 
-        _city, 
-        _country, 
-        _phil_health_no,
-        _sss_no,
-        _pag_ibig_no,
-        _roleId);
+	VALUES (_firstname, _middlename, _lastname, _mobileno, _gender, _email, _birthdate, _street, _city, _country, _roleId, _phil_health_no,_sss_no,_pag_ibig_no);
     SELECT last_insert_id() as id;
     
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateEmployeeAccount`(IN `_username` VARCHAR(255), IN `_password` VARCHAR(255), IN `_qrcode` VARCHAR(255), IN `_employeeId` INT(11), IN `_roleId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateEmployeeAccount`(
+	IN `_username` VARCHAR(255), 
+    IN `_password` VARCHAR(255), 
+    IN `_qrcode` VARCHAR(255), 
+    IN `_employeeId` INT(11), 
+    IN `_roleId` INT(11))
 BEGIN
-    DECLARE _accountType INT;
-	
-	CASE
-    WHEN _roleId IN(1, 2 , 3 , 4) THEN
-	SET _accountType = 3; # SUPERVISOR
-
-	WHEN _roleId IN(5, 6 , 7 , 8) THEN
-	SET _accountType = 2;  # EMPLOYEE
-
-	ELSE SET _accountType = 1; # ADMIN
-
-	END CASE;  
-    
-	INSERT INTO `user` 
+   INSERT INTO `user` 
     (
 		`username`, 
 		`password`, 
@@ -165,7 +151,7 @@ BEGIN
 		_username, 
         _password, 
         _qrcode,
-        _accountType,
+        _roleId,
         _employeeId
 	);
     SELECT * FROM `user` WHERE id = (SELECT LAST_INSERT_ID());
@@ -448,9 +434,9 @@ BEGIN
 		emp_h.street as department_head_street,
 		emp_h.city as department_head_city,
 		emp_h.country as department_head_country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss_no,
-        emp.pag_ibig_no as pag_ibig_no,
+        emp_h.phil_health_no as phil_health_no,
+        emp_h.sss_no as sss_no,
+        emp_h.pag_ibig_no as pag_ibig_no,
         emp_h.isActive as isActive,
 		u.qr_code as department_head_qrcode
 	from softype.department as dept
@@ -484,9 +470,9 @@ BEGIN
 		emp_m.street as manager_street,
 		emp_m.city as manager_city,
 		emp_m.country as manager_country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss_no,
-        emp.pag_ibig_no as pag_ibig_no,
+        emp_m.phil_health_no as phil_health_no,
+        emp_m.sss_no as sss_no,
+        emp_m.pag_ibig_no as pag_ibig_no,
         emp_m.isActive as isActive,
 		u.qr_code as manager_qrcode
 	from softype.department as dept
@@ -1623,11 +1609,10 @@ emp.id as employeeId,
        street,
        city,
        country,
-       roleId,
        email,
        qr_code ,
        position ,
-       account_type
+       account_type as roleId
    from
 softype.employee emp
 join softype.user usr
