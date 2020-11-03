@@ -25,7 +25,7 @@ class LeaveRequestController extends Controller
 
         if ($validator->fails()) {
             $messages = json_encode($validator->messages());
-            return Result::setError($messages  , 401);
+            return Result::setError($messages  , 401 , $messages);
         } else {
             try {
                 $params = array(
@@ -39,7 +39,7 @@ class LeaveRequestController extends Controller
                 $leave_request = DB::select("call UserCreateLeaveRequest(?,?,?,?,?,?)", $params);
                 return Result::setData($leave_request);// response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
             } catch (\Exception $e) {
-                return  Result::setError( "Something went wrong" , 500) ;//response()->json(["data" => $e, "error" => true, "message" =>$error_message], 500);
+                return  Result::setError($e->getMessage()) ;//response()->json(["data" => $e, "error" => true, "message" =>$error_message], 500);
             }
 
         }
@@ -48,14 +48,23 @@ class LeaveRequestController extends Controller
 
     public function retrieveLeaveRequest_Limited(Request $request)
     {
-        $leave_request = LeaveRequest::where('id', '=', $request->id)->get();
-        return response()->json($leave_request, 200);
+        try{
+            $leave_request = LeaveRequest::where('id', '=', $request->id)->get();
+            return  Result::setData($leave_request); //response()->json($leave_request, 200);
+        }catch(\Exception $e){
+            return  Result::setError($e->getMessage());
+        }
     }
 
     public function deleteLeaveRequest(Request $request)
     {
-        $leave_request = LeaveRequest::where('id', '=', $request->id)->delete();
-        return response()->json($leave_request, Response::HTTP_OK);
+        try{ 
+            $leave_request = LeaveRequest::where('id', '=', $request->id)->delete();
+            return  Result::setData($leave_request); 
+        }catch(\Exception $e){
+            return  Result::setError($e->getMessage());
+        }
+     
     }
     public function getLeaveRequests(Request $request)
     {
@@ -65,7 +74,7 @@ class LeaveRequestController extends Controller
             $leave_request = DB::select("call RetrieveLeaveRequests(?,?)", [$roleId, $employeeId] );
             return Result::setData($leave_request);
         }catch(\Exception $e){
-            return  Result::setError( "Something went wrong" , 500);
+            return  Result::setError( $e->getMessage());
         }
      
         

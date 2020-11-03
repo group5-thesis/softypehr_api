@@ -27,8 +27,16 @@ class FileController extends Controller
         $type = File::mimeType($path);
         $response = Response::make($file, 200);
         $response->header("Content-Type", $type);
-        
         return $response;
+    }
+
+    public function downloadFile($dir , $path)
+    {
+        try{
+            return response()->file(public_path("$dir/$path"));
+        }catch(Exception $e){
+            return Result::setError($e->getMessage());
+        }
     }
 
     public static function store($file)
@@ -38,7 +46,7 @@ class FileController extends Controller
             $file->move(public_path('images'), $imageName);
             return $imageName;
         }catch(\Exception $e){
-            throw $e;
+            return Result::setError( $e->getMessage()) ;
         }
     }
 
@@ -85,54 +93,42 @@ class FileController extends Controller
 
     public function addFile(Request $request)
     {
+        DB::beginTransaction();
         try{
-            $images = ["jpg","png"];
-            $docs = ["docs","pdf","txt"];
-            $imageName = time().'.'.$request->file->getClientOriginalExtension();
-            $extension = $request->file->getClientOriginalExtension();
-            if (in_array($extension,$images)){
-                $request->file->move(public_path('images'), $imageName);
-                $path = public_path('images');
-                $type = "img";
-            }elseif (in_array($extension,$docs)){
-                $request->file->move(public_path('documents'), $imageName);
-                $path = public_path('documents');
-                $type = "documents";
-            }else{
-                $request->file->move(public_path('others'), $imageName);
-                $path = public_path('others');
-                $type = "others";
-            }
-            
-            $file = \DB::select(
+            $fileName =$request->file('file')->getClientOriginalName();
+            $path ='uploads_'.time().'.'.$request->file->getClientOriginalExtension();
+            $type = $request->type;
+            $dir = public_path($type);
+            $request->file->move($dir, $path);
+            $_file = DB::select(
                 'call AddFile(?,?,?,?,?)', 
                 array(
                     $request->employeeId,
-                    $imageName,
+                    $fileName,
                     $path, 
                     $type,
                     $request->description)
                 );
             
-            $result = collect($file);
+            $result = collect($_file);
             $file_id = $result[0]->id;
-            // $response = $this->retrieveLimitedFile($file_id);
-            return response()->json($file_id, 200);
+            DB::commit();
+            return  Result::setData(["success"=>true]);
         }catch(\Exception $e){
-            return $e;
+            DB::rollback();
+        
+            return Result::setError( $e->getMessage()) ;
         }
     }
 
 
     public function retrieveFiles(){
         try {
-            $files = DB::select('call RetrieveFiles');
+            $files = DB::select('call RetrieveFiles()');
             $result = collect($files);
-            $response = ['data' => ['files' => $result], 'error' => false, 'message' => 'success'];
-            return response()->json($response, 200);
+            return Result::setData(['files' => $result]);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( $e->getMessage()) ;
         }
     }   
 
@@ -144,8 +140,7 @@ class FileController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( $e->getMessage()) ;
         }
     }
 
@@ -158,8 +153,7 @@ class FileController extends Controller
             $response = ['data' => ['files' => $result], 'error' => false, 'message' => 'success'];
             return response()->json($response, 200);
         } catch (\Exception $e) {
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( $e->getMessage());
         }
     }
 
@@ -183,8 +177,7 @@ class FileController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
-            $response = ['data' => $e, "error" => true, "message" => $e->getMessage()];
-            return response()->json($response, 500);
+            return Result::setError( $e->getMessage()) ;
         }
     } 
 }

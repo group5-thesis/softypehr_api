@@ -11,6 +11,8 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\Console\Input\Input;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Result;
+
 
 class AuthController extends Controller
 {
@@ -28,30 +30,28 @@ class AuthController extends Controller
                     $result->save();
                     $temp = 'test';
                     $employee = DB::select('call UserGetProfile(?)', array($result->id));
-                    // $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
-                    $employee = collect($employee);
-                    $res = [];
+                    //   $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
+                    $response = [];
                     foreach ($employee as $key => $value) {
-                        $res = ['data' => [
+                        $response = [
                             'access_token' => $access_token,
                             'account_information' => $employee,
-                        ], 'error' => false, 'message' => 'success'];
+                        ];
                     }
-                    return response()->json($res, 200);
+                    return Result::setData($response);
                 } else {
                     // error password
-                    $res = ['data' => [], 'error' => true, 'message' => "Invalid Credentials!"];
-                    return response()->json($res, 405);
+                    return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
                 }
             } else {
                  // error: user not found
-                $res = ['data' => [], 'error' => true, 'message' => "Invalid Credentials!"];
-                return response()->json($res, 405);
+                return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
             }
+            // response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
         } catch (\Exception $e) {
-            $res = ['data' => null, "error" => true, "message" => "Something went wrong : " . $e->getMessage()];
-            return response()->json($res, 500);
+            return Result::setError($e->getMessage());//response()->json(["data" => $e, "error" => true, "message" =>$error_message], 500);
         }
+
     }
 
     public function login1(Request $request)

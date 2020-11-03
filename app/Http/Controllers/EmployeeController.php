@@ -69,7 +69,11 @@ class EmployeeController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollBack();
+<<<<<<< HEAD
                 return Result::setError("Something went wrong : " . $e->getMessage(), 500);
+=======
+                return Result::setError( $e->getMessage()) ;
+>>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
             }
         }
     }
@@ -81,7 +85,11 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
+<<<<<<< HEAD
             return Result::setError("Something went wrong", 500);
+=======
+            return Result::setError( $e->getMessage()) ;
+>>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
         }
 
     }
@@ -93,7 +101,11 @@ class EmployeeController extends Controller
             $result = collect($employee);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
+<<<<<<< HEAD
             return Result::setError("Something went wrong", 500);
+=======
+            return Result::setError( $e->getMessage()) ;
+>>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
         }
     }
 
@@ -104,7 +116,11 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
+<<<<<<< HEAD
             return Result::setError("Something went wrong", 500);
+=======
+            return Result::setError( $e->getMessage()) ;
+>>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
         }
     }
 
@@ -115,7 +131,11 @@ class EmployeeController extends Controller
             $result = collect($employees);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
+<<<<<<< HEAD
             return Result::setError("Something went wrong", 500);
+=======
+            return Result::setError( $e->getMessage()) ;
+>>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
         }
     }
 
@@ -147,7 +167,11 @@ class EmployeeController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
+<<<<<<< HEAD
             return Result::setError("Something went wrong", 500);
+=======
+            return Result::setError( $e->getMessage()) ;
+>>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
         }
     }
 
@@ -161,7 +185,11 @@ class EmployeeController extends Controller
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
+<<<<<<< HEAD
             return Result::setError("Something went wrong", 500);
+=======
+            return Result::setError( $e->getMessage()) ;
+>>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
         }
     }
 
@@ -172,7 +200,11 @@ class EmployeeController extends Controller
             return Result::setData($employee);
 
         } catch (\Exception $e) {
+<<<<<<< HEAD
             return Result::setError("Something went wrong", 500);
+=======
+            return Result::setError( $e->getMessage()) ;
+>>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
         }
     }
 
@@ -190,10 +222,17 @@ class EmployeeController extends Controller
                 return $this->retrieveLimitedEmployee($employee_id);
             } else {
                 DB::rollback();
+<<<<<<< HEAD
                 return Result::setError("Update failed", 500);
             }
         } catch (\Exception $e) {
             return Result::setError($e->getMessage() . ": Something went wrong", 500);
+=======
+                return Result::setError( null, 401, "Update failed" ) ;
+            }
+        }catch(\Exception $e){
+            return Result::setError($e->getMessage()) ;          
+>>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
             DB::rollback();
         }
     }
