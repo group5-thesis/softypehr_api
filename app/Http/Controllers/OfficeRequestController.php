@@ -45,10 +45,9 @@ class OfficeRequestController extends Controller
                 );
                 $response = $this->retrieveLimitedOfficeRequest($officeRequest[0]->id);
                 DB::commit();
-                return $response;
-            } catch (\Exception $e) {
-                DB::rollback();
-                return Result::setError("Something went wrong", 500);
+                return  $response;
+            }catch(\Exception $e){
+                return  Result::setError($e->getMessage());
             }
         }
     }
@@ -116,7 +115,9 @@ class OfficeRequestController extends Controller
             $result = collect($retrieveOfficeRequest);
             return Result::setData(['officeRequest_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+            return  Result::setError($e->getMessage());
+
+            // return Result::setError("Something went wrong", 500);
         }
     }
 

@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\Input;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Result;
+use App\Http\Controllers\MailController;
 
 
 class AuthController extends Controller
@@ -154,5 +155,23 @@ class AuthController extends Controller
             ]);
         }
         return $token;
+    }
+    
+    public function forgotPassword(Request $request)
+    {
+        $email = $request->$email;
+        try{
+            $result = DB::select('call CheckUserEmail(?)', array($email));
+            $user = collect($result);
+            if ($user[0]->isExist === 0) {
+                return Result::setError('' , 'Email address not found' , 401);
+            }else{
+                $addRecoveryCode = DB::select('call AddRecoveryCode(?)',$email);          
+                $codes = collect($addRecoveryCode);      
+                return  MailController::sendEmail($email,$codes[0]->code,'Account Recovery Code');
+            }
+        }catch(\Exception $e){
+            return Result::setError($e->getMessage());
+        }
     }
 }
