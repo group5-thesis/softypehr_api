@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
-class CreateTicketRequest extends Migration
+class CreateOfficeRequest extends Migration
 {
     /**
      * Run the migrations.
@@ -14,18 +14,21 @@ class CreateTicketRequest extends Migration
      */
     public function up()
     {
-        Schema::create('ticket', function (Blueprint $table) {
+        Schema::create('office_request', function (Blueprint $table) {
             $table->id()->autoIncrement();
-            $table->string('transaction_no');
             $table->integer('employeeId');
+            $table->integer('approverId');
+            $table->string('transaction_no');
             $table->string('item');
             $table->integer('quantity');
-            $table->string('description');
             $table->date('resolve_date')->nullable();
-            $table->integer('approverId');
+            $table->double('price');
+            $table->double('total_price');
+            $table->date('date_needed');
             $table->integer('status')->default(1); // default for status 1 === Open 0 === Close
-            $table->string('remarks')->nullable();
-            $table->date('created_at')->default(Carbon::now());
+            $table->string('remarks');
+            $table->timestamps();
+            // $table->date('created_at')->default(Carbon::now());
         });
     }
 
@@ -36,6 +39,6 @@ class CreateTicketRequest extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ticket');
+        Schema::dropIfExists('office_request');
     }
 }

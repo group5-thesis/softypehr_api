@@ -31,15 +31,15 @@ class AuthController extends Controller
                     $temp = 'test';
                     $employee = DB::select('call UserGetProfile(?)', array($result->id));
                     //   $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
-                    $response = [];
-                    foreach ($employee as $key => $value) {
-                        $response = [
-                            'access_token' => $access_token,
-                            'account_information' => $employee,
-                        ];
-                    }
-                    return Result::setData($response);
-                } else {
+                    $response=[];
+                      foreach ($employee as $key => $value) {
+                          $response =  [
+                              'access_token' => $access_token,
+                              'account_information' => $employee,
+                          ];
+                      }
+                      return Result::setData($response);
+                  } else {
                     // error password
                     return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
                 }

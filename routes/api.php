@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-*/
+ */
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
@@ -25,50 +25,50 @@ Route::group(['middleware' => 'api-header'], function () {
     // Therefore the jwtMiddleware will be exclusive of them
 
     // Meeting
-    Route::post('/create_meeting','MeetingController@createMeeting');
-    Route::get('/retrieve_meetings','MeetingController@retrieveMeetings');
-    Route::get('/retrieve_limited_meeting/{id}','MeetingController@retrieveLimitedMeeting');
-    Route::post('/update_meeting','MeetingController@updateMeeting');
-    Route::get('/retrieve_meeting_now','MeetingController@retrieveMeetingByCurrentDate');
-    Route::post('/delete_meeting/{id}','MeetingController@deleteMeeting');
+    Route::post('/create_meeting', 'MeetingController@createMeeting');
+    Route::get('/retrieve_meetings', 'MeetingController@retrieveMeetings');
+    Route::get('/retrieve_limited_meeting/{id}', 'MeetingController@retrieveLimitedMeeting');
+    Route::post('/update_meeting', 'MeetingController@updateMeeting');
+    Route::get('/retrieve_meeting_now', 'MeetingController@retrieveMeetingByCurrentDate');
+    Route::post('/delete_meeting/{id}', 'MeetingController@deleteMeeting');
 
-    // Ticket
-    Route::post('/create_ticket','TicketController@createTicket');
-    Route::post('/update_ticket','TicketController@updateTicket');
-    Route::get('/retrieve_tickets','TicketController@retrieveTickets');
-    Route::get('/retrieve_tickets_by_year/{year}','TicketController@retrieveTicketsByYear');
-    Route::get('/retrieve_tickets_by_month/{month}','TicketController@retrieveTicketsByMonth');
-    Route::get('/retrieve_tickets_by_date','TicketController@retrieveTicketsByDate');
-    Route::post('/delete_ticket','TicketController@deleteTicket');
-    Route::post('/close_ticket','TicketController@closeTicketRequest');
-    Route::get('/retrieve_tickets_by_status/{status}','TicketController@retrieveTicketsByStatus');
-    Route::get('/retrieve_tickets_by_employee/{id}','TicketController@retrieveTicketsByEmployee');
+    // OfficeRequest
+    Route::post('/create_officeRequest', 'OfficeRequestController@createOfficeRequest');
+    Route::post('/update_officeRequest', 'OfficeRequestController@updateOfficeRequest');
+    Route::get('/retrieve_officeRequests', 'OfficeRequestController@retrieveOfficeRequests');
+    Route::get('/retrieve_officeRequests_by_year/{year}', 'OfficeRequestController@retrieveOfficeRequestsByYear');
+    Route::get('/retrieve_officeRequests_by_month/{month}', 'OfficeRequestController@retrieveOfficeRequestsByMonth');
+    Route::get('/retrieve_officeRequests_by_date', 'OfficeRequestController@retrieveOfficeRequestsByDate');
+    Route::post('/delete_officeRequest', 'OfficeRequestController@deleteOfficeRequest');
+    Route::post('/close_officeRequest', 'OfficeRequestController@closeOfficeRequestRequest');
+    Route::get('/retrieve_officeRequests_by_status/{status}', 'OfficeRequestController@retrieveOfficeRequestsByStatus');
+    Route::get('/retrieve_officeRequests_by_employee/{id}', 'OfficeRequestController@retrieveOfficeRequestsByEmployee');
 
     // Login
     Route::post('/login', 'AuthController@login');
 
     // File upload
-    Route::get('/image/{folder}/{file}','FileController@serve');
+    Route::get('/image/{folder}/{file}', 'FileController@serve');
     // Route::post('/upload','FileController@store');
     // Route::get('/retrieveLimitedFiles/{id}','FileController@retrieveLimitedFile');
-    Route::post('/add_file','FileController@addFile');
-    Route::get('/retrieve_files','FileController@retrieveFiles');
-    Route::get('/retrieve_files_by_type/{id}','FileController@retrieveFilesByType');
-    Route::post('/delete_file/{id}','FileController@deleteFile');
-    Route::post('/update_file','FileController@updateFile');
-    Route::get('/image/{filename}','FileController@serveImage');
+    Route::post('/add_file', 'FileController@addFile');
+    Route::get('/retrieve_files', 'FileController@retrieveFiles');
+    Route::get('/retrieve_files_by_type/{id}', 'FileController@retrieveFilesByType');
+    Route::post('/delete_file/{id}', 'FileController@deleteFile');
+    Route::post('/update_file', 'FileController@updateFile');
+    Route::get('/image/{filename}', 'FileController@serveImage');
 
 
     // Employee
     Route::post('/create_employee', 'EmployeeController@createEmployee');
-    Route::get('/retrieve_employees','EmployeeController@retrieveEmployees');
-    Route::get('/retrieve_limited_employee/{id}','EmployeeController@retrieveLimitedEmployee');
-    Route::get('/retrieve_employee_by_department/{id}','EmployeeController@retrieveEmployeeByDepartment');
-    Route::get('/retrieve_employee_by_manager/{id}','EmployeeController@retrieveEmployeeByManager');
-    Route::post('/delete_employee/{id}','EmployeeController@deleteEmployee');
-    Route::post('/update_employee','EmployeeController@updateEmployee');
-    Route::post('/update_profile/img','EmployeeController@updateProfilePicture');
-    Route::post('/retrieve_employee_profile','EmployeeController@retrieveEmployeeProfile');
+    Route::get('/retrieve_employees', 'EmployeeController@retrieveEmployees');
+    Route::get('/retrieve_limited_employee/{id}', 'EmployeeController@retrieveLimitedEmployee');
+    Route::get('/retrieve_employee_by_department/{id}', 'EmployeeController@retrieveEmployeeByDepartment');
+    Route::get('/retrieve_employee_by_manager/{id}', 'EmployeeController@retrieveEmployeeByManager');
+    Route::post('/delete_employee/{id}', 'EmployeeController@deleteEmployee');
+    Route::post('/update_employee', 'EmployeeController@updateEmployee');
+    Route::post('/update_profile/img', 'EmployeeController@updateProfilePicture');
+    Route::post('/retrieve_employee_profile', 'EmployeeController@retrieveEmployeeProfile');
     Route::post('/retrieve_employee_limited', 'EmployeeController@retrieveEmployeeLimited');
     Route::get('/getProfile', 'EmployeeController@retrieveEmployeeProfile');
 
@@ -81,7 +81,6 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_departments', 'DepartmentController@retrieveDepartments');
     Route::get('/retrieve_department_heads_v1', 'DepartmentController@retrieveDepartmentHeads');
     Route::post('/retrieve_departments_managers_v1', 'DepartmentController@retrieveDepartmentManagers');
-    
 
 
     // Department Employee
@@ -106,20 +105,19 @@ Route::group(['middleware' => 'api-header'], function () {
 
 
     // Performance Review
-    Route::post('/create_performance_review','PerformanceReviewController@createPerformanceReview');
-    Route::get('/retrieve_performance_reviews','PerformanceReviewController@retrievePerformanceReviews');
-    Route::get('/retrieve_performance_review/{id}','PerformanceReviewController@retrieveLimitedPerformanceReview');
-    Route::get('/retrieve_performance_review_by_employee/{id}','PerformanceReviewController@retrieveLimitedPerformanceReviewByEmployee');
+    Route::post('/create_performance_review', 'PerformanceReviewController@createPerformanceReview');
+    Route::get('/retrieve_performance_reviews', 'PerformanceReviewController@retrievePerformanceReviews');
+    Route::get('/retrieve_performance_review/{id}', 'PerformanceReviewController@retrieveLimitedPerformanceReview');
+    Route::get('/retrieve_performance_review_by_employee/{id}', 'PerformanceReviewController@retrieveLimitedPerformanceReviewByEmployee');
+    Route::post('/retrieve_performance_review_by_employee_month', 'PerformanceReviewController@retrieveEmployeePerformanceReviewByMonth');
+
 });
 
-
 // this routes are needed with jwt token, you need first to login before executing this routes
-// Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
+Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
 
-//      // all routes to protected resources are registered here
-//      Route::get('/retrieve_users', 'UserController@retrieveUsers');
-
-// });
+     // all routes to protected resources are registered here
+    Route::get('/retrieve_users', 'UserController@retrieveUsers');
 
 // User
 // Route::post('/create_user', 'AccountController@createUser');
@@ -127,11 +125,10 @@ Route::group(['middleware' => 'api-header'], function () {
 // Route::post('/update_user', 'UserController@updateUser');
 // Route::post('/delete_user', 'UserController@deleteUser');
 // // Employee Leave
-Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
-Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
+    Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
+    Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
 
-Route::get('sendbasicemail','MailController@basic_email');
-Route::get('sendhtmlemail','MailController@html_email');
-Route::get('sendattachmentemail','MailController@attachment_email');
-
-
+    Route::get('sendbasicemail', 'MailController@basic_email');
+    Route::get('sendhtmlemail', 'MailController@html_email');
+    Route::get('sendattachmentemail', 'MailController@attachment_email');
+});
