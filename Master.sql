@@ -417,8 +417,8 @@ DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveDepartmentHeads`()
 BEGIN
 	SELECT
-		emp_h.id as employeeId,
         dept_h.id as department_headId,
+        emp_h.id as employeeId,
 		u.id as userId,
 		u.account_type as accountType,
 		r.position as role,
@@ -441,9 +441,9 @@ BEGIN
 		u.qr_code as department_head_qrcode
 	from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
-    JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
-    JOIN softype.role as r ON emp_h.roleId = r.id
-    JOIN softype.user as u ON emp_h.id = u.employeeId
+    LEFT JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+    LEFT JOIN softype.role as r ON emp_h.roleId = r.id
+    LEFT JOIN softype.user as u ON emp_h.id = u.employeeId
     LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId;
 END$$
 DELIMITER ;
@@ -452,8 +452,8 @@ DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveDepartmentManagers`()
 BEGIN
 	SELECT
-        emp_m.id as employeeId,
         dept_m.id as managerId,
+        emp_m.id as employeeId,
 		u.id as userId,
 		u.account_type as accountType,
 		r.position as role,
@@ -476,14 +476,23 @@ BEGIN
         emp_m.isActive as isActive,
 		u.qr_code as manager_qrcode
 	from softype.department as dept
-    LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
     LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
-    JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
-    JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
-    JOIN softype.role as r ON emp_m.roleId = r.id
-    JOIN softype.user as u ON emp_m.id = u.employeeId
-    LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
-    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId;
+    LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
+    LEFT JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+    LEFT JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
+    LEFT JOIN softype.role as r ON emp_m.roleId = r.id
+    LEFT JOIN softype.user as u ON emp_m.id = u.employeeId
+    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+	LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId;
+	#from softype.department as dept
+	#LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
+    #LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
+    #JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
+	#JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+    #JOIN softype.role as r ON emp_m.roleId = r.id
+    #JOIN softype.user as u ON emp_m.id = u.employeeId
+    #LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
+    #LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId;
 END$$
 DELIMITER ;
 
@@ -975,6 +984,46 @@ BEGIN
 	JOIN softype.employee as emp_reviewed on emp_reviewed.id = pr.employee_reviewed
 	JOIN softype.employee as emp_reviewer ON emp_reviewer.id = pr.reviewer
 	WHERE pr.id = _id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveManagersByDepartment`(IN _departmentId INT(11))
+BEGIN
+	SELECT
+        dept_m.id as managerId,
+        emp_m.id as employeeId,
+		u.id as userId,
+		u.account_type as accountType,
+		r.position as role,
+		dept.id as department_id,
+        dept.name as department_name,
+        concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
+		emp_m.firstname as manager_firstname, 
+		emp_m.middlename as manager_middlename,
+		emp_m.lastname as manager_lastname,
+		emp_m.gender as manager_gender,
+		emp_m.mobileno as manager_mobileno,
+		emp_m.birthdate as manager_birthdate,
+		emp_m.email as manager_email,
+		emp_m.street as manager_street,
+		emp_m.city as manager_city,
+		emp_m.country as manager_country,
+        emp_m.phil_health_no as phil_health_no,
+        emp_m.sss_no as sss_no,
+        emp_m.pag_ibig_no as pag_ibig_no,
+        emp_m.isActive as isActive,
+		u.qr_code as manager_qrcode
+        from softype.department as dept
+    LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
+    LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
+    LEFT JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+    LEFT JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
+    LEFT JOIN softype.role as r ON emp_m.roleId = r.id
+    LEFT JOIN softype.user as u ON emp_m.id = u.employeeId
+    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+	LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
+    WHERE dept_m.departmentId = _departmentId;
 END$$
 DELIMITER ;
 
