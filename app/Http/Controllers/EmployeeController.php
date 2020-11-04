@@ -42,11 +42,22 @@ class EmployeeController extends Controller
             DB::beginTransaction();
             try {
                 $employee = DB::select(
-                    'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?)',
+                    'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                     array(
-                        $request->firstname, $request->middlename, $request->lastname, $request->mobileno,
-                        $request->gender, $request->email, $request->birthdate,
-                        $request->street, $request->city, $request->country, $request->role
+                        $request->firstname,
+                        $request->middlename,
+                        $request->lastname,
+                        $request->mobileno,
+                        $request->gender,
+                        $request->email,
+                        $request->birthdate,
+                        $request->street,
+                        $request->city,
+                        $request->country,
+                        $request->phil_health_no,
+                        $request->sss_no,
+                        $request->pag_ibig_no,
+                        $request->role
                     )
                 );
                 $result = collect($employee);
@@ -61,7 +72,7 @@ class EmployeeController extends Controller
                     \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
-                        array($username, $defaultPassword, $file, $employee_id, $request->accountType)
+                        array($username, $defaultPassword, $file, $employee_id, $request->account_type)
                     );
                 }
                 DB::commit();
