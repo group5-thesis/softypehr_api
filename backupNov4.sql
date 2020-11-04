@@ -1,15 +1,19 @@
+-- nov 4 2020 backup
+-- yol
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddDepartment`(IN `_name` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddDepartment`(IN _name VARCHAR(255))
 BEGIN
-	INSERT INTO softype.department(name)
+	INSERT INTO softype.department(`name`)
     VALUES(_name);
-    
     SELECT last_insert_id() as id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddDepartmentEmployee`(IN `_employeeId` INT(11), IN `_department_managerId` INT(11), IN `_department_headId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddDepartmentEmployee`(
+	IN _employeeId INT(11), 
+    IN _department_managerId INT(11),
+    IN _department_headId INT(11))
 BEGIN
     INSERT INTO department_employees(employeeId, department_managerId, department_headId, created_at)
     VALUES(_employeeId, _department_managerId, _department_headId, date(now()));
@@ -18,7 +22,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddDepartmentHead`(IN `_departmentId` INT(11), IN `_department_head` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddDepartmentHead`(IN _departmentId INT(11), IN _department_head INT(11))
 BEGIN
 	INSERT INTO department_head(departmentId, department_head, created_at)
     VALUES(_departmentId, _department_head, date(now()));
@@ -27,7 +31,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddDepartmentManager`(IN `_departmentId` INT(11), IN `_department_manager` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddDepartmentManager`(IN _departmentId INT(11), IN _department_manager INT(11) )
 BEGIN
     INSERT INTO department_manager(departmentId, department_manager, created_at)
     VALUES (_departmentId, _department_manager, date(now()));
@@ -36,7 +40,13 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddFile`(IN `_employeeId` INT(11), IN `_name` VARCHAR(255), IN `_path` VARCHAR(255), IN `_type` VARCHAR(255), IN `_description` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddFile`(
+	IN _employeeId INT(11), 
+    IN _name VARCHAR(255), 
+	IN _path VARCHAR(255),
+    IN _type VARCHAR(255),
+    IN _description VARCHAR(255)
+)
 BEGIN
 	INSERT INTO company_repository(uploadedBy, filename, path, type, description, created_at)
     VALUES(_employeeId, _name , _path, _type, _description, date(now()));
@@ -46,7 +56,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddMember`(IN `_meetingId` INT(11), IN `_memberId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddMember`(IN _meetingId int(11), IN _memberId int(11))
 BEGIN
 	INSERT INTO calendar_invites(meetingId, memberId)
     VALUES (_meetingId, _memberId);
@@ -54,49 +64,26 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddRecoveryCode`(
-	IN _email varchar(255)
-)
-BEGIN
-declare _id int;
-	 INSERT INTO softype.account_recovery(`email`) values (_email);
-     SELECT LAST_INSERT_ID() into _id;
-     SELECT `code` FROM softype.account_recovery where id = _id; 
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckUserEmail`(
-	IN _email varchar(50)
-)
-BEGIN
-	declare isExist int ;
-    set isExist =0;
-    select count(id) into isExist from  softype.employee where email = _email;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CloseOfficeRequest`(IN `_office_requestId` INT(11), IN `_approverId` INT(11), IN `_indicator` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CloseTicketRequest`(IN _ticketId INT(11) , IN _approverId INT(11), IN _indicator INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
     IF _indicator = 1 THEN
-    UPDATE office_request
+    UPDATE ticket
     SET approverId = _approverId, status = 0, resolve_date = date(now()), remarks = "Request Approved"
-    WHERE id = _office_requestId;
+    WHERE id = _ticketId;
     END IF;	
     IF _indicator = 0 THEN
-	UPDATE office_request
+	UPDATE ticket
     SET approverId = _approverId, status = 0, resolve_date = date(now()), remarks = "Request Rejected"
-    WHERE id = _office_requestId;
+    WHERE id = _ticketId;
     END IF;
     
-    SELECT _office_requestId as id;
+    SELECT _ticketId as id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateAnnouncement`(IN `_employeeId` INT(11), IN `_title` VARCHAR(255), IN `_description` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateAnnouncement`(IN _employeeId INT(11), IN _title VARCHAR(255), IN _description VARCHAR(255))
 BEGIN
 	INSERT INTO announcement(employeeId, title, description)
     VALUES(_employeeId, _title, _description);
@@ -116,18 +103,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateEmployee`(
         IN `_street` VARCHAR(255),
         IN `_city` VARCHAR(255),
         IN `_country` VARCHAR(255),
-        IN `_phil_health_no` VARCHAR(255),
-        IN `_sss_no` VARCHAR(255),
-        IN `_pag_ibig_no` VARCHAR(255),
         IN `_role` VARCHAR(255))
 BEGIN
 	DECLARE _roleId int(11);
     IF NOT EXISTS(SELECT id FROM softype.`role` WHERE position = _role)
 	THEN
 		INSERT INTO softype.`role` (position) VALUES (_role);
-		SELECT last_insert_id() into _roleId;
+		SELECT last_insert_id() into _roleID;
 	ELSE
-		SELECT id FROM softype.`role` WHERE position = _role into _roleId;
+		SELECT id FROM softype.`role` WHERE position = _role into _roleID;
 	END If;
     
 	INSERT INTO 
@@ -142,12 +126,9 @@ BEGIN
 			street,
 			city,
 			country,
-			roleId,
-            phil_health_no,
-            sss_no,
-            pag_ibig_no
+			roleId
 		)
-	VALUES (_firstname, _middlename, _lastname, _mobileno, _gender, _email, _birthdate, _street, _city, _country, _roleId, _phil_health_no,_sss_no,_pag_ibig_no);
+	VALUES (_firstname, _middlename, _lastname, _mobileno, _gender, _email, _birthdate, _street, _city, _country, _roleID);
     SELECT last_insert_id() as id;
     
 END$$
@@ -160,8 +141,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateEmployeeAccount`(
     IN `_qrcode` VARCHAR(255), 
     IN `_employeeId` INT(11), 
     IN `_roleId` INT(11))
-BEGIN
-   INSERT INTO `user` 
+BEGIN	
+	INSERT INTO `user` 
     (
 		`username`, 
 		`password`, 
@@ -182,7 +163,10 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateMeeting`(IN `_title` VARCHAR(255), IN `_organizer` INT(11), IN `_category` VARCHAR(255), IN `_description` VARCHAR(255), IN `_set_date` DATE, IN `_time_start` VARCHAR(255), IN `_time_end` VARCHAR(255), IN `_status` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateMeeting`(
+		IN _title VARCHAR(255), IN _organizer int(11),IN _category VARCHAR(255), IN _description VARCHAR(255),
+		IN _set_date date, IN _time_start VARCHAR(255), IN _time_end VARCHAR(255), IN _status VARCHAR(255)
+	)
 BEGIN
 	INSERT INTO meeting(title, organizer, category, description, set_date, time_start, time_end, status, created_at)
 	VALUES (_title, _organizer, _category, _description, _set_date, _time_start, _time_end, _status, date(now()));
@@ -193,60 +177,34 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateOfficeRequest`(
-	IN `_transac` VARCHAR(255), 
-    IN `_employeeId` INT(11), 
-    IN `_item` VARCHAR(255), 
-    IN `_quantity` INT(11),
-    IN `_price` DOUBLE,
-    IN `_total_price` DOUBLE,
-    IN `_date_needed` DATE)
-BEGIN
-    DECLARE _approver INT(11);
-    
-	INSERT INTO office_request(transaction_no, employeeId, item, quantity, approverId, price, total_price, date_needed)
-	VALUES (_transac, _employeeId, _item, _quantity, GetAdmin(), _price, _total_price, _date_needed );
-
-	SELECT LAST_INSERT_ID() as id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreatePerformanceReview`(
-		IN `_c1` INT(11), 
-        IN `_c2` INT(11), 
-        IN `_c3` INT(11), 
-        IN `_c4` INT(11), 
-        IN `_c5` INT(11), 
-        IN `_employee_reviewed` INT(11),
-		IN `_reviewer` INT(11)
-	)
-BEGIN
-	INSERT INTO softype.performance_review(c1, c2, c3, c4, c5, employee_reviewed, reviewer)
-    VALUES(_c1, _c2, _c3, _c4, _c5, _employee_reviewed, _reviewer);
-    
-    SELECT last_insert_id() as id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateRoleType`(IN `_position` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateRoleType`(IN _position VARCHAR(255))
 BEGIN
 	INSERT INTO softype.role(position) VALUES(_position);
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteAccountRecoveryCode`(
-IN _email varchar(255)
-)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateTicket`(IN _transac VARCHAR(255),IN _employeeId INT(11), IN _item VARCHAR(255), 
+		IN _quantity INT(11), IN _description VARCHAR(255))
 BEGIN
-	delete from softype.account_recovery where email = _email;
+    DECLARE _approver INT(11);
+    
+	INSERT INTO ticket(transaction_no, employeeId, item, quantity, approverId, description)
+	VALUES (_transac, _employeeId, _item, _quantity, GetAdmin(),_description);
+
+	SELECT LAST_INSERT_ID() as id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteAnnouncement`(IN `_announcementId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateUserType`(IN _user_type VARCHAR(255))
+BEGIN
+	INSERT INTO accont_type(type) VALUES(_user_type);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteAnnouncement`(IN _announcementId INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
     DELETE FROM announcement
@@ -255,7 +213,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteDepartment`(IN `_departmentId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteDepartment`(IN _departmentId INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
     DELETE FROM department
@@ -264,7 +222,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteDepartmentEmployee`(IN `_department_employeeId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteDepartmentEmployee`(IN _department_employeeId INT(11))
 BEGIN
 	DELETE FROM department_employees
     WHERE id = _department_employeeId;
@@ -272,7 +230,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteDepartmentHead`(IN `_id` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteDepartmentHead`(IN _id INT(11))
 BEGIN
 	DELETE FROM softype.department_head
     WHERE id = _id;
@@ -280,7 +238,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteDepartmentManager`(IN `_id` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteDepartmentManager`(IN _id INT(11))
 BEGIN
 	DELETE FROM softype.department_manager
     WHERE id = _id;
@@ -289,13 +247,14 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteEmployee`(IN `_id` INT(11))
+    NO SQL
 BEGIN
 	DELETE FROM `employee` WHERE id = _id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteFile`(IN `_id` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteFile`(IN _id INT(11))
 BEGIN
 	DELETE FROM company_repository
     WHERE id = _id;
@@ -303,7 +262,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteMeeting`(IN `_id` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteMeeting`(IN _id int(11))
 BEGIN
 	SET sql_safe_updates = 0;
 	DELETE meeting, calendar_invites 
@@ -314,7 +273,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteMember`(IN `_id` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteMember`(IN _id int(11))
 BEGIN
 	SET sql_safe_updates = 0;
     DELETE FROM calendar_invites
@@ -323,20 +282,13 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeletePerformanceReview`(IN `_id` INT(11))
-BEGIN
-	DELETE FROM `performance_review` WHERE id = _id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeletOfficeRequest`(IN `_officeRequestId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteTicket`(IN _ticketId INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
-    DELETE FROM office_request
-    WHERE id = _officeRequestId;
+    DELETE FROM ticket
+    WHERE id = _ticketId;
     
-    call RetrieveOfficeRequests();
+    call retrieveTickets();
 END$$
 DELIMITER ;
 
@@ -370,17 +322,17 @@ DELIMITER ;
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveByFileType`(IN `_type` VARCHAR(255))
 BEGIN
-	SELECT 
-		cr.id as file_id,
-		cr.created_at as uploadedAt,
-        cr.filename as filename,
-        cr.path as path,
-        cr.type as type,
-        cr.description as description,
-        concat(emp.firstname, ' ', emp.lastname) as uploadedBy
-    FROM softype.company_repository as cr
-    JOIN softype.employee as emp ON emp.id = cr.uploadedBy
-    WHERE cr.type = _type;
+SELECT
+cr.id as file_id,
+cr.created_at as uploadedAt,
+       cr.filename as filename,
+       cr.path as path,
+       cr.type as type,
+       cr.description as description,
+       concat(emp.firstname, ' ', emp.lastname) as uploadedBy
+   FROM softype.company_repository as cr
+   JOIN softype.employee as emp ON emp.id = cr.uploadedBy
+   WHERE cr.type = _type;
 END$$
 DELIMITER ;
 
@@ -409,11 +361,6 @@ BEGIN
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss,
-        emp.pag_ibig_no as pag_ibig_no,
-		emp.profile_img as profile_img,
-        emp.isActive as isActive,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
     JOIN softype.role as r ON r.id = emp.roleId
@@ -431,27 +378,11 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveDepartmentEmployeesWithPerformanceReviews`(IN _department_headId INT(11))
-BEGIN
-	SELECT *
-		#emp.id as department_employeeId
-		# dept employees
-		FROM softype.employee as emp
-		LEFT JOIN softype.department_employees as dept_emp ON dept_emp.employeeId = emp.id
-        LEFT JOIN softype.performance_review as emp_pr ON emp_pr.employee_reviewed = emp.id;
-		# dept managers
-        #LEFT JOIN softype.department_head ;
-         
-		
-END$$
-DELIMITER ;
-
-DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveDepartmentHeads`()
 BEGIN
 	SELECT
 		emp_h.id as employeeId,
-        dept_h.id as department_headId,
+        dept_h.id as managerId,
 		u.id as userId,
 		u.account_type as accountType,
 		r.position as role,
@@ -467,11 +398,6 @@ BEGIN
 		emp_h.street as department_head_street,
 		emp_h.city as department_head_city,
 		emp_h.country as department_head_country,
-        emp_h.phil_health_no as phil_health_no,
-        emp_h.sss_no as sss,
-        emp_h.pag_ibig_no as pag_ibig_no,
-        emp.profile_img as profile_img,
-        emp_h.isActive as isActive,
 		u.qr_code as department_head_qrcode
 	from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
@@ -504,12 +430,7 @@ BEGIN
 		emp_m.street as manager_street,
 		emp_m.city as manager_city,
 		emp_m.country as manager_country,
-        emp_m.phil_health_no as phil_health_no,
-        emp_m.sss_no as sss,
-        emp_m.pag_ibig_no as pag_ibig_no,
-        emp_m.isActive as isActive,
-		u.qr_code as manager_qrcode,
-        emp.profile_img as profile_img
+		u.qr_code as manager_qrcode
 	from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
     LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
@@ -528,24 +449,22 @@ BEGIN
 	SELECT 
 		dept.id as department_id,
         dept.name as department_name,
-        concat(emp_h.firstname,' ', emp_h.lastname) as department_head
-        #concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
-        #concat(emps.firstname, ' ', emps.lastname) as department_employee
+        concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
+        concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
+        concat(emps.firstname, ' ', emps.lastname) as department_employee
     from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
-    #LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
-    #LEFT JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
-    LEFT JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
-    #LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
-    #LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
-	#LEFT JOIN softype.department_employees as dept_emps ON dept_emps.employeeId = emps.id
-    #LEFT JOIN softype.employee as emps ON dept_emp_h.employeeId = emps.id
-    ORDER BY department_name ASC;
+    LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
+    JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
+    JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+    LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
+    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+    JOIN softype.employee as emps ON dept_emp_h.employeeId = emps.id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveEmployeeByDepartment`(IN `_departmentId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveEmployeeByDepartment`(IN _departmentId INT(11))
 BEGIN
 	SELECT
 		emp.id as employeeId,
@@ -568,17 +487,11 @@ BEGIN
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss,
-        emp.pag_ibig_no as pag_ibig_no,
-        emp.isActive as isActive,
-		u.qr_code as qrcode,
-		emp.profile_img as profile_img
-
-        
+         emp.profile_img as profile_img,
+		u.qr_code as qrcode
 	FROM softype.employee as emp
-    LEFT JOIN softype.role as r ON r.id = emp.roleId
-    LEFT JOIN softype.user as u ON u.employeeId = emp.id
+    JOIN softype.role as r ON r.id = emp.roleId
+    JOIN softype.user as u ON u.employeeId = emp.id
     LEFT JOIN softype.department_employees as dept_emp ON dept_emp.employeeId = emp.id
     LEFT JOIN softype.department_manager as dm ON dm.department_manager = emp.id
 	LEFT JOIN softype.department_head as dh ON dh.department_head = emp.id
@@ -592,7 +505,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveEmployeeByManager`(IN `_department_managerId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveEmployeeByManager`(IN _department_managerId INT(11))
 BEGIN
 SELECT
 		emp.id as employeeId,
@@ -615,11 +528,7 @@ SELECT
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss_no,
-        emp.pag_ibig_no as pag_ibig_no,
-        emp.isActive as isActive,
-        emp.profile_img as profile_img,
+		emp.profile_img as profile_img,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
     JOIN softype.role as r ON r.id = emp.roleId
@@ -634,52 +543,6 @@ SELECT
     LEFT JOIN softype.department as dept ON dem.departmentId = dept.id
     
     WHERE dept_emp.department_managerId = _department_managerId;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveEmployeePerformanceReviewByMonth`(IN _employee_reviewed INT(11), IN _date_reviewed DATE)
-BEGIN
-	SELECT
-		pr_emp.id as performance_reviewId,
-		emp.id as employee_reviewedId,
-        emp_r.id as reviewerId, 
-        pr_emp.c1 as criteria_1,
-        pr_emp.c2 as criteria_2,
-        pr_emp.c3 as criteria_3,
-        pr_emp.c4 as criteria_4,
-        pr_emp.c5 as criteria_5,
-        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.employee as emp
-    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
-    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    WHERE pr_emp.employee_reviewed = _employee_reviewed AND 
-    YEAR(pr_emp.date_reviewed) = YEAR(_date_reviewed) AND
-    MONTH(pr_emp.date_reviewed) = MONTH(_date_reviewed);
-
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveEmployeePerformanceReviews`()
-BEGIN
-	SELECT 
-		pr_emp.id as performance_reviewId,
-        emp.id as employee_reviewedId,
-        emp_r.id as reviewerId, 
-		pr_emp.c1 as criteria_1,
-		pr_emp.c2 as criteria_2,
-		pr_emp.c3 as criteria_3,
-		pr_emp.c4 as criteria_4,
-		pr_emp.c5 as criteria_5,
-		concat(emp.firstname, ' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname, ' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.performance_review as pr_emp
-    LEFT JOIN softype.employee as emp ON pr_emp.employee_reviewed = emp.id
-    LEFT JOIN softype.employee as emp_r ON pr_emp.reviewer = emp_r.id;
 END$$
 DELIMITER ;
 
@@ -707,15 +570,11 @@ SELECT
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-        emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss,
-        emp.pag_ibig_no as pag_ibig_no,
-        emp.isActive as isActive,
         emp.profile_img as profile_img,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
-	JOIN softype.role as r ON r.id = emp.roleId
-    JOIN softype.user as u ON u.employeeId = emp.id
+    LEFT JOIN softype.role as r ON r.id = emp.roleId
+    LEFT JOIN softype.user as u ON u.employeeId = emp.id
     LEFT JOIN softype.department_employees as dept_emp ON dept_emp.employeeId = emp.id
     LEFT JOIN softype.department_manager as dm ON dm.department_manager = emp.id
 	LEFT JOIN softype.department_head as dh ON dh.department_head = emp.id
@@ -739,12 +598,15 @@ BEGIN
         cr.description as description,
         concat(emp.firstname, ' ', emp.lastname) as uploadedBy
     FROM softype.company_repository as cr
-    JOIN softype.employee as emp ON emp.id = cr.employeeId;
+    JOIN softype.employee as emp ON emp.id = cr.uploadedBy;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLeaveRequests`(IN `_roleID` INT(11), IN `_empId` INT(11), IN `_status` VARCHAR(50))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLeaveRequests`(
+	IN _roleID  int(11),
+    IN _empId int(11)
+)
 BEGIN
 	/*
 		*1  = admin
@@ -752,26 +614,15 @@ BEGIN
         *3  = regular
     */
     
-    if _status is null OR _status = "" then 
-       set _status = "pending";
-	end if;
-    
-    if _roleID = 1 then 
-		select "admin";
-    end if;
-    
-     if _roleID = 2 then 
-		select "manager";
-    end if;
-    
-     if _roleID = 3 then 
-		SELECT emp.id AS employee_id, 
+     SELECT 
+	   lr.id as id,
+       emp.id AS employee_id, 
        Concat (emp.firstname, "", emp.lastname) AS `name`, 
        `status`, 
        date_from, 
        date_to, 
        reason, 
-       type AS category, 
+       category AS category, 
        Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
        lr.approver AS approver_id 
        FROM   softype.leave_request lr 
@@ -781,16 +632,17 @@ BEGIN
          ON lr.employeeid = emp.id 
        JOIN softype.employee emp1 
          ON lr.approver = emp1.id 
-	  WHERE emp.id = _empId 
-        AND lr.`status` =  _status;
-     end if;
-    
-    
+	  WHERE (
+      CASE
+			WHEN _roleID = 2 THEN lr.approver = _empId AND emp.id = _empId
+			WHEN _roleID = 3 THEN emp.id = _empId
+			END
+        );
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedDepartment`(IN `_departmentId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedDepartment`(IN _departmentId INT(11))
 BEGIN
 	SELECT 
 		dept.id as department_id,
@@ -801,17 +653,17 @@ BEGIN
     from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
     LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
-    LEFT JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
-    LEFT JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+    JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
+    JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
     LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
     LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
-    LEFT JOIN softype.employee as emps ON dept_emp_h.employeeId = emps.id
+    JOIN softype.employee as emps ON dept_emp_h.employeeId = emps.id
     WHERE dept.id = _departmentId;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedDepartmentEmployee`(IN `_department_employeeId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedDepartmentEmployee`(IN _department_employeeId INT(11))
 BEGIN
 	SELECT
 		emp.id as employeeId,
@@ -852,11 +704,11 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedDepartmentHead`(IN `_id` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedDepartmentHead`(IN _id INT(11))
 BEGIN
 	SELECT
 		emp_h.id as employeeId,
-        dept_h.id as department_headId,
+        dept_h.id as managerId,
 		u.id as userId,
 		u.account_type as accountType,
 		r.position as role,
@@ -884,7 +736,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedDepartmentManager`(IN `_managerId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedDepartmentManager`(IN _managerId INT(11))
 BEGIN
 	SELECT
 		emp_m.id as employeeId,
@@ -920,7 +772,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedEmployee`(IN `_id` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedEmployee`(IN _id INT(11))
 BEGIN
 SELECT
 		emp.id as employeeId,
@@ -943,14 +795,11 @@ SELECT
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-		u.qr_code as qrcode,
-	    emp.sss_no as sss,
-        emp.pag_ibig_no as pag_ibig_no ,
-        emp.phil_health_no as phil_health_no ,
-        emp.profile_img as profile_img
+         emp.profile_img as profile_img,
+		u.qr_code as qrcode
 	FROM softype.employee as emp
-    JOIN softype.role as r ON r.id = emp.roleId
-    JOIN softype.user as u ON u.employeeId = emp.id
+    LEFT JOIN softype.role as r ON r.id = emp.roleId
+    LEFT JOIN softype.user as u ON u.employeeId = emp.id
     LEFT JOIN softype.department_employees as dept_emp ON dept_emp.employeeId = emp.id
     LEFT JOIN softype.department_manager as dm ON dm.department_manager = emp.id
 	LEFT JOIN softype.department_head as dh ON dh.department_head = emp.id
@@ -964,7 +813,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedMeeting`(IN `_meetingId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedMeeting`(IN _meetingId int(11))
 BEGIN
 	SELECT ci.meetingId, m.organizer, ci.memberId, emp.firstname, emp.middlename, emp.lastname, emp.email,
     m.title, m.category, m.description, m.set_date, m.time_start, m.time_end, m.status
@@ -976,49 +825,25 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedOfficeRequest`(IN `_officeRequestId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedTicket`(IN _ticketId INT(11))
 BEGIN
 	SELECT 
 		t.id, 
         t.transaction_no as transaction_no,
         concat(emp.firstname , ' ', emp.lastname) as name, 
         emp.email,
+        t.description as description,
         t.item as item,
 		t.quantity as quantity,
-        t.price as price,
-        t.total_price as total_price,
-        t.date_needed as date_needed,
         concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
         t.created_at as date_requested
-    FROM office_request as t
+    FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE t.id = _officeRequestId;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedPerformanceReview`(IN `_id` INT(11))
-BEGIN
-	SELECT 
-    	pr.id as performance_review_id,
-        emp_reviewed.id as employee_reviewedId, 
-        emp_reviewer.id as reviewerId, 
-        pr.c1 as criteria_1,
-        pr.c2 as criteria_2,
-        pr.c3 as criteria_3,
-        pr.c4 as criteria_4,
-        pr.c5 as criteria_5,
-		concat(emp_reviewed.firstname,' ', emp_reviewed.lastname) as employee_reviewed,
-        concat(emp_reviewer.firstname,' ', emp_reviewer.lastname) as employee_reviewer,
-        pr.date_reviewed as date_reviewed
-	FROM softype.performance_review as pr
-	JOIN softype.employee as emp_reviewed on emp_reviewed.id = pr.employee_reviewed
-	JOIN softype.employee as emp_reviewer ON emp_reviewer.id = pr.reviewer
-	WHERE pr.id = _id;
+    WHERE t.id = _ticketId;
 END$$
 DELIMITER ;
 
@@ -1046,48 +871,44 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveOfficeRequests`()
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTickets`()
 BEGIN
 	SELECT 
 		t.id, 
         t.transaction_no as transaction_no,
         concat(emp.firstname , ' ', emp.lastname) as name, 
         emp.email,
+        t.description as description,
         t.item as item,
 		t.quantity as quantity,
-        t.price as price,
-        t.total_price as total_price,
-        t.date_needed as date_needed,
         concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
         t.created_at as date_requested
-    FROM office_request as t
+    FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveOfficeRequestsByDate`()
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByDate`()
 BEGIN
 	SELECT 
 		t.id, 
         t.transaction_no as transaction_no,
         concat(emp.firstname , ' ', emp.lastname) as name, 
         emp.email,
+        t.description as description,
         t.item as item,
 		t.quantity as quantity,
-        t.price as price,
-        t.total_price as total_price,
-        t.date_needed as date_needed,
         concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
         t.created_at as date_requested
-    FROM office_request as t
+    FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
     WHERE t.created_at = date(now());
@@ -1095,25 +916,23 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveOfficeRequestsByEmployee`(IN `_employeeId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByEmployee`(IN _employeeId INT(11))
 BEGIN
 	SELECT 
 		emp.id as employeeId,
-		t.id as office_requestId, 
+		t.id as ticketId,
         t.transaction_no as transaction_no,
         concat(emp.firstname , ' ', emp.lastname) as name, 
         emp.email,
+        t.description as description,
         t.item as item,
 		t.quantity as quantity,
-        t.price as price,
-        t.total_price as total_price,
-        t.date_needed as date_needed,
         concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
         t.created_at as date_requested
-    FROM office_request as t
+    FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
     WHERE t.employeeId = _employeeId;
@@ -1121,24 +940,22 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveOfficeRequestsByMonth`(IN `_month` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByMonth`(IN _month VARCHAR(255))
 BEGIN
 	SELECT 
 		t.id, 
         t.transaction_no as transaction_no,
         concat(emp.firstname , ' ', emp.lastname) as name, 
         emp.email,
+        t.description as description,
         t.item as item,
 		t.quantity as quantity,
-        t.price as price,
-        t.total_price as total_price,
-        t.date_needed as date_needed,
         concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
         t.created_at as date_requested
-    FROM office_request as t
+    FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
     WHERE MONTH(t.created_at) = _month;
@@ -1146,24 +963,22 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveOfficeRequestsByStatus`(IN `_status` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByStatus`(IN _status INT(11))
 BEGIN
 	SELECT 
 		t.id, 
         t.transaction_no as transaction_no,
         concat(emp.firstname , ' ', emp.lastname) as name, 
         emp.email,
+        t.description as description,
         t.item as item,
 		t.quantity as quantity,
-        t.price as price,
-        t.total_price as total_price,
-        t.date_needed as date_needed,
         concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
         t.created_at as date_requested
-    FROM office_request as t
+    FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
     WHERE t.status = _status;
@@ -1171,117 +986,25 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveOfficeRequestsByYear`(IN `_year` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveTicketsByYear`(IN _year VARCHAR(255))
 BEGIN
 	SELECT 
 		t.id, 
         t.transaction_no as transaction_no,
         concat(emp.firstname , ' ', emp.lastname) as name, 
         emp.email,
+        t.description as description,
         t.item as item,
 		t.quantity as quantity,
-        t.price as price,
-        t.total_price as total_price,
-        t.date_needed as date_needed,
         concat(emp_app.firstname, ' ', emp_app.lastname) as person_in_charge,
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
         t.created_at as date_requested
-    FROM office_request as t
+    FROM ticket as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
     WHERE YEAR(t.created_at) = _year;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByEmployee`(IN `_id` INT(11))
-BEGIN
-	SELECT
-		pr_emp.id as performance_reviewId,
-		emp.id as employee_reviewedId,
-        emp_r.id as reviewerId,
-        pr_emp.c1 as criteria_1,
-        pr_emp.c2 as criteria_2,
-        pr_emp.c3 as criteria_3,
-        pr_emp.c4 as criteria_4,
-        pr_emp.c5 as criteria_5,
-        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.employee as emp
-    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
-    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    WHERE pr_emp.employee_reviewed = _id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByMonth`()
-BEGIN
-	SELECT
-		MONTH(pr_emp.date_reviewed) as month_reviewed,
-		pr_emp.id as performance_reviewId,
-		emp.id as employee_reviewedId,
-        emp_r.id as reviewerId,
-        pr_emp.c1 as criteria_1,
-        pr_emp.c2 as criteria_2,
-        pr_emp.c3 as criteria_3,
-        pr_emp.c4 as criteria_4,
-        pr_emp.c5 as criteria_5,
-        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.employee as emp
-    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
-    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    GROUP BY MONTH(pr_emp.date_reviewed);
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByReviewer`(IN _reviewer INT(11))
-BEGIN
-	SELECT
-		pr_emp.id as performance_reviewId,
-		emp.id as employee_reviewedId,
-        emp_r.id as reviewerId,
-        pr_emp.c1 as criteria_1,
-        pr_emp.c2 as criteria_2,
-        pr_emp.c3 as criteria_3,
-        pr_emp.c4 as criteria_4,
-        pr_emp.c5 as criteria_5,
-        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.employee as emp
-    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
-    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    WHERE pr_emp.reviewer = _reviewer;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrievePerformanceReviewByYear`()
-BEGIN
-	SELECT
-		Year(pr_emp.date_reviewed) as year_reviewed,
-		pr_emp.id as performance_reviewId,
-		emp.id as employee_reviewedId,
-        emp_r.id as reviewerId,
-        pr_emp.c1 as criteria_1,
-        pr_emp.c2 as criteria_2,
-        pr_emp.c3 as criteria_3,
-        pr_emp.c4 as criteria_4,
-        pr_emp.c5 as criteria_5,
-        concat(emp.firstname,' ', emp.lastname) as employee_reviewed,
-        concat(emp_r.firstname,' ', emp_r.lastname) as reviewer,
-        pr_emp.date_reviewed as date_reviewed
-    FROM softype.employee as emp
-    LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
-    LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    GROUP BY YEAR(pr_emp.date_reviewed);
 END$$
 DELIMITER ;
 
@@ -1293,7 +1016,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `TimeIn`(IN `_employeeId` INT(11), IN `_timeIn` TIME)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `TimeIn`(IN _employeeId INT(11), IN _timeIn TIME)
 BEGIN
 	INSERT INTO employee_attendance(employeeId, time_in, time_out, date, no_of_hours)
     VALUES(_employeeId, _timeIn, '00:00:00', date(now()), 0);
@@ -1303,7 +1026,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateAnnouncement`(IN `_announcementId` INT(11), IN `_title` VARCHAR(255), IN `_description` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateAnnouncement`(IN _announcementId INT(11), IN _title VARCHAR(255), IN _description VARCHAR(255))
 BEGIN
 	SET sql_safe_updates = 0;
 	IF _title IS NOT NULL THEN
@@ -1322,108 +1045,101 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateDepartment`(IN `_departmentId` INT(11), IN `_name` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateDepartment`(IN _departmentId INT(11), IN _name VARCHAR(255))
 BEGIN
 	SET sql_safe_updates = 0;
-    SET @update_id := 0;
     IF _name IS NOT NULL THEN
     UPDATE department
-    SET name = _name  , id = (SELECT @update_id := id)
-    WHERE id = _departmentId;
+    SET name = _name WHERE id = _departmentId;
     END IF;
-    SELECT @update_id as id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateDepartmentEmployee`(IN `_id` INT(11), IN `_employeeId` INT(11), IN `_department_managerId` INT(11), IN `_department_headId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateDepartmentEmployee`(
+	IN _id INT(11), 
+    IN _employeeId INT(11), 
+    IN _department_managerId INT(11), 
+    IN _department_headId INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
-    SET @update_id := 0;
     IF _employeeId IS NOT NULL THEN
     UPDATE department_employees
-    SET employeeId = _employeeId , id = (SELECT @update_id := id)
+    SET employeeId = _employeeId
     WHERE id = _id;
     END IF;
 	IF _department_managerId IS NOT NULL THEN
     UPDATE department_employees
-    SET department_managerId = _department_managerId , id = (SELECT @update_id := id)
+    SET department_managerId = _department_managerId
     WHERE id = _id;
     END IF;
     IF _department_headId IS NOT NULL THEN
     UPDATE department_employees
-    SET department_headId = _department_headId , id = (SELECT @update_id := id)
+    SET department_headId = _department_headId
     WHERE id = _id;
     END IF;
     UPDATE department_employees
-    SET updated_at = date(now()) , id = (SELECT @update_id := id)
+    SET updated_at = date(now())
     WHERE id = _id;
-    SELECT @update_id as id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateDepartmentHead`(IN `_id` INT(11), IN `_departmentId` INT(11), IN `_department_head` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateDepartmentHead`(IN _id INT(11), IN _departmentId INT(11), IN _department_head INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
-    SET @update_id := 0;
     IF _departmentId IS NOT NULL THEN
     UPDATE department_head
-    SET departmentId = _departmentId, id = (SELECT @update_id := id)
+    SET departmentId = _departmentId
     WHERE id = _id;
     END IF;
     IF _department_head IS NOT NULL THEN
     UPDATE department_head
-    SET department_head = _department_head, id = (SELECT @update_id := id)
+    SET department_head = _department_head
     WHERE id = _id;
     END IF;
 	UPDATE department_head
-    SET updated_at = date(now()), id = (SELECT @update_id := id)
+    SET updated_at = date(now())
     WHERE id = _id;
-	SELECT @update_id as id;
+    
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateDepartmentManager`(IN `_id` INT(11), IN `_departmentId` INT(11), IN `_employeeId` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateDepartmentManager`(IN _id INT(11), IN _departmentId INT(11), IN _employeeId INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
-    SET @update_id := 0;
     IF _departmentId IS NOT NULL THEN
-    UPDATE department_manager 
-    SET departmentId = _departmentId , id = (SELECT @update_id := id)
+    UPDATE department_employees
+    SET departmentId = _departmentId
     WHERE id = _id;
     END IF;
     IF _employeeId IS NOT NULL THEN
-    UPDATE department_manager
-    SET department_manager = _employeeId, id = (SELECT @update_id := id)
+    UPDATE department_employees
+    SET department_manager = _employeeId
     WHERE id = _id;
     END IF;
-    UPDATE department_manager
-    SET updated_at = date(now()), id = (SELECT @update_id := id)
+    UPDATE department_employees
+    SET updated_at = date(now())
     WHERE id = _id;
-    SELECT @update_id as id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateEmployee`(
-	IN `_employeeId` INT(11), 
-    IN `_firstname` VARCHAR(255), 
-    IN `_middlename` VARCHAR(255), 
-    IN `_lastname` VARCHAR(255), 
-    IN `_mobileno` VARCHAR(255), 
-    IN `_gender` VARCHAR(255), 
-    IN `_email` VARCHAR(255), 
-    IN `_birthdate` DATE, 
-    IN `_street` VARCHAR(255), 
-    IN `_city` VARCHAR(255), 
-    IN `_country` VARCHAR(255), 
-    IN `_phil_health_no` VARCHAR(255),
-    IN `_sss_no` VARCHAR(255),
-    IN `_pag_ibig_no` VARCHAR(255),
-    IN `_isActive` INT(11),
-    IN `_roleId` INT(11))
+	IN _employeeId INT(11), 
+    IN _firstname VARCHAR(255),
+    IN _middlename VARCHAR(255),
+    IN _lastname VARCHAR(255),
+    IN _mobileno VARCHAR(255),
+    IN _gender VARCHAR(255),
+    IN _email VARCHAR(255),
+    IN _birthdate DATE,
+    IN _street VARCHAR(255),
+    IN _city VARCHAR(255),
+    IN _country VARCHAR(255),
+    IN _roleId INT(11)
+    )
 BEGIN
 	SET sql_safe_updates = 0;
     SET @update_id := 0;
@@ -1482,148 +1198,112 @@ BEGIN
     SET roleId = _roleId, id = (SELECT @update_id := id)
     WHERE id = _employeeId;
     END IF;
-    IF _phil_health_no IS NOT NULL THEN
-    UPDATE employee
-    SET phil_health_no = _phil_health_no, id = (SELECT @update_id := id)
-    WHERE id = _employeeId;
-    END IF;
-    IF _sss_no IS NOT NULL THEN
-    UPDATE employee
-    SET sss_no = _sss_no, id = (SELECT @update_id := id)
-    WHERE id = _employeeId;
-    END IF;
-    IF _pag_ibig_no IS NOT NULL THEN
-    UPDATE employee
-    SET pag_ibig_no = _pag_ibig_no, id = (SELECT @update_id := id)
-    WHERE id = _employeeId;
-    END IF;
-    IF _isActive IS NOT NULL THEN
-    UPDATE employee
-    SET isActive = _isActive, id = (SELECT @update_id := id)
-    WHERE id = _employeeId;
-    END IF;
     SELECT @update_id as id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateMeeting`(IN `_meetingId` INT(11), IN `_title` VARCHAR(255), IN `_organizer` INT(11), IN `_category` VARCHAR(255), IN `_description` VARCHAR(255), IN `_set_date` DATE, IN `_time_start` VARCHAR(255), IN `_time_end` VARCHAR(255), IN `_status` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateMeeting`(IN _meetingId int(11),
+		IN _title VARCHAR(255), IN _organizer int(11),IN _category VARCHAR(255), IN _description VARCHAR(255),
+		IN _set_date date, IN _time_start VARCHAR(255), IN _time_end VARCHAR(255), IN _status VARCHAR(255))
 BEGIN
 	SET sql_safe_updates = 0;
-    SET @update_id := 0;
     IF _title IS NOT NULL then
     UPDATE meeting
-    SET title = _title , id = (SELECT @update_id := id)
-    WHERE id = _meetingId;
+    SET title = _title WHERE id = _meetingId;
     END IF;
     IF _organizer IS NOT NULL then
     UPDATE meeting
-    SET organizer = _organizer , id = (SELECT @update_id := id)
-    WHERE id = _meetingId;
+    SET organizer = _organizer WHERE id = _meetingId;
     END IF;
     IF _category IS NOT NULL then
     UPDATE meeting
-    SET category = _category , id = (SELECT @update_id := id)
-    WHERE id = _meetingId;
+    SET category = _category WHERE id = _meetingId;
     END IF;
     IF _description IS NOT NULL then
     UPDATE meeting
-    SET description = _description , id = (SELECT @update_id := id)
-    WHERE id = _meetingId;
+    SET description = _description WHERE id = _meetingId;
     END IF;
     IF _set_date IS NOT NULL then
     UPDATE meeting
-    SET set_date = _set_date , id = (SELECT @update_id := id)
-    WHERE id = _meetingId;
+    SET set_date = _set_date WHERE id = _meetingId;
     END IF;
     IF _time_start IS NOT NULL then
     UPDATE meeting
-    SET time_start = _time_start, id = (SELECT @update_id := id)
-    WHERE id = _meetingId;
+    SET time_start = _time_start WHERE id = _meetingId;
     END IF;
     IF _time_end IS NOT NULL then
     UPDATE meeting
-    SET time_end = _time_end , id = (SELECT @update_id := id)
-    WHERE id = _meetingId;
+    SET time_end = _time_end WHERE id = _meetingId;
     END IF;
     IF _status IS NOT NULL then
     UPDATE meeting
-    SET status = _status , id = (SELECT @update_id := id)
-    WHERE id = _meetingId;
+    SET status = _status WHERE id = _meetingId;
     END IF;
     UPDATE meeting
     SET updated_at = date(now()) WHERE id = _meetingId;
-    SELECT @update_id as id;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateOfficeRequest`(
-	IN `_office_requestId` INT(11), 
-    IN `_employeeId` INT(11), 
-    IN `_item` VARCHAR(255), 
-    IN `_quantity` INT(11), 
-    IN `_price` DOUBLE,
-    IN `_total_price` DOUBLE,
-    IN `_date_needed`DATE,
-    IN `_status` INT(11))
-BEGIN
-	SET sql_safe_updates = 0;
-	SET @update_id := 0;
-    IF _item IS NOT NULL then
-    UPDATE office_request
-    SET item = _item , id = (SELECT @update_id := id)
-    WHERE id = _office_requestId AND employeeId = _employeeId;
-    END IF;
-    IF _quantity IS NOT NULL then
-    UPDATE office_request
-    SET quantity = _quantity , id = (SELECT @update_id := id)
-    WHERE id = _office_requestId AND employeeId = _employeeId;
-    END IF;
-	IF _price IS NOT NULL then
-    UPDATE office_request
-    SET price = _price , id = (SELECT @update_id := id)
-    WHERE id = _office_requestId AND employeeId = _employeeId;
-    END IF;
-    IF _total_price IS NOT NULL then
-    UPDATE office_request
-    SET total_price = _total_price , id = (SELECT @update_id := id)
-    WHERE id = _office_requestId AND employeeId = _employeeId;
-    END IF;
-	IF _date_needed IS NOT NULL then
-    UPDATE office_request
-    SET date_needed = _date_needed , id = (SELECT @update_id := id)
-    WHERE id = _office_requestId AND employeeId = _employeeId;
-    END IF;
-    SELECT @update_id as id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdatePassword`(
-	IN _password varchar(50)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProfileImage`(
+IN _employee_id INT(11),
+IN _path varchar(255)
 )
 BEGIN
-    SET SQL_SAFE_UPDATES = 0;
-	update softype.`user` set `password` = _password;
-    select row_count() AS result;
+	update softype.employee set profile_img=_path where id = _employee_id;
+    select ROW_COUNT()  as completed;
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UserCreateLeaveRequest`(IN `_employeeId` INT(11), IN `_leave_categoryId` INT(11), IN `_date_from` DATE, IN `_date_to` DATE, IN `_reason` VARCHAR(255), IN `_approver` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateTicket`(IN _ticketId INT(11), IN _employeeId INT(11), IN _description VARCHAR(255), IN _item VARCHAR(255), 
+		IN _quantity INT(11), IN _status INT(11))
 BEGIN
+	SET sql_safe_updates = 0;
+    IF _description IS NOT NULL then
+    UPDATE ticket
+    SET description = _description WHERE id = _ticketId AND employeeId = _employeeId;
+    END IF;
+    IF _item IS NOT NULL then
+    UPDATE ticket
+    SET item = _item WHERE id = _ticketId AND employeeId = _employeeId;
+    END IF;
+    IF _quantity IS NOT NULL then
+    UPDATE ticket
+    SET quantity = _quantity WHERE id = _ticketId AND employeeId = _employeeId;
+    END IF;
+    
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UserCreateLeaveRequest`(
+	IN _employeeId int(11),
+	IN _leave_categoryId int(11),
+	IN _date_from date,
+	IN _date_to date,
+	IN _reason varchar(255),
+	IN _approver int(11)
+)
+BEGIN
+	declare newId int(11);
 	insert into 
 		softype.leave_request
 		(employeeId, leave_categoryId, date_from, date_to, reason, `status`, approver,created_at) 
     values 
 		(_employeeId, _leave_categoryId, _date_from, _date_to, _reason, "pending", _approver,now());
-	 SELECT * FROM  softype.leave_request WHERE id = (SELECT LAST_INSERT_ID());
+	
+    SELECT LAST_INSERT_ID() into newId;
+	 call RetrieveLeaveRequestDetails(newId);
 END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UserDoLogin`(IN `_username` VARCHAR(50), IN `_password` VARCHAR(50))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UserDoLogin`(
+IN `_username` VARCHAR(50), 
+IN `_password` VARCHAR(50)
+)
 BEGIN
 	DECLARE _employeeID INT;
     DECLARE _results INT;
@@ -1644,7 +1324,9 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UserGetProfile`(IN `_userID` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UserGetProfile`(
+IN _userID int(11)
+)
 BEGIN
 declare _employeeID int(11);
    declare _qrCode varchar(50);
@@ -1653,7 +1335,7 @@ declare _employeeID int(11);
   -- select * , _qrCode as qr_code from  softype.employee  emp where id = _employeeID ;
    
    select
-       emp.id as employeeId,
+emp.id as employeeId,
        usr.id as userId,
        firstname,
        middlename,
@@ -1667,11 +1349,7 @@ declare _employeeID int(11);
        email,
        qr_code ,
        position ,
-       account_type as roleId,
-       emp.sss_no as sss,
-       emp.pag_ibig_no as pag_ibig_no ,
-       emp.phil_health_no as phil_health_no ,
-       emp.profile_img as profile_img
+       account_type as roleId
    from
 softype.employee emp
 join softype.user usr
@@ -1681,3 +1359,4 @@ on emp.roleId = rl.id
    where usr.id = _userID;
 END$$
 DELIMITER ;
+ 
