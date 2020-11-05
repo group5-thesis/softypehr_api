@@ -72,7 +72,7 @@ class LeaveRequestController extends Controller
         try{
             $employeeId = $request->employeeId;
             $roleId = $request->roleId;
-            $leave_request = DB::select("call RetrieveLeaveRequests(?,?)", [$roleId, $employeeId] );
+            $leave_request = DB::select("call RetrieveLeaveRequests(?,?,?)", [$roleId, $employeeId ,'pending'] );
             return Result::setData($leave_request);
         }catch(\Exception $e){
             return  Result::setError( $e->getMessage());

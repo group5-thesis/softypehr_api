@@ -32,7 +32,7 @@ class OfficeRequestController extends Controller
             DB::beginTransaction();
             try {
                 $officeRequest = DB::select(
-                    'call CreateOfficeRequest(?,?,?,?,?)',
+                    'call CreateOfficeRequest(?,?,?,?,?,?,?)',
                     array(
                         Helpers::createTransactionNo("SOFTYPETKT" . $request->employeeId . "_"),
                         $request->employeeId,
