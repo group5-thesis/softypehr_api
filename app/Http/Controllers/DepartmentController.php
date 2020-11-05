@@ -121,4 +121,17 @@ class DepartmentController extends Controller
             return Result::setError("Something went wrong", 500);
         }
     }
+
+    // here modified
+
+    public function retrieveManagersByDepartment(Request $request)
+    {
+        try {
+            $department_managers = DB::select('call RetrieveManagersByDepartment(?)', array($request->departmentId));
+            $result = collect($department_managers);
+            return Result::setData(["department_managers" => $result]);
+        } catch (\Exception $e) {
+            return Result::setError("Something went wrong", 500);
+        }
+    }
 }

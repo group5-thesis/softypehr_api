@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Result;
 use App\Http\Controllers\MailController;
 
-
 class AuthController extends Controller
 {
     public function login(Request $request)
@@ -32,15 +31,15 @@ class AuthController extends Controller
                     $temp = 'test';
                     $employee = DB::select('call UserGetProfile(?)', array($result->id));
                     //   $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
-                    $response=[];
-                      foreach ($employee as $key => $value) {
-                          $response =  [
-                              'access_token' => $access_token,
-                              'account_information' => $employee,
-                          ];
-                      }
-                      return Result::setData($response);
-                  } else {
+                    $response = [];
+                    foreach ($employee as $key => $value) {
+                        $response = [
+                            'access_token' => $access_token,
+                            'account_information' => $employee,
+                        ];
+                    }
+                    return Result::setData($response);
+                } else {
                     // error password
                     return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
                 }
@@ -92,12 +91,12 @@ class AuthController extends Controller
                     return response()->json($response, 200);
                 } else {
                   // error password
-                  $response = ['data' => [],'error' => true, 'message' => "Password didn't matched!"];
-                  return response()->json($response, 405);
+                    $response = ['data' => [], 'error' => true, 'message' => "Password didn't matched!"];
+                    return response()->json($response, 405);
                 }
             } else {
                // error: user not found
-               $response = ['data' => [] ,'error' => true, 'message' => 'User not found!'];
+                $response = ['data' => [], 'error' => true, 'message' => 'User not found!'];
                 return response()->json($response, 405);
             }
 
@@ -126,12 +125,12 @@ class AuthController extends Controller
                     return response()->json($response, 200);
                 } else {
                   // error password
-                    $response = ['data' => [],'error' => true, 'message' => "Password didn't matched!"];
+                    $response = ['data' => [], 'error' => true, 'message' => "Password didn't matched!"];
                     return response()->json($response, 405);
                 }
             } else {
                // error: user not found
-                $response = ['data' => [] ,'error' => true, 'message' => 'User not found!'];
+                $response = ['data' => [], 'error' => true, 'message' => 'User not found!'];
                 return response()->json($response, 405);
             }
         }
@@ -156,21 +155,40 @@ class AuthController extends Controller
         }
         return $token;
     }
-    
+
     public function forgotPassword(Request $request)
     {
         $email = $request->$email;
-        try{
+        try {
             $result = DB::select('call CheckUserEmail(?)', array($email));
             $user = collect($result);
             if ($user[0]->isExist === 0) {
-                return Result::setError('' , 'Email address not found' , 401);
-            }else{
-                $addRecoveryCode = DB::select('call AddRecoveryCode(?)',$email);          
-                $codes = collect($addRecoveryCode);      
-                return  MailController::sendEmail($email,$codes[0]->code,'Account Recovery Code');
+                return Result::setError('', 'Email address not found', 401);
+            } else {
+                $addRecoveryCode = DB::select('call AddRecoveryCode(?)', $email);
+                $codes = collect($addRecoveryCode);
+                return MailController::sendEmail($email, $codes[0]->code, 'Account Recovery Code');
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage());
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $change_password = DB::select('ChangePassword(?,?,?,?)', array(
+                $request->userId,
+                $request->current_password,
+                $request->new_password,
+                $request->password_confirmation
+            ));
+            $response = ['error' => false, 'message' => 'success'];
+            DB::commit();
+            return Result::setData($response);
+        } catch (\Exception $e) {
+            DB::rollback();
             return Result::setError($e->getMessage());
         }
     }

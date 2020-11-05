@@ -16,6 +16,7 @@ class OfficeRequest extends Model
         'resolve_date',
         'price',
         'total_price',
+        'purpose',
         'status',
         'date_needed',
         'remarks'
