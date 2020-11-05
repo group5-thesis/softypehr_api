@@ -55,7 +55,7 @@ class EmployeeController extends Controller
                         $request->city,
                         $request->country,
                         $request->phil_health_no,
-                        $request->sss_no,
+                        $request->sss,
                         $request->pag_ibig_no,
                         $request->role
                     )
@@ -149,7 +149,7 @@ class EmployeeController extends Controller
                     $request->city,
                     $request->country,
                     $request->phil_health_no,
-                    $request->sss_no,
+                    $request->sss,
                     $request->pag_ibig_no,
                     $request->isActive,
                     $request->roleId

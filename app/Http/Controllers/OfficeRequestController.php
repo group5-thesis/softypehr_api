@@ -20,6 +20,7 @@ class OfficeRequestController extends Controller
             'quantity' => 'required',
             'price' => 'required',
             'total_price' => 'required',
+            'purpose' => 'required',
             'date_needed' => 'required'
         ]);
 
@@ -40,15 +41,15 @@ class OfficeRequestController extends Controller
                         $request->quantity,
                         $request->price,
                         $request->total_price,
-                        $request->date_needed
+                        $request->date_needed,
+                        $request->purpose
                     )
                 );
                 $response = $this->retrieveLimitedOfficeRequest($officeRequest[0]->id);
                 DB::commit();
-                return $response;
-            } catch (\Exception $e) {
-                DB::rollback();
-                return Result::setError("Something went wrong", 500);
+                return  $response;
+            }catch(\Exception $e){
+                return  Result::setError($e->getMessage());
             }
         }
     }
@@ -77,6 +78,7 @@ class OfficeRequestController extends Controller
                     $request->quantity,
                     $request->price,
                     $request->total_price,
+                    $request->purpose,
                     $request->date_needed,
                     $request->status
                 )
@@ -116,7 +118,9 @@ class OfficeRequestController extends Controller
             $result = collect($retrieveOfficeRequest);
             return Result::setData(['officeRequest_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+            return  Result::setError($e->getMessage());
+
+            // return Result::setError("Something went wrong", 500);
         }
     }
 
