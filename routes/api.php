@@ -51,6 +51,7 @@ Route::group(['middleware' => 'api-header'], function () {
     // Auth
     Route::post('/login', 'AuthController@login');
     Route::post('/forgotPassword', 'AuthController@forgotPassword');
+    Route::post('/changePassword', 'AuthController@changePassword');
 
     // File upload
     Route::get('/image/{folder}/{file}', 'FileController@serve');
@@ -86,6 +87,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_departments', 'DepartmentController@retrieveDepartments');
     Route::get('/retrieve_department_heads_v1', 'DepartmentController@retrieveDepartmentHeads');
     Route::post('/retrieve_departments_managers_v1', 'DepartmentController@retrieveDepartmentManagers');
+    Route::post('/retrieve_managers_by_department', 'DepartmentController@retrieveManagersByDepartment');
 
 
     // Department Employee

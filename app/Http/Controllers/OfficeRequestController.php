@@ -20,6 +20,7 @@ class OfficeRequestController extends Controller
             'quantity' => 'required',
             'price' => 'required',
             'total_price' => 'required',
+            'purpose' => 'required',
             'date_needed' => 'required'
         ]);
 
@@ -40,7 +41,8 @@ class OfficeRequestController extends Controller
                         $request->quantity,
                         $request->price,
                         $request->total_price,
-                        $request->date_needed
+                        $request->date_needed,
+                        $request->purpose
                     )
                 );
                 $response = $this->retrieveLimitedOfficeRequest($officeRequest[0]->id);
@@ -76,6 +78,7 @@ class OfficeRequestController extends Controller
                     $request->quantity,
                     $request->price,
                     $request->total_price,
+                    $request->purpose,
                     $request->date_needed,
                     $request->status
                 )
