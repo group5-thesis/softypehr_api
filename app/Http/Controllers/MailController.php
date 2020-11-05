@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Mail;
-
+use App\Models\Result;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
@@ -22,14 +22,18 @@ class MailController extends Controller {
           return "e";
        }
    }
-   public function html_email() {
-      $data = array('name'=>"Softype");
-      Mail::send('mail', $data, function($message) {
-         $message->to('11aresearchers@gmail.com', 'Softype')->subject
-            ('Test Email');
-         $message->from('softypeapi@gmail.com','Softype');
-      });
-      echo "HTML Email Sent. Check your inbox.";
+   public static function sendEmail($receiver , $content , $subject) {
+       try{
+        $data = array('name'=>"Softype");
+        Mail::send(['text'=>$content], $data, function($message) {
+           $message->to($receiver, 'Softype')->subject
+              ($subject);
+           $message->from('softypeapi@gmail.com','Softype');
+        });
+        return ['status'=>'success'];
+       }catch(\Exception $e){
+        return Result::setError($e->getMessage());
+       }
    }
    public function attachment_email() {
       $data = array('name'=>"Softype");

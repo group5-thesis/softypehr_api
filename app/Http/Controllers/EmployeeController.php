@@ -42,11 +42,22 @@ class EmployeeController extends Controller
             DB::beginTransaction();
             try {
                 $employee = DB::select(
-                    'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?)',
+                    'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                     array(
-                        $request->firstname, $request->middlename, $request->lastname, $request->mobileno,
-                        $request->gender, $request->email, $request->birthdate,
-                        $request->street, $request->city, $request->country, $request->role
+                        $request->firstname, 
+                        $request->middlename, 
+                        $request->lastname, 
+                        $request->mobileno,
+                        $request->gender, 
+                        $request->email, 
+                        $request->birthdate,
+                        $request->street, 
+                        $request->city, 
+                        $request->country, 
+                        $request->phil_health_no,
+                        $request->sss,
+                        $request->pag_ibig_no,
+                        $request->role
                     )
                 );
                 $result = collect($employee);

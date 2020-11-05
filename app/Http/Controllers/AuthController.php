@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\Input;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Result;
+use App\Http\Controllers\MailController;
 
 
 class AuthController extends Controller
@@ -31,15 +32,15 @@ class AuthController extends Controller
                     $temp = 'test';
                     $employee = DB::select('call UserGetProfile(?)', array($result->id));
                     //   $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
-                    $response=[];
-                      foreach ($employee as $key => $value) {
-                          $response =  [
-                              'access_token' => $access_token,
-                              'account_information' => $employee,
-                          ];
-                      }
-                      return Result::setData($response);
-                  } else {
+                    $response = [];
+                    foreach ($employee as $key => $value) {
+                        $response = [
+                            'access_token' => $access_token,
+                            'account_information' => $employee,
+                        ];
+                    }
+                    return Result::setData($response);
+                } else {
                     // error password
                     return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
                 }
@@ -154,5 +155,23 @@ class AuthController extends Controller
             ]);
         }
         return $token;
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $email = $request->$email;
+        try {
+            $result = DB::select('call CheckUserEmail(?)', array($email));
+            $user = collect($result);
+            if ($user[0]->isExist === 0) {
+                return Result::setError('', 'Email address not found', 401);
+            } else {
+                $addRecoveryCode = DB::select('call AddRecoveryCode(?)', $email);
+                $codes = collect($addRecoveryCode);
+                return MailController::sendEmail($email, $codes[0]->code, 'Account Recovery Code');
+            }
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage());
+        }
     }
 }

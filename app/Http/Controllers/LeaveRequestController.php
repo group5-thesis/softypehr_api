@@ -25,7 +25,7 @@ class LeaveRequestController extends Controller
 
         if ($validator->fails()) {
             $messages = json_encode($validator->messages());
-            return Result::setError($messages  , 401 , $messages);
+            return Result::setError('' , $messages , 401);
         } else {
             try {
                 $params = array(
@@ -68,6 +68,7 @@ class LeaveRequestController extends Controller
     }
     public function getLeaveRequests(Request $request)
     {
+        // return [];
         try{
             $employeeId = $request->employeeId;
             $roleId = $request->roleId;

@@ -24,6 +24,10 @@ Route::group(['middleware' => 'api-header'], function () {
     // as users at that point have not been authenticated yet
     // Therefore the jwtMiddleware will be exclusive of them
 
+    //Leave Request
+    Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
+    Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
+
     // Meeting
     Route::post('/create_meeting', 'MeetingController@createMeeting');
     Route::get('/retrieve_meetings', 'MeetingController@retrieveMeetings');
@@ -44,8 +48,9 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_officeRequests_by_status/{status}', 'OfficeRequestController@retrieveOfficeRequestsByStatus');
     Route::get('/retrieve_officeRequests_by_employee/{id}', 'OfficeRequestController@retrieveOfficeRequestsByEmployee');
 
-    // Login
+    // Auth
     Route::post('/login', 'AuthController@login');
+    Route::post('/forgotPassword', 'AuthController@forgotPassword');
 
     // File upload
     Route::get('/image/{folder}/{file}', 'FileController@serve');
@@ -125,8 +130,8 @@ Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
 // Route::post('/update_user', 'UserController@updateUser');
 // Route::post('/delete_user', 'UserController@deleteUser');
 // // Employee Leave
-    Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
-    Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
+    // Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
+    // Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
 
     Route::get('sendbasicemail', 'MailController@basic_email');
     Route::get('sendhtmlemail', 'MailController@html_email');
