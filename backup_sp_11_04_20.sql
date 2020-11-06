@@ -54,61 +54,6 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddRecoveryCode`(
-	IN _email varchar(255)
-)
-BEGIN
-declare _id int;
-	 INSERT INTO softype.account_recovery(`email`) values (_email);
-     SELECT LAST_INSERT_ID() into _id;
-     SELECT `code` FROM softype.account_recovery where id = _id; 
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `ChangePassword`(
-	IN _userId INT(11),
-	IN _current_password VARCHAR(255),
-    IN _new_password VARCHAR(255),
-    IN _confirmation_password VARCHAR(255)
-)
-BEGIN
-	DECLARE pass varchar(255);
-    SET @update_id := 0;
-    SET SQL_SAFE_UPDATES = 0;
-    
-	SELECT u.password into pass
-    FROM softype.user as u
-    WHERE u.id = _userId;
-    
-    IF _current_password IS NOT NULL THEN
-		IF _new_password IS NOT NULL THEN
-			IF _confirmation_password IS NOT NULL THEN
-				IF _current_password = pass THEN
-					IF _new_password = _confirmation_password THEN
-						UPDATE softype.user 
-						SET password = _new_password , id = (SELECT @update_id := id)
-						WHERE id = _userId;
-					END IF;
-				END IF;
-			END IF;
-		END IF;
-     END IF;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckUserEmail`(
-	IN _email varchar(50)
-)
-BEGIN
-	declare isExist int ;
-    set isExist =0;
-    select count(id) into isExist from  softype.employee where email = _email;
-END$$
-DELIMITER ;
-
-DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CloseOfficeRequest`(IN `_office_requestId` INT(11), IN `_approverId` INT(11), IN `_indicator` INT(11))
 BEGIN
 	SET sql_safe_updates = 0;
@@ -116,7 +61,7 @@ BEGIN
     UPDATE office_request
     SET approverId = _approverId, status = 0, resolve_date = date(now()), remarks = "Request Approved"
     WHERE id = _office_requestId;
-    END IF;
+    END IF;	
     IF _indicator = 0 THEN
 	UPDATE office_request
     SET approverId = _approverId, status = 0, resolve_date = date(now()), remarks = "Request Rejected"
@@ -232,14 +177,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateOfficeRequest`(
     IN `_quantity` INT(11),
     IN `_price` DOUBLE,
     IN `_total_price` DOUBLE,
-    IN `_date_needed` DATE,
-	IN `_purpose` VARCHAR(255)
-)
+    IN `_date_needed` DATE)
 BEGIN
     DECLARE _approver INT(11);
     
-	INSERT INTO office_request(transaction_no, employeeId, item, quantity, approverId, price, total_price, purpose, date_needed)
-	VALUES (_transac, _employeeId, _item, _quantity, GetAdmin(), _price, _total_price, _purpose, _date_needed );
+	INSERT INTO office_request(transaction_no, employeeId, item, quantity, approverId, price, total_price, date_needed)
+	VALUES (_transac, _employeeId, _item, _quantity, GetAdmin(), _price, _total_price, _date_needed );
 
 	SELECT LAST_INSERT_ID() as id;
 END$$
@@ -267,15 +210,6 @@ DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateRoleType`(IN `_position` VARCHAR(255))
 BEGIN
 	INSERT INTO softype.role(position) VALUES(_position);
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteAccountRecoveryCode`(
-IN _email varchar(255)
-)
-BEGIN
-	delete from softype.account_recovery where email = _email;
 END$$
 DELIMITER ;
 
@@ -444,9 +378,8 @@ BEGIN
 		emp.city as city,
 		emp.country as country,
         emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss,
+        emp.sss_no as sss_no,
         emp.pag_ibig_no as pag_ibig_no,
-		emp.profile_img as profile_img,
         emp.isActive as isActive,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
@@ -502,9 +435,8 @@ BEGIN
 		emp_h.city as department_head_city,
 		emp_h.country as department_head_country,
         emp_h.phil_health_no as phil_health_no,
-        emp_h.sss_no as sss,
+        emp_h.sss_no as sss_no,
         emp_h.pag_ibig_no as pag_ibig_no,
-        emp.profile_img as profile_img,
         emp_h.isActive as isActive,
 		u.qr_code as department_head_qrcode
 	from softype.department as dept
@@ -539,11 +471,10 @@ BEGIN
 		emp_m.city as manager_city,
 		emp_m.country as manager_country,
         emp_m.phil_health_no as phil_health_no,
-        emp_m.sss_no as sss,
+        emp_m.sss_no as sss_no,
         emp_m.pag_ibig_no as pag_ibig_no,
         emp_m.isActive as isActive,
-		u.qr_code as manager_qrcode,
-        emp_m.profile_img as profile_img
+		u.qr_code as manager_qrcode
 	from softype.department as dept
     LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
@@ -612,13 +543,10 @@ BEGIN
 		emp.city as city,
 		emp.country as country,
         emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss,
+        emp.sss_no as sss_no,
         emp.pag_ibig_no as pag_ibig_no,
         emp.isActive as isActive,
-		u.qr_code as qrcode,
-		emp.profile_img as profile_img
-
-        
+		u.qr_code as qrcode
 	FROM softype.employee as emp
     LEFT JOIN softype.role as r ON r.id = emp.roleId
     LEFT JOIN softype.user as u ON u.employeeId = emp.id
@@ -662,7 +590,6 @@ SELECT
         emp.sss_no as sss_no,
         emp.pag_ibig_no as pag_ibig_no,
         emp.isActive as isActive,
-        emp.profile_img as profile_img,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
     JOIN softype.role as r ON r.id = emp.roleId
@@ -751,10 +678,9 @@ SELECT
 		emp.city as city,
 		emp.country as country,
         emp.phil_health_no as phil_health_no,
-        emp.sss_no as sss,
+        emp.sss_no as sss_no,
         emp.pag_ibig_no as pag_ibig_no,
         emp.isActive as isActive,
-        emp.profile_img as profile_img,
 		u.qr_code as qrcode
 	FROM softype.employee as emp
 	JOIN softype.role as r ON r.id = emp.roleId
@@ -986,11 +912,7 @@ SELECT
 		emp.street as street,
 		emp.city as city,
 		emp.country as country,
-		u.qr_code as qrcode,
-	    emp.sss_no as sss,
-        emp.pag_ibig_no as pag_ibig_no ,
-        emp.phil_health_no as phil_health_no ,
-        emp.profile_img as profile_img
+		u.qr_code as qrcode
 	FROM softype.employee as emp
     JOIN softype.role as r ON r.id = emp.roleId
     JOIN softype.user as u ON u.employeeId = emp.id
@@ -1035,7 +957,6 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
@@ -1146,7 +1067,6 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
@@ -1171,7 +1091,6 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
@@ -1198,7 +1117,6 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
@@ -1224,7 +1142,6 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
@@ -1250,7 +1167,6 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
@@ -1276,7 +1192,6 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
@@ -1655,7 +1570,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateOfficeRequest`(
     IN `_quantity` INT(11), 
     IN `_price` DOUBLE,
     IN `_total_price` DOUBLE,
-    IN `_purpose` VARCHAR(255),
     IN `_date_needed`DATE,
     IN `_status` INT(11))
 BEGIN
@@ -1681,28 +1595,12 @@ BEGIN
     SET total_price = _total_price , id = (SELECT @update_id := id)
     WHERE id = _office_requestId AND employeeId = _employeeId;
     END IF;
-    IF _purpose IS NOT NULL then
-    UPDATE office_request
-    SET purpose = _purpose , id = (SELECT @update_id := id)
-    WHERE id = _office_requestId AND employeeId = _employeeId;
-    END IF;
 	IF _date_needed IS NOT NULL then
     UPDATE office_request
     SET date_needed = _date_needed , id = (SELECT @update_id := id)
     WHERE id = _office_requestId AND employeeId = _employeeId;
     END IF;
     SELECT @update_id as id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdatePassword`(
-	IN _password varchar(50)
-)
-BEGIN
-    SET SQL_SAFE_UPDATES = 0;
-	update softype.`user` set `password` = _password;
-    select row_count() AS result;
 END$$
 DELIMITER ;
 
@@ -1749,7 +1647,7 @@ declare _employeeID int(11);
   -- select * , _qrCode as qr_code from  softype.employee  emp where id = _employeeID ;
    
    select
-       emp.id as employeeId,
+emp.id as employeeId,
        usr.id as userId,
        firstname,
        middlename,
@@ -1763,11 +1661,7 @@ declare _employeeID int(11);
        email,
        qr_code ,
        position ,
-       account_type as roleId,
-       emp.sss_no as sss,
-       emp.pag_ibig_no as pag_ibig_no ,
-       emp.phil_health_no as phil_health_no ,
-       emp.profile_img as profile_img
+       account_type as roleId
    from
 softype.employee emp
 join softype.user usr
