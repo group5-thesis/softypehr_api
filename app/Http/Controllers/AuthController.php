@@ -41,11 +41,11 @@ class AuthController extends Controller
                     return Result::setData($response);
                 } else {
                     // error password
-                    return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
+                    return Result::setError('', "Invalid Credentials!", 401);
                 }
             } else {
                  // error: user not found
-                return Result::setError($e->getMessage(), "Invalid Credentials!", 401);
+                return Result::setError('', "Invalid Credentials!", 401);
             }
             // response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
         } catch (\Exception $e) {
@@ -158,16 +158,17 @@ class AuthController extends Controller
 
     public function forgotPassword(Request $request)
     {
-        $email = $request->$email;
+        $email = $request->email;
         try {
             $result = DB::select('call CheckUserEmail(?)', array($email));
             $user = collect($result);
             if ($user[0]->isExist === 0) {
                 return Result::setError('', 'Email address not found', 401);
             } else {
-                $addRecoveryCode = DB::select('call AddRecoveryCode(?)', $email);
+                $addRecoveryCode = DB::select('call AddRecoveryCode(?)', [$email]);
                 $codes = collect($addRecoveryCode);
-                return MailController::sendEmail($email, $codes[0]->code, 'Account Recovery Code');
+                $mail = new MailController();
+                return $mail->sendEmail($email, $codes[0]->code, 'Account Recovery Code');
             }
         } catch (\Exception $e) {
             return Result::setError($e->getMessage());

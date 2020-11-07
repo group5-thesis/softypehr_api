@@ -8,6 +8,8 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
 class MailController extends Controller {
+    protected $receiver;
+    protected $subject;
    public function basic_email() {
        try{
 
@@ -22,12 +24,14 @@ class MailController extends Controller {
           return "e";
        }
    }
-   public static function sendEmail($receiver , $content , $subject) {
+ 
+   public function sendEmail($receiver , $content , $subject) {
        try{
+           $this->receiver = $receiver;
+           $this->subject = $subject;
         $data = array('name'=>"Softype");
         Mail::send(['text'=>$content], $data, function($message) {
-           $message->to($receiver, 'Softype')->subject
-              ($subject);
+           $message->to($this->receiver, 'Softype')->subject($this->subject);
            $message->from('softypeapi@gmail.com','Softype');
         });
         return ['status'=>'success'];

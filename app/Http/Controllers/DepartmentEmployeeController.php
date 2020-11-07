@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use DB;
+use App\Models\Result;
+
 
 class DepartmentEmployeeController extends Controller
 {
@@ -34,7 +36,7 @@ class DepartmentEmployeeController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                return Result::setError( "Something went wrong" , 500) ;
+                return Result::setError( $e->getMessage() , 500) ;
             }
         }
     }
@@ -52,7 +54,7 @@ class DepartmentEmployeeController extends Controller
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage() , 500) ;
         }
     }
 
@@ -66,7 +68,7 @@ class DepartmentEmployeeController extends Controller
             $result = collect($department_employee);
             return Result::setData(["employee_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage() , 500) ;
         }
     }
 
@@ -77,7 +79,7 @@ class DepartmentEmployeeController extends Controller
             $result = collect($department_employees);
             return Result::setData(["employee_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage() , 500) ;
         }
     }
 
@@ -96,7 +98,7 @@ class DepartmentEmployeeController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage() , 500) ;
         }
     }
 }

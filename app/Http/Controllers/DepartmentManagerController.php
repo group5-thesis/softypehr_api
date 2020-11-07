@@ -35,7 +35,7 @@ class DepartmentManagerController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                return Result::setError( "Something went wrong" , 500) ;
+                return Result::setError( $e->getMessage() , 500) ;
             }
         }
     }
@@ -55,7 +55,7 @@ class DepartmentManagerController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage() , 500) ;
         }
     }
 
@@ -69,7 +69,7 @@ class DepartmentManagerController extends Controller
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage() , 500) ;
         }
     }
 
@@ -83,7 +83,7 @@ class DepartmentManagerController extends Controller
             $result = collect($department_manager);
             return Result::setData(['department_manager_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage() , 500) ;
         }
     }
 
@@ -96,7 +96,7 @@ class DepartmentManagerController extends Controller
             $result = collect($department_managers);
             return Result::setData(['department_manager_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+            return Result::setError( $e->getMessage() , 500) ;
         }
     }
 }

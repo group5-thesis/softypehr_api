@@ -61,7 +61,7 @@ class OfficeRequestController extends Controller
             $result = collect($retrieveOfficeRequest);
             return Result::setData(['officeRequest_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -90,7 +90,7 @@ class OfficeRequestController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError("Something went wrong", 500);
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -107,7 +107,7 @@ class OfficeRequestController extends Controller
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError("Something went wrong", 500);
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -120,7 +120,7 @@ class OfficeRequestController extends Controller
         } catch (\Exception $e) {
             return  Result::setError($e->getMessage());
 
-            // return Result::setError("Something went wrong", 500);
+            // return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -131,7 +131,7 @@ class OfficeRequestController extends Controller
             $result = collect($officeRequest_date);
             return Result::setData(['officeRequest_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -142,7 +142,7 @@ class OfficeRequestController extends Controller
             $result = collect($officeRequest_month);
             return Result::setData(['officeRequest_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -153,7 +153,7 @@ class OfficeRequestController extends Controller
             $result = collect($officeRequest);
             return Result::setData(['officeRequest_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -164,7 +164,7 @@ class OfficeRequestController extends Controller
             $result = collect($officeRequest_year);
             return Result::setData(['officeRequest_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -182,7 +182,7 @@ class OfficeRequestController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError("Something went wrong", 500);
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -193,7 +193,7 @@ class OfficeRequestController extends Controller
             $result = collect($employee_officeRequests);
             return Result::setData(['employee_officeRequest_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
