@@ -179,7 +179,7 @@ BEGIN
             sss_no,
             pag_ibig_no
 		)
-	VALUES (_firstname, _middlename, _lastname, _mobileno, _gender, _email, _birthdate, _street, _city, _country, _role, _phil_health_no,_sss_no,_pag_ibig_no);
+	VALUES (_firstname, _middlename, _lastname, _mobileno, _gender, _email, _birthdate, _street, _city, _country, _roleId, _phil_health_no,_sss_no,_pag_ibig_no);
     SELECT last_insert_id() as id;
     
 END$$
