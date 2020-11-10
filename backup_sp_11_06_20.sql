@@ -105,7 +105,6 @@ BEGIN
 	declare isExist int ;
     set isExist =0;
     select count(id) into isExist from  softype.employee where email = _email;
-    select isExist;
 END$$
 DELIMITER ;
 
@@ -180,7 +179,7 @@ BEGIN
             sss_no,
             pag_ibig_no
 		)
-	VALUES (_firstname, _middlename, _lastname, _mobileno, _gender, _email, _birthdate, _street, _city, _country, _role, _phil_health_no,_sss_no,_pag_ibig_no);
+	VALUES (_firstname, _middlename, _lastname, _mobileno, _gender, _email, _birthdate, _street, _city, _country, _roleId, _phil_health_no,_sss_no,_pag_ibig_no);
     SELECT last_insert_id() as id;
     
 END$$
@@ -415,8 +414,7 @@ BEGIN
         concat(emp.firstname, ' ', emp.lastname) as uploadedBy
     FROM softype.company_repository as cr
     JOIN softype.employee as emp ON emp.id = cr.uploadedBy
-    WHERE cr.type = _type
-    ORDER BY cr.created_at DESC;
+    WHERE cr.type = _type;
 END$$
 DELIMITER ;
 
@@ -451,7 +449,6 @@ BEGIN
 		emp.profile_img as profile_img,
         emp.isActive as isActive,
 		u.qr_code as qrcode
-
 	FROM softype.employee as emp
     JOIN softype.role as r ON r.id = emp.roleId
     JOIN softype.user as u ON u.employeeId = emp.id
@@ -463,9 +460,7 @@ BEGIN
     LEFT JOIN softype.employee as emp_m ON dem.department_manager = emp_m.id
     LEFT JOIN softype.employee as emp_h ON deh.department_head = emp_h.id
     LEFT JOIN softype.department as dept ON dem.departmentId = dept.id
-    WHERE dept_emp.employeeId IS NOT NULL
-        ORDER BY emp.lastname ASC;
-    
+    WHERE dept_emp.employeeId IS NOT NULL;
 END$$
 DELIMITER ;
 
@@ -477,8 +472,7 @@ BEGIN
 		# dept employees
 		FROM softype.employee as emp
 		LEFT JOIN softype.department_employees as dept_emp ON dept_emp.employeeId = emp.id
-        LEFT JOIN softype.performance_review as emp_pr ON emp_pr.employee_reviewed = emp.id
-		ORDER BY emp_pr.date_reviewed DESC;
+        LEFT JOIN softype.performance_review as emp_pr ON emp_pr.employee_reviewed = emp.id;
 		# dept managers
         #LEFT JOIN softype.department_head ;
          
@@ -636,8 +630,7 @@ BEGIN
     LEFT JOIN softype.employee as emp_m ON dem.department_manager = emp_m.id
     LEFT JOIN softype.employee as emp_h ON deh.department_head = emp_h.id
     LEFT JOIN softype.department as dept ON dem.departmentId = dept.id
-    WHERE dept.id = _departmentId
-     ORDER BY emp.lastname ASC;
+    WHERE dept.id = _departmentId;
 END$$
 DELIMITER ;
 
@@ -807,48 +800,11 @@ BEGIN
 	end if;
     
     if _roleID = 1 then 
-		SELECT emp.id AS employee_id, 
-       Concat (emp.firstname, "", emp.lastname) AS `name`, 
-       `status`, 
-       date_from, 
-       date_to, 
-       reason, 
-       category, 
-       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
-       lr.approver AS approver_id 
-       FROM   softype.leave_request lr 
-       JOIN softype.leave_category lc 
-         ON lr.leave_categoryid = lc.id 
-       JOIN softype.employee emp 
-         ON lr.employeeid = emp.id 
-       JOIN softype.employee emp1 
-         ON lr.approver = emp1.id 
-		WHERE YEAR(lr.created_at) = YEAR(NOW())
-        ORDER BY  lr.created_at desc
-        ;
+		select "admin";
     end if;
     
      if _roleID = 2 then 
-		SELECT emp.id AS employee_id, 
-       Concat (emp.firstname, "", emp.lastname) AS `name`, 
-       `status`, 
-       date_from, 
-       date_to, 
-       reason, 
-       category, 
-       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
-       lr.approver AS approver_id 
-       FROM   softype.leave_request lr 
-       JOIN softype.leave_category lc 
-         ON lr.leave_categoryid = lc.id 
-       JOIN softype.employee emp 
-         ON lr.employeeid = emp.id 
-       JOIN softype.employee emp1 
-         ON lr.approver = emp1.id 
-	  WHERE lr.approver= _empId 
-      AND YEAR(lr.created_at) = YEAR(NOW())
-     #   AND lr.`status` =  _status
-        ORDER BY  lr.created_at desc;
+		select "manager";
     end if;
     
      if _roleID = 3 then 
@@ -858,7 +814,7 @@ BEGIN
        date_from, 
        date_to, 
        reason, 
-       category, 
+       type AS category, 
        Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
        lr.approver AS approver_id 
        FROM   softype.leave_request lr 
@@ -868,10 +824,8 @@ BEGIN
          ON lr.employeeid = emp.id 
        JOIN softype.employee emp1 
          ON lr.approver = emp1.id 
-	  WHERE emp.id = _empId AND
-      YEAR(lr.created_at) = YEAR(NOW())
-        # AND lr.`status` =  _status
-	  ORDER BY  lr.created_at desc;
+	  WHERE emp.id = _empId 
+        AND lr.`status` =  _status;
      end if;
     
     
@@ -936,8 +890,7 @@ BEGIN
     LEFT JOIN softype.employee as emp_m ON dem.department_manager = emp_m.id
     LEFT JOIN softype.employee as emp_h ON deh.department_head = emp_h.id
     LEFT JOIN softype.department as dept ON dem.departmentId = dept.id
-    WHERE dept_emp.id = _department_employeeId
-    ORDER BY emp.lastname ;
+    WHERE dept_emp.id = _department_employeeId;
 END$$
 DELIMITER ;
 
@@ -1197,8 +1150,7 @@ BEGIN
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
-    INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    ORDER BY  t.created_at desc;
+    INNER JOIN employee as emp_app ON t.approverId = emp_app.id;
 END$$
 DELIMITER ;
 
@@ -1224,8 +1176,7 @@ BEGIN
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE t.created_at = date(now())
-    ;
+    WHERE t.created_at = date(now());
 END$$
 DELIMITER ;
 
@@ -1252,8 +1203,7 @@ BEGIN
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE t.employeeId = _employeeId
-    ORDER BY  t.created_at desc;
+    WHERE t.employeeId = _employeeId;
 END$$
 DELIMITER ;
 
@@ -1279,8 +1229,7 @@ BEGIN
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE MONTH(t.created_at) = _month
-    ORDER BY  t.created_at desc;
+    WHERE MONTH(t.created_at) = _month;
 END$$
 DELIMITER ;
 
@@ -1306,8 +1255,7 @@ BEGIN
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE t.status = _status
-    ORDER BY  t.created_at desc;
+    WHERE t.status = _status;
 END$$
 DELIMITER ;
 
@@ -1333,8 +1281,7 @@ BEGIN
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE YEAR(t.created_at) = _year
-    ORDER BY  t.created_at desc;
+    WHERE YEAR(t.created_at) = _year;
 END$$
 DELIMITER ;
 
@@ -1356,8 +1303,7 @@ BEGIN
     FROM softype.employee as emp
     LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
     LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    WHERE pr_emp.employee_reviewed = _id
-    ORDER BY pr_emp.date_reviewed desc;
+    WHERE pr_emp.employee_reviewed = _id;
 END$$
 DELIMITER ;
 
@@ -1380,8 +1326,7 @@ BEGIN
     FROM softype.employee as emp
     LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
     LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    GROUP BY MONTH(pr_emp.date_reviewed)
-    ORDER BY pr_emp.date_reviewed desc;
+    GROUP BY MONTH(pr_emp.date_reviewed);
 END$$
 DELIMITER ;
 
@@ -1403,8 +1348,7 @@ BEGIN
     FROM softype.employee as emp
     LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
     LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    WHERE pr_emp.reviewer = _reviewer
-   ORDER BY pr_emp.date_reviewed desc;
+    WHERE pr_emp.reviewer = _reviewer;
 END$$
 DELIMITER ;
 
@@ -1427,15 +1371,14 @@ BEGIN
     FROM softype.employee as emp
     LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
     LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    GROUP BY YEAR(pr_emp.date_reviewed)
-    ORDER BY pr_emp.date_reviewed desc;
+    GROUP BY YEAR(pr_emp.date_reviewed);
 END$$
 DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveUsers`()
 BEGIN
-	SELECT * from `user` ORDER BY account_type;
+	SELECT * from `user`;
 END$$
 DELIMITER ;
 
