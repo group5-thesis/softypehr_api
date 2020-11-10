@@ -30,6 +30,7 @@ class CreateEmployee extends Migration
             $table->string('sss_no')->nullable();
             $table->string('pag_ibig_no')->nullable();
             $table->string('isActive')->default(1);
+            $table->string('remaining_leave')->default(21);
             $table->string('profile_img', 191)->nullable();
         });
     }

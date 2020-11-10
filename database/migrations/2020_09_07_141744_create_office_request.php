@@ -24,6 +24,7 @@ class CreateOfficeRequest extends Migration
             $table->date('resolve_date')->nullable();
             $table->double('price');
             $table->double('total_price');
+            $table->string('purpose');
             $table->date('date_needed');
             $table->integer('status')->default(1); // default for status 1 === Open 0 === Close
             $table->string('remarks');

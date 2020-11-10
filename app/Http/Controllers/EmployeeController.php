@@ -44,16 +44,16 @@ class EmployeeController extends Controller
                 $employee = DB::select(
                     'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                     array(
-                        $request->firstname, 
-                        $request->middlename, 
-                        $request->lastname, 
+                        $request->firstname,
+                        $request->middlename,
+                        $request->lastname,
                         $request->mobileno,
-                        $request->gender, 
-                        $request->email, 
+                        $request->gender,
+                        $request->email,
                         $request->birthdate,
-                        $request->street, 
-                        $request->city, 
-                        $request->country, 
+                        $request->street,
+                        $request->city,
+                        $request->country,
                         $request->phil_health_no,
                         $request->sss,
                         $request->pag_ibig_no,
@@ -104,152 +104,128 @@ class EmployeeController extends Controller
             $result = collect($employee);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-            << << <<< HEAD
+
             return Result::setError("Something went wrong", 500);
-=======
-            return Result::setError(  $e->getMessage()) ;
->>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
+
+            return Result::setError($e->getMessage());
+
         }
     }
 
-    public function retrieveEmployeeByDepartment( $id)
+    public function retrieveEmployeeByDepartment($id)
     {
         try {
-             $employees = DB::select('call RetrieveEmployeeByDepartment(?)', array( $id));
-             $result = collect( $employees);
-            return Result::setData(['employee_information' =>  $result]);
-        } catch (\Exception  $e) {
-<<<<<<< HEAD
-            return Result::setError("Something went wrong", 500);
-=======
-            return Result::setError(  $e->getMessage()) ;
->>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
+            $employees = DB::select('call RetrieveEmployeeByDepartment(?)', array($id));
+            $result = collect($employees);
+            return Result::setData(['employee_information' => $result]);
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage());
         }
     }
 
-    public function retrieveEmployeeByManager( $id)
+    public function retrieveEmployeeByManager($id)
     {
         try {
-             $employees = DB::select('call RetrieveEmployeeByManager(?)', array( $id));
-             $result = collect( $employees);
-            return Result::setData(['employee_information' =>  $result]);
-        } catch (\Exception  $e) {
-<<<<<<< HEAD
-            return Result::setError("Something went wrong", 500);
-=======
-            return Result::setError(  $e->getMessage()) ;
->>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
+            $employees = DB::select('call RetrieveEmployeeByManager(?)', array($id));
+            $result = collect($employees);
+            return Result::setData(['employee_information' => $result]);
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage());
         }
     }
 
-    public function updateEmployee(Request  $request)
+    public function updateEmployee(Request $request)
     {
         try {
             DB::beginTransaction();
-             $updated_employee = DB::select(
+            $updated_employee = DB::select(
                 'call UpdateEmployee(?,?,?,?,?,?,?,?,?,?,?,?)',
                 array(
-                     $request->employeeId,
-                     $request->firstname,
-                     $request->middlename,
-                     $request->lastname,
-                     $request->mobileno,
-                     $request->gender,
-                     $request->email,
-                     $request->birthdate,
-                     $request->street,
-                     $request->city,
-                     $request->country,
-                     $request->phil_health_no,
-                     $request->sss_no,
-                     $request->pag_ibig_no,
-                     $request->isActive,
-                     $request->roleId
+                    $request->employeeId,
+                    $request->firstname,
+                    $request->middlename,
+                    $request->lastname,
+                    $request->mobileno,
+                    $request->gender,
+                    $request->email,
+                    $request->birthdate,
+                    $request->street,
+                    $request->city,
+                    $request->country,
+                    $request->phil_health_no,
+                    $request->sss,
+                    $request->pag_ibig_no,
+                    $request->isActive,
+                    $request->roleId
                 )
             );
-             $result = collect( $updated_employee);
-             $employee_id =  $result [0]->id;
-             $response =  $this->retrieveLimitedEmployee( $employee_id);
+            $result = collect($updated_employee);
+            $employee_id = $result[0]->id;
+            $response = $this->retrieveLimitedEmployee($employee_id);
             DB::commit();
-            return  $response;
-        } catch (\Exception  $e) {
+            return $response;
+        } catch (\Exception $e) {
             DB::rollback();
-<<<<<<< HEAD
-            return Result::setError("Something went wrong", 500);
-=======
-            return Result::setError(  $e->getMessage()) ;
->>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
+            return Result::setError($e->getMessage());
         }
     }
 
-    public function deleteEmployee( $id)
+    public function deleteEmployee($id)
     {
         try {
             DB::beginTransaction();
-             $deleted_employee = DB::select('call DeleteEmployee(?)', array( $id));
-             $response = ['error' => false, 'message' => 'success'];
+            $deleted_employee = DB::select('call DeleteEmployee(?)', array($id));
+            $response = ['error' => false, 'message' => 'success'];
             DB::commit();
-            return Result::setData( $response);
-        } catch (\Exception  $e) {
+            return Result::setData($response);
+        } catch (\Exception $e) {
             DB::rollback();
-<<<<<<< HEAD
-            return Result::setError("Something went wrong", 500);
-=======
-            return Result::setError(  $e->getMessage()) ;
->>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
+            return Result::setError($e->getMessage());
         }
     }
 
-    public function retrieveEmployeeProfile(Request  $request)
+    public function retrieveEmployeeProfile(Request $request)
     {
         try {
-             $employee = DB::select('call UserGetProfile(?)', array( $request->userId));
-            return Result::setData( $employee);
+            $employee = DB::select('call UserGetProfile(?)', array($request->userId));
+            return Result::setData($employee);
 
-        } catch (\Exception  $e) {
-<<<<<<< HEAD
-            return Result::setError("Something went wrong", 500);
-=======
-            return Result::setError(  $e->getMessage()) ;
->>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage());
         }
     }
 
-    public function updateProfilePicture(Request  $request)
+    public function updateProfilePicture(Request $request)
     {
         try {
             DB::beginTransaction();
-             $file =  $request->file;
-<<<<<<< HEAD
-             $employee_id =  $request->employee_id;
-=======
-             $employee_id=  $request->employee_id;
->>>>>>> fd81f03222bc557b7aaedeb3bd75c528cb49e035
-             $imageName = FileController::store( $file);
-             $query = DB::select("call UpdateProfileImage(?,?)", array( $employee_id,  $imageName));
-             $result = collect( $query);
-            if ( $result [0]->completed > 0) {
+            $file = $request->file;
+            $employee_id = $request->employee_id;
+            $imageName = FileController::store($file);
+            $query = DB::select("call UpdateProfileImage(?,?)", array($employee_id, $imageName));
+            $result = collect($query);
+            if ($result[0]->completed > 0) {
                 DB::commit();
-                return  $this->retrieveLimitedEmployee( $employee_id);
+                return $this->retrieveLimitedEmployee($employee_id);
             } else {
                 DB::rollback();
-<<<<<<< HEAD
+
                 return Result::setError("Update failed", 500);
             }
-        } catch (\Exception  $e) {
-            return Result::setError( $e->getMessage() . ": Something went wrong", 500);
-=======
-                return Result::setError( null, 401, "Update failed" ) ;
-            }
-        }catch(\Exception  $e){
-<<<<<<< HEAD
-            return Result::setError( $e->getMessage()) ;          
->>>>>>> c6196cb0a72984d0cd21c54c1c546af932e3af5e
-=======
-            return Result::setError( $e->getMessage()) ;
->>>>>>> fd81f03222bc557b7aaedeb3bd75c528cb49e035
-            DB::rollback();
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage() . ": Something went wrong", 500);
+
+            return Result::setError(null, 401, "Update failed");
         }
+    // } catch (\Exception $e) {
+
+    //     return Result::setError($e->getMessage());
+
+
+    //     return Result::setError($e->getMessage());
+
+        DB::rollback();
     }
+// }
 
 }
