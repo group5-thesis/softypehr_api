@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,7 +15,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 
  
 Route::get('/test', function () {
-    return "Server is running...";
+    return "Server is running...".\Hash::check("yol", '$2y$10$iJXhPCmA5I4AWKCsebFbuOl.LitknOFkXjKGXT7FJFxhpxBodfgYO')?"valid":"incorrect";
 });
 
 Route::get('/file/{dir}/{path}','FileController@downloadFile');
