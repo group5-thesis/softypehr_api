@@ -55,13 +55,19 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `AddRecoveryCode`(
-	IN _email varchar(255)
+	IN _email varchar(255),
+    IN _code varchar  (50),
+    IN _created varchar(50)
 )
 BEGIN
-declare _id int;
-	 INSERT INTO softype.account_recovery(`email`) values (_email);
-     SELECT LAST_INSERT_ID() into _id;
-     SELECT `code` FROM softype.account_recovery where id = _id; 
+     declare _count int;
+	 select count(email)   into _count from softype.account_recovery where email = _email ; 
+	 if _count < 1 then
+	    INSERT INTO softype.account_recovery(`email` , `code` ,`created_at`) values (_email , _code ,_created);
+	 else 
+        update softype.account_recovery set `code` = _code , `created_at` = _created where email  = _email;
+	end if;
+    select "ok" as result;
 END$$
 DELIMITER ;
 
@@ -515,7 +521,7 @@ BEGIN
         emp_m.pag_ibig_no as pag_ibig_no,
         emp_m.isActive as isActive,
 		u.qr_code as manager_qrcode,
-        emp.profile_img as profile_img
+        emp_m.profile_img as profile_img
 	from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
     LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
@@ -524,7 +530,8 @@ BEGIN
     JOIN softype.role as r ON emp_m.roleId = r.id
     JOIN softype.user as u ON emp_m.id = u.employeeId
     LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
-    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId;
+    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+    ORDER BY emp_m.lastname DESC;
 END$$
 DELIMITER ;
 
@@ -1658,11 +1665,12 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdatePassword`(
-	IN _password varchar(50)
+	IN _password varchar(255),
+    IN _userID int
 )
 BEGIN
     SET SQL_SAFE_UPDATES = 0;
-	update softype.`user` set `password` = _password;
+	update softype.`user` set `password` = _password where id = _userID;
     select row_count() AS result;
 END$$
 DELIMITER ;
@@ -1697,6 +1705,28 @@ BEGIN
     where 
 		users.username = _username  and users.`password` = _password;
         
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UserGetCurrentPassword`(
+	IN userID int 
+)
+BEGIN
+	select `password` from softype.user where id = userID;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UserGetInfoByEmail`(
+    In _email  varchar(255)
+)
+BEGIN
+	select usr.id as userId 
+    from softype.user usr 
+    join softype.employee emp 
+    on usr.employeeId = emp.id
+    where email = _email;
 END$$
 DELIMITER ;
 
@@ -1736,5 +1766,20 @@ on emp.id = usr.employeeId
    left join softype.role rl
 on emp.roleId = rl.id
    where usr.id = _userID;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `verifyRecoveryCode`(
+	IN _email varchar(255),
+    IN _code varchar(50),
+    IN _remove tinyint(1)
+)
+BEGIN
+   if _remove = 0 then
+	select id  , email , `code` , created_at from softype.account_recovery where email = _email and `code` =  _code ; 
+    else 
+    delete from softype.account_recovery where email = _email and `code` =  _code ; 
+    end if;
 END$$
 DELIMITER ;
