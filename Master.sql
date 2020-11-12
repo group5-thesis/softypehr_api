@@ -429,9 +429,9 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
 		dept.name as department_name,
-		deh.department_head as department_headId,
+		deh.id as department_headId,
 		concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        dem.department_manager as department_managerId,
+        dem.id as department_managerId,
         concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
 		emp.firstname as firstname, 
 		emp.middlename as middlename,
@@ -527,6 +527,7 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
         dept.name as department_name,
+        dept_h.id as department_headId,
         concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
 		emp_m.firstname as manager_firstname, 
 		emp_m.middlename as manager_middlename,
@@ -547,12 +548,12 @@ BEGIN
 	from softype.department as dept
     LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
-    LEFT JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
-    LEFT JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
+	JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+	JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
     LEFT JOIN softype.role as r ON emp_m.roleId = r.id
-    LEFT JOIN softype.user as u ON emp_m.id = u.employeeId
-    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
-	LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId;
+    LEFT JOIN softype.user as u ON emp_m.id = u.employeeId;
+    #LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+	#LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId;
 	#from softype.department as dept
 	#LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
     #LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
@@ -571,6 +572,7 @@ BEGIN
 	SELECT 
 		dept.id as department_id,
         dept.name as department_name,
+        emp_h.id as department_head_employeeId,
         concat(emp_h.firstname,' ', emp_h.lastname) as department_head
         #concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
         #concat(emps.firstname, ' ', emps.lastname) as department_employee
@@ -736,9 +738,9 @@ SELECT
 		r.position as role,
 		dept.id as department_id,
 		dept.name as department_name,
-		deh.department_head as department_headId,
+		deh.id as department_headId,
 		concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        dem.department_manager as department_managerId,
+        dem.id as department_managerId,
         concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
 		emp.firstname as firstname, 
 		emp.middlename as middlename,
@@ -838,9 +840,8 @@ BEGIN
 	SELECT 
 		dept.id as department_id,
         dept.name as department_name,
-        concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
-        concat(emps.firstname, ' ', emps.lastname) as department_employee
+        emp_h.id as department_head_employeeId,
+        concat(emp_h.firstname,' ', emp_h.lastname) as department_head
     from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
     LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
@@ -864,9 +865,9 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
 		dept.name as department_name,
-		deh.department_head as department_headId,
+		deh.id as department_headId,
 		concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        dem.department_manager as department_managerId,
+        dem.id as department_managerId,
         concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
 		emp.firstname as firstname, 
 		emp.middlename as middlename,
@@ -937,6 +938,7 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
         dept.name as department_name,
+        dept_h.id as department_headId,
         concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
 		emp_m.firstname as manager_firstname, 
 		emp_m.middlename as manager_middlename,
@@ -956,8 +958,8 @@ BEGIN
     JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
     JOIN softype.role as r ON emp_m.roleId = r.id
     JOIN softype.user as u ON emp_m.id = u.employeeId
-    LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
-    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+    #LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
+    #LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
     WHERE dept_m.id = _managerId;
 END$$
 DELIMITER ;
@@ -1777,3 +1779,4 @@ on emp.roleId = rl.id
    where usr.id = _userID;
 END$$
 DELIMITER ;
+SELECT * FROM softype.department_head;
