@@ -1,6 +1,11 @@
 /node_modules
 /public/hot
-/public
+/public/qrcode/*.svg
+/public/images/*
+/public/documents/*
+/public/videos/*
+/public/others/*
+/public/hot
 /storage/*.key
 /vendor
 .env

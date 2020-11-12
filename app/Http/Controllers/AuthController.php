@@ -163,32 +163,95 @@ class AuthController extends Controller
             $result = DB::select('call CheckUserEmail(?)', array($email));
             $user = collect($result);
             if ($user[0]->isExist === 0) {
-                return Result::setError('', 'Email address not found', 401);
+                return Result::setError('Email address not found', 401);
             } else {
-                $addRecoveryCode = DB::select('call AddRecoveryCode(?)', [$email]);
-                $codes = collect($addRecoveryCode);
+                $code = substr(time() , \Str::length(time())-6 ,\Str::length(time()));
+                $addRecoveryCode = DB::select('call AddRecoveryCode(?, ? ,?)', [$email ,$code , now()]);
                 $mail = new MailController();
-                return $mail->sendEmail($email, $codes[0]->code, 'Account Recovery Code');
+                return $mail->sendEmail($email, $code, 'Account Recovery Code');
             }
         } catch (\Exception $e) {
+            return Result::setError("auth : ".$e->getMessage());
+        }
+    }
+
+     public function updatePassword(Request $request)
+     {
+        \Log::info("update password");
+
+         DB::beginTransaction();
+        try {
+            $query = DB::select('call UserGetInfoByEmail(?)' ,[$request->email]);
+            $results = collect($query);
+            \Log::info(json_encode($results));
+            $changePasswordQuery = DB::select('call UpdatePassword(?,?)' ,[Hash::make($request->new_password) , $results[0]->userId]);
+            $response = ['result' => 'Password changed successfully.'];
+            DB::commit();
+            return Result::setData($response);
+        } catch (\Exception $e) {
+            \Log::info("err : ".$e->getMessage());
+            DB::rollback();
+            return Result::setError($e->getMessage());
+        }
+     }
+
+    public function changePassword(Request $request)
+    {
+        if ($request->isOtp == 1) {
+            return $this->updatePassword($request);
+        }
+        DB::beginTransaction();
+        try {
+            $query = DB::select('call UserGetCurrentPassword(?)' ,[ $request->userId]);
+            $results = collect($query);
+            if (Hash::check($current_password, $results[0]->password)) {
+                $changePasswordQuery = DB::select('call UpdatePassword(?,?)' ,[Hash::make($request->new_password) , $request->userId]);
+                $response = ['result' => 'Password changed successfully.'];
+                DB::commit();
+                return Result::setData($response);
+            }else{
+                return Result::setError("" ,"Password incorrect." , 401);
+            }
+        } catch (\Exception $e) {
+            DB::rollback();
             return Result::setError($e->getMessage());
         }
     }
 
-    public function changePassword(Request $request)
+    public function verifyOTP(Request $request)
     {
-        try {
-            DB::beginTransaction();
-            $change_password = DB::select('ChangePassword(?,?,?,?)', array(
-                $request->userId,
-                $request->current_password,
-                $request->new_password,
-                $request->password_confirmation
-            ));
-            $response = ['error' => false, 'message' => 'success'];
+        $params = [$request->email , $request->OTP ,0 ];
+        $error_message = "Invalid Verification Code!";
+        DB::beginTransaction();
+        try{ 
+            $query = DB::select('call verifyRecoveryCode(?,?,?)' ,$params);
+            $result = collect($query);
+            \Log::info(json_encode($result));
+
+            if (sizeof($result) < 1) {
+                \Log::info("no result");
+                return Result::setError('' , "Invalid Verification Code!", 401);
+            }
+            $startTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $result[0]->created_at);
+            $endTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
+            $totalDuration = $endTime->diffInMinutes($startTime);
+            // $startTime =\Carbon\Carbon::parse(now());
+            // $endTime =\Carbon\Carbon::parse( $result[0]->created_at);
+            // $totalDuration =  $startTime->diff($endTime);//->format('%I');
+            $params[2] = 1;
+            if (intval($totalDuration) > 10) {
+                \Log::info("created : ".$startTime );
+                \Log::info("now : ".$endTime );
+                \Log::info("expired : ".$totalDuration );
+                $query = DB::select('call verifyRecoveryCode(?,?,?)' ,$params);
+                return Result::setError('' ,  "Invalid Verification Code!" , 401);               
+            }
+            $query = DB::select('call verifyRecoveryCode(?,?,?)' ,$params);
             DB::commit();
-            return Result::setData($response);
-        } catch (\Exception $e) {
+            return Result::setData(["success" =>"true"]);
+         } catch (\Exception $e) {
+            \Log::info("error ". $e->getMessage());
+
             DB::rollback();
             return Result::setError($e->getMessage());
         }

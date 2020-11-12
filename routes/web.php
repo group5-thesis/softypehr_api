@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 
  
 Route::get('/test', function () {
-    return "Server is running...".\Hash::check("yol", '$2y$10$iJXhPCmA5I4AWKCsebFbuOl.LitknOFkXjKGXT7FJFxhpxBodfgYO')?"valid":"incorrect";
+    return "server running";
 });
 
 Route::get('/file/{dir}/{path}','FileController@downloadFile');
