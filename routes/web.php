@@ -13,9 +13,17 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 |
  */
 
- 
-Route::get('/test', function () {
-    return "Server is running...".\Hash::check("yol", '$2y$10$iJXhPCmA5I4AWKCsebFbuOl.LitknOFkXjKGXT7FJFxhpxBodfgYO')?"valid":"incorrect";
+Route::get('/', function () {
+    return view('welcome');
 });
 
-Route::get('/file/{dir}/{path}','FileController@downloadFile');
+Route::get('/testing', function () {
+    event(new App\Events\MyEvent('Welcome'));
+    return "Event has been sent!";
+});
+
+Route::get('/test', function () {
+    return "Server is running..." . \Hash::check("yol", '$2y$10$iJXhPCmA5I4AWKCsebFbuOl.LitknOFkXjKGXT7FJFxhpxBodfgYO') ? "valid" : "incorrect";
+});
+
+Route::get('/file/{dir}/{path}', 'FileController@downloadFile');
