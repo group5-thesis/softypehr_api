@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\User;
 use Illuminate\Support\Facades\Hash;
+use DB;
+use App\Models\Result;
 
 class UserController extends Controller
 {
@@ -22,27 +24,36 @@ class UserController extends Controller
         );
     }
 
-    public function retrieveUsers()
+    public function retrieveEmployeesAccounts()
     {
-        $users = User::get();
-        return response()->json($users, Response::HTTP_OK);
+        try {
+            $employees_accounts = DB::select('call RetrieveEmployeeAccounts()');
+            $result = collect($employees_accounts);
+            return Result::setData(["employees_accounts" => $result]);
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage(), 500);
+        }
     }
 
-    public function retrieveUser(Request $request)
+    public function resetEmployeeAccount(Request $request)
     {
-        $user = User::where('id', '=', $request->id)->get();
-        return response()->json($user, Response::HTTP_OK);
+        try {
+            $employees_account = DB::select('call ResetEmployeeAccount()', array());
+            $result = collect($employees_account);
+            return Result::setData(["employees_account" => $result]);
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage(), 500);
+        }
     }
 
-    public function updateUser(Request $request)
+    public function disableEmployeeAccount(Request $request)
     {
-        $user = User::where('id', '=', $request->id)->update(['password' => $request->updatePassword]);
-        return response()->json($user, Response::HTTP_OK);
-    }
-
-    public function deleteUser(Request $request)
-    {
-        $user = User::where('id', '=', $request->id)->delete();
-        return response()->json($user, Response::HTTP_OK);
+        try {
+            $employees_account = DB::select('call DisableEmployeeAccount()', array());
+            $result = collect($employees_account);
+            return Result::setData(["employees_account" => $result]);
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage(), 500);
+        }
     }
 }
