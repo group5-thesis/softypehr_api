@@ -10,9 +10,9 @@ use App\Http\Controllers\Controller;
 class MailController extends Controller {
     protected $receiver;
     protected $subject;
+    protected $html;
    public function basic_email() {
        try{
-
            $data = array('name'=>"Softype");  
            Mail::send(['text'=>'mail'], $data, function($message) {
               $message->to('yoltorres24@gmail.com', 'Softype')->subject
@@ -25,18 +25,37 @@ class MailController extends Controller {
        }
    }
  
-   public function sendEmail($receiver , $content , $subject) {
+//    public function sendEmail($receiver , $content , $subject) {
+//        try{
+//            $this->receiver = $receiver;
+//            $this->subject = $subject;
+//         $data = array('name'=>"Softype");
+//         Mail::send(['text'=>$content], $data, function($message) {
+//            $message->to($this->receiver, 'Softype')->subject($this->subject);
+//            $message->from('softypeapi@gmail.com','Softype');
+//         });
+//         return ['status'=>'success'];
+//        }catch(\Exception $e){
+//         return Result::setError($e->getMessage());
+//        }
+//    }
+   public function sendEmail($receiver , $code , $subject) {
+        $this->receiver =$receiver;
+        $this->subject =$subject;
        try{
-           $this->receiver = $receiver;
-           $this->subject = $subject;
-        $data = array('name'=>"Softype");
-        Mail::send(['text'=>$content], $data, function($message) {
-           $message->to($this->receiver, 'Softype')->subject($this->subject);
-           $message->from('softypeapi@gmail.com','Softype');
-        });
-        return ['status'=>'success'];
+            $path = public_path('mail/mail.html');
+            $file = file_get_contents($path);
+            $this->html =  str_replace("ACCESS_CODE","<br>".$code,$file);
+            Mail::send([], [], function ($message)  {
+                $message->to($this->receiver)
+                ->subject($this->subject)
+                ->from('softypeapi@gmail.com','Softype Mail Service')
+                ->setBody($this->html, 'text/html');
+            });
+            return  Result::setData(['status'=>'success']);
        }catch(\Exception $e){
-        return Result::setError($e->getMessage());
+        \Log::info("mail : ".$e->getMessage());
+            return Result::setError($e->getMessage());
        }
    }
    public function attachment_email() {
