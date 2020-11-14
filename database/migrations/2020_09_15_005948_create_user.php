@@ -19,7 +19,8 @@ class CreateUser extends Migration
             $table->string('password');
             $table->string('qr_code')->unique();
             $table->integer('account_type');
-            $table->integer('disabled')->default(0);
+            $table->integer('is_deactivated')->default(0);
+            $table->integer('is_password_changed')->default(0);
             $table->integer('employeeId')->unique();
         });
     }

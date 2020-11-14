@@ -121,6 +121,10 @@ Route::group(['middleware' => 'api-header'], function () {
 
     // Accounts
     Route::get('/retrieve_employees_accounts', 'UserController@retrieveEmployeesAccounts');
+    Route::post('/reset_employee_account', 'UserController@resetEmployeeAccount');
+    Route::post('/disable_employee_account', 'UserController@disableEmployeeAccount');
+    Route::get('/retrieve_limited_employee_account', 'UserController@retrieveLimitedEmployeeAccount');
+    Route::post('/enable_employee_account', 'UserController@enableEmployeeAccount');
 
 });
 
