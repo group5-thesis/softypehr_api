@@ -135,7 +135,7 @@ class EmployeeController extends Controller
         try {
             DB::beginTransaction();
             $updated_employee = DB::select(
-                'call UpdateEmployee(?,?,?,?,?,?,?,?,?,?,?,?)',
+                'call UpdateEmployee(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                 array(
                     $request->employeeId,
                     $request->firstname,
