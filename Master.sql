@@ -348,6 +348,98 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `FilterLeaveRequest`(
+	IN _month varchar(20),
+	IN _year int(11),
+	IN _status varchar(255),
+	IN _category varchar(255),
+	IN _employeeId int(11),
+	IN _roleID int(11)
+)
+BEGIN
+    if _roleID = 1 then 
+    
+		SELECT emp.id AS employee_id, 
+        lr.id as id,
+       Concat (emp.firstname, " ", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+		WHERE 
+            (monthname(lr.created_at) = _month  or _month ='All' )
+            and ( year(lr.created_at) = _year or _year = 'All')
+             and (`status` = _status or _status ='All' )
+             and( category = _category or _category = 'All' )
+        ORDER BY  lr.created_at asc
+        ;
+    end if; 
+     if _roleID = 2 then 
+		SELECT emp.id AS employee_id, 
+        lr.id as id,
+       Concat (emp.firstname, "", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+	  WHERE lr.approver= _empId 
+      AND  (monthname(lr.created_at) = _month  or _month ='All' )
+            and ( year(lr.created_at) = _year or _year = 'All')
+             and (`status` = _status or _status ='All' )
+            and( category = _category or _category = 'All' )
+     #   AND lr.`status` =  _status
+        ORDER BY  lr.created_at asc;
+    end if;
+    
+     if _roleID = 3 then 
+		SELECT emp.id AS employee_id, 
+      lr.id as id,
+      Concat (emp.firstname, " ", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+	  WHERE emp.id = _employeeId AND
+         (monthname(lr.created_at) = _month  or _month ='All' )
+            and ( year(lr.created_at) = _year or _year = 'All')
+             and (`status` = _status or _status ='All' )
+            and( category = _category or _category = 'All' )
+	  ORDER BY  lr.created_at asc;
+     end if;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveAnnouncementByDate`()
 BEGIN
 	SELECT 
@@ -403,9 +495,9 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
 		dept.name as department_name,
-		deh.id as department_headId,
+		deh.department_head as department_headId,
 		concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        dem.id as department_managerId,
+        dem.department_manager as department_managerId,
         concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
 		emp.firstname as firstname, 
 		emp.middlename as middlename,
@@ -505,7 +597,6 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
         dept.name as department_name,
-        dept_h.id as department_headId,
         concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
 		emp_m.firstname as manager_firstname, 
 		emp_m.middlename as manager_middlename,
@@ -525,21 +616,14 @@ BEGIN
         emp_m.profile_img as profile_img
 	from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
-	JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
-	JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
-    LEFT JOIN softype.role as r ON emp_m.roleId = r.id
-    LEFT JOIN softype.user as u ON emp_m.id = u.employeeId;
-    #LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
-	#LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId;
-	#from softype.department as dept
-	#LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
-    #LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
-    #JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
-	#JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
-    #JOIN softype.role as r ON emp_m.roleId = r.id
-    #JOIN softype.user as u ON emp_m.id = u.employeeId
-    #LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
-    #LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId;
+    LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
+    JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
+    JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+    JOIN softype.role as r ON emp_m.roleId = r.id
+    JOIN softype.user as u ON emp_m.id = u.employeeId
+    LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
+    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+    ORDER BY emp_m.lastname DESC;
 END$$
 DELIMITER ;
 
@@ -549,7 +633,6 @@ BEGIN
 	SELECT 
 		dept.id as department_id,
         dept.name as department_name,
-        emp_h.id as department_head_employeeId,
         concat(emp_h.firstname,' ', emp_h.lastname) as department_head
         #concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
         #concat(emps.firstname, ' ', emps.lastname) as department_employee
@@ -716,9 +799,9 @@ SELECT
 		r.position as role,
 		dept.id as department_id,
 		dept.name as department_name,
-		deh.id as department_headId,
+		deh.department_head as department_headId,
 		concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        dem.id as department_managerId,
+        dem.department_manager as department_managerId,
         concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
 		emp.firstname as firstname, 
 		emp.middlename as middlename,
@@ -790,11 +873,11 @@ BEGIN
        Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
        lr.approver AS approver_id 
        FROM   softype.leave_request lr 
-       JOIN softype.leave_category lc 
+       left JOIN softype.leave_category lc 
          ON lr.leave_categoryid = lc.id 
-       JOIN softype.employee emp 
+       left JOIN softype.employee emp 
          ON lr.employeeid = emp.id 
-       JOIN softype.employee emp1 
+       left JOIN softype.employee emp1 
          ON lr.approver = emp1.id 
 		WHERE YEAR(lr.created_at) = YEAR(NOW())
         ORDER BY  lr.created_at desc
@@ -857,8 +940,9 @@ BEGIN
 	SELECT 
 		dept.id as department_id,
         dept.name as department_name,
-        emp_h.id as department_head_employeeId,
-        concat(emp_h.firstname,' ', emp_h.lastname) as department_head
+        concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
+        concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
+        concat(emps.firstname, ' ', emps.lastname) as department_employee
     from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
     LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
@@ -882,9 +966,9 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
 		dept.name as department_name,
-		deh.id as department_headId,
+		deh.department_head as department_headId,
 		concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        dem.id as department_managerId,
+        dem.department_manager as department_managerId,
         concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
 		emp.firstname as firstname, 
 		emp.middlename as middlename,
@@ -956,7 +1040,6 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
         dept.name as department_name,
-        dept_h.id as department_headId,
         concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
 		emp_m.firstname as manager_firstname, 
 		emp_m.middlename as manager_middlename,
@@ -976,8 +1059,8 @@ BEGIN
     JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
     JOIN softype.role as r ON emp_m.roleId = r.id
     JOIN softype.user as u ON emp_m.id = u.employeeId
-    #LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
-    #LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+    LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
+    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
     WHERE dept_m.id = _managerId;
 END$$
 DELIMITER ;
@@ -1685,13 +1768,21 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UserCreateLeaveRequest`(IN `_employeeId` INT(11), IN `_leave_categoryId` INT(11), IN `_date_from` DATE, IN `_date_to` DATE, IN `_reason` VARCHAR(255), IN `_approver` INT(11))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UserCreateLeaveRequest`(IN `_employeeId` INT(11), IN `_leave_category` VARCHAR(100), IN `_date_from` DATE, IN `_date_to` DATE, IN `_reason` VARCHAR(255), IN `_approver` INT(11))
 BEGIN
+	DECLARE _catId int(11);
+		IF NOT EXISTS(SELECT id FROM softype.`leave_category` WHERE category= _leave_category)
+		THEN
+			INSERT INTO softype.`leave_category` (category) VALUES (_leave_category);
+			SELECT last_insert_id() into _catId ;
+		ELSE	
+			SELECT id FROM softype.`leave_category` WHERE category= _leave_category = _role into _catId;
+	END If;
 	insert into 
 		softype.leave_request
 		(employeeId, leave_categoryId, date_from, date_to, reason, `status`, approver,created_at) 
     values 
-		(_employeeId, _leave_categoryId, _date_from, _date_to, _reason, "pending", _approver,now());
+		(_employeeId, _catId, _date_from, _date_to, _reason, "pending", _approver,now());
 	 SELECT * FROM  softype.leave_request WHERE id = (SELECT LAST_INSERT_ID());
 END$$
 DELIMITER ;
@@ -1712,7 +1803,7 @@ BEGIN
     on 
 		users.employeeId = emp.id
     where 
-		users.username = _username  and users.`password` = _password;
+		users.username = _username  and users.`password` = _password and disabled = 0;
         
 END$$
 DELIMITER ;
