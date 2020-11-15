@@ -202,9 +202,9 @@ class AuthController extends Controller
         }
         DB::beginTransaction();
         try {
-            $query = DB::select('call UserGetCurrentPassword(?)' ,[ $request->userId]);
+            $query = DB::select('call UserGetCurrentPassword(?)' ,[$request->userId]);
             $results = collect($query);
-            if (Hash::check($current_password, $results[0]->password)) {
+            if (Hash::check($request->current_password, $results[0]->password)) {
                 $changePasswordQuery = DB::select('call UpdatePassword(?,?)' ,[Hash::make($request->new_password) , $request->userId]);
                 $response = ['result' => 'Password changed successfully.'];
                 DB::commit();
@@ -223,7 +223,7 @@ class AuthController extends Controller
         $params = [$request->email , $request->OTP ,0 ];
         $error_message = "Invalid Verification Code!";
         DB::beginTransaction();
-        try{ 
+        try{
             $query = DB::select('call verifyRecoveryCode(?,?,?)' ,$params);
             $result = collect($query);
             \Log::info(json_encode($result));
@@ -244,7 +244,7 @@ class AuthController extends Controller
                 \Log::info("now : ".$endTime );
                 \Log::info("expired : ".$totalDuration );
                 $query = DB::select('call verifyRecoveryCode(?,?,?)' ,$params);
-                return Result::setError('' ,  "Invalid Verification Code!" , 401);               
+                return Result::setError('' ,  "Invalid Verification Code!" , 401);
             }
             $query = DB::select('call verifyRecoveryCode(?,?,?)' ,$params);
             DB::commit();

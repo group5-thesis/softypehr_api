@@ -120,22 +120,19 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_performance_review_by_employee/{id}', 'PerformanceReviewController@retrieveLimitedPerformanceReviewByEmployee');
     Route::post('/retrieve_performance_review_by_employee_month', 'PerformanceReviewController@retrieveEmployeePerformanceReviewByMonth');
 
+    // Accounts
+    Route::get('/retrieve_employees_accounts', 'UserController@retrieveEmployeesAccounts');
+    Route::post('/reset_employee_account', 'UserController@resetEmployeeAccount');
+    Route::post('/disable_employee_account', 'UserController@disableEmployeeAccount');
+    Route::get('/retrieve_limited_employee_account', 'UserController@retrieveLimitedEmployeeAccount');
+    Route::post('/enable_employee_account', 'UserController@enableEmployeeAccount');
+
 });
 
 // this routes are needed with jwt token, you need first to login before executing this routes
 Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
 
      // all routes to protected resources are registered here
-    Route::get('/retrieve_users', 'UserController@retrieveUsers');
-
-// User
-// Route::post('/create_user', 'AccountController@createUser');
-// Route::post('/retrieve_user', 'UserController@retrieveUser');
-// Route::post('/update_user', 'UserController@updateUser');
-// Route::post('/delete_user', 'UserController@deleteUser');
-// // Employee Leave
-    // Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
-    // Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
 
     Route::get('sendbasicemail', 'MailController@basic_email');
     Route::get('sendhtmlemail', 'MailController@html_email');
