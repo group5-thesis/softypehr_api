@@ -14,6 +14,7 @@ class LeaveRequestController extends Controller
     private $error_message = "Something went wrong.";
     public function createLeaveRequest(Request $request)
     {
+        DB::beginTransaction();
         $validator = Validator::make($request->all(), [
             'employeeID' => 'required',
             'date_from' => 'required',
@@ -37,8 +38,10 @@ class LeaveRequestController extends Controller
                     $request->approverId,
                 );
                 $leave_request = DB::select("call UserCreateLeaveRequest(?,?,?,?,?,?)", $params);
+                DB::commit();
                 return Result::setData($leave_request);// response()->json(["data" => $leave_request, "error" => false, "message" => "ok"], 200);
             } catch (\Exception $e) {
+                DB::rollback();
                 return  Result::setError($e->getMessage()) ;//response()->json(["data" => $e, "error" => true, "message" =>$error_message], 500);
             }
 
@@ -77,8 +80,35 @@ class LeaveRequestController extends Controller
         }catch(\Exception $e){
             return  Result::setError( $e->getMessage());
         }
-     
-        
+             
         // $leave_request = LeaveRequest::get();
+    }
+
+
+    public function getApprovedRequests (Request $request){
+        try{
+            $query = DB::select("call GetApprovedRequests()");
+            $results = collect($query);
+            return Result::setData(["leave_requests"=>$results]);
+        }catch(\Exception $e){
+            return  Result::setError( $e->getMessage());
+        }
+    }
+    public function filterLeaveRequest (Request $request){
+        $filter = [
+            $request->month,
+            $request->year,
+            $request->status,
+            $request->category,
+            $request->employeeId,
+            $request->roleId,
+        ];
+        try{
+            $query = DB::select("call FilterLeaveRequest(?,?,?,?,?,?)", $filter);
+            $results = collect($query);
+            return Result::setData(["leave_requests"=>$results]);
+        }catch(\Exception $e){
+            return  Result::setError( $e->getMessage());
+        }
     }
 }

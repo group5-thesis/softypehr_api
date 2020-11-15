@@ -27,6 +27,7 @@ Route::group(['middleware' => 'api-header'], function () {
     //Leave Request
     Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
     Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
+    Route::post('/filterLeaveRequest', 'LeaveRequestController@filterLeaveRequest');
 
     // Meeting
     Route::post('/create_meeting', 'MeetingController@createMeeting');
@@ -52,6 +53,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/login', 'AuthController@login');
     Route::post('/forgotPassword', 'AuthController@forgotPassword');
     Route::post('/changePassword', 'AuthController@changePassword');
+    Route::post('/verifyOTP', 'AuthController@verifyOTP');
 
     // File upload
     Route::get('/image/{folder}/{file}', 'FileController@serve');

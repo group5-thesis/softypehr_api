@@ -1,0 +1,41 @@
+
+1. Set up get Started:
+
+ url : https://graph.facebook.com/v3.1/me/messenger_profile?access_token=**YOUR PAGE ACCESS TOKEN**
+ method: POST
+ payload: 
+    { 
+        "get_started":{
+            "payload":"@pStart"
+        }
+    }
+
+2. Set up Persistent menu :
+
+url:https://graph.facebook.com/v2.6/me/messenger_profile?access_token=YOUR_ACCESS_TOKEN_HERE
+method:POST
+{
+  "persistent_menu": [
+    {
+      "locale": "default",
+      "composer_input_disabled": false,
+      "call_to_actions": [
+        {
+          "type": "postback",
+          "title": "ROOM RATES",
+          "payload": "room_rates@pCategorySelected"
+        },
+        {
+          "type": "postback",
+          "title": "BANQUET PACKAGES",
+          "payload": "banquet_packages@pCategorySelected"
+        },
+        {
+          "type": "postback",
+          "title": "CAFE MEZZO",
+          "payload": "cafe_mezzo@pCategorySelected"
+        }
+      ]
+    }
+  ]
+}

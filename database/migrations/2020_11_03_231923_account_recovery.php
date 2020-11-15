@@ -17,7 +17,7 @@ class AccountRecovery extends Migration
         Schema::create('account_recovery', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string("email");
-            $table->string("code")->default(time());
+            $table->string("code");
             $table->timestamps();
         });
         //
