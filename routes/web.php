@@ -13,9 +13,17 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 |
  */
 
- 
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/testing', function () {
+    event(new App\Events\MyEvent('Welcome'));
+    return "Event has been sent!";
+});
+
 Route::get('/test', function () {
     return "server running";
 });
 
-Route::get('/file/{dir}/{path}','FileController@downloadFile');
+Route::get('/file/{dir}/{path}', 'FileController@downloadFile');
