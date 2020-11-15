@@ -55,45 +55,19 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `AddRecoveryCode`(
-	IN _email varchar(255)
+	IN _email varchar(255),
+    IN _code varchar  (50),
+    IN _created varchar(50)
 )
 BEGIN
-declare _id int;
-	 INSERT INTO softype.account_recovery(`email`) values (_email);
-     SELECT LAST_INSERT_ID() into _id;
-     SELECT `code` FROM softype.account_recovery where id = _id; 
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `ChangePassword`(
-	IN _userId INT(11),
-	IN _current_password VARCHAR(255),
-    IN _new_password VARCHAR(255),
-    IN _confirmation_password VARCHAR(255)
-)
-BEGIN
-	DECLARE pass varchar(255);
-    SET @update_id := 0;
-    SET SQL_SAFE_UPDATES = 0;
-    
-	SELECT u.password into pass
-    FROM softype.user as u
-    WHERE u.id = _userId;
-    
-    IF _current_password IS NOT NULL THEN
-		IF _new_password IS NOT NULL THEN
-			IF _confirmation_password IS NOT NULL THEN
-				IF _current_password = pass THEN
-					IF _new_password = _confirmation_password THEN
-						UPDATE softype.user 
-						SET password = _new_password , id = (SELECT @update_id := id)
-						WHERE id = _userId;
-					END IF;
-				END IF;
-			END IF;
-		END IF;
-     END IF;
+     declare _count int;
+	 select count(email)   into _count from softype.account_recovery where email = _email ; 
+	 if _count < 1 then
+	    INSERT INTO softype.account_recovery(`email` , `code` ,`created_at`) values (_email , _code ,_created);
+	 else 
+        update softype.account_recovery set `code` = _code , `created_at` = _created where email  = _email;
+	end if;
+    select "ok" as result;
 END$$
 DELIMITER ;
 
@@ -105,6 +79,7 @@ BEGIN
 	declare isExist int ;
     set isExist =0;
     select count(id) into isExist from  softype.employee where email = _email;
+    select isExist;
 END$$
 DELIMITER ;
 
@@ -116,7 +91,7 @@ BEGIN
     UPDATE office_request
     SET approverId = _approverId, status = 0, resolve_date = date(now()), remarks = "Request Approved"
     WHERE id = _office_requestId;
-    END IF;
+    END IF;	
     IF _indicator = 0 THEN
 	UPDATE office_request
     SET approverId = _approverId, status = 0, resolve_date = date(now()), remarks = "Request Rejected"
@@ -232,14 +207,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateOfficeRequest`(
     IN `_quantity` INT(11),
     IN `_price` DOUBLE,
     IN `_total_price` DOUBLE,
-    IN `_date_needed` DATE,
-	IN `_purpose` VARCHAR(255)
-)
+    IN `_date_needed` DATE)
 BEGIN
     DECLARE _approver INT(11);
     
-	INSERT INTO office_request(transaction_no, employeeId, item, quantity, approverId, price, total_price, purpose, date_needed)
-	VALUES (_transac, _employeeId, _item, _quantity, GetAdmin(), _price, _total_price, _purpose, _date_needed );
+	INSERT INTO office_request(transaction_no, employeeId, item, quantity, approverId, price, total_price, date_needed)
+	VALUES (_transac, _employeeId, _item, _quantity, GetAdmin(), _price, _total_price, _date_needed );
 
 	SELECT LAST_INSERT_ID() as id;
 END$$
@@ -375,6 +348,57 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DisableEmployeeAccount`(IN _userId INT(11))
+BEGIN
+	SET sql_safe_updates = 0;
+	SET @update_id := 0;
+    
+	IF _userId IS NOT NULL THEN
+    UPDATE softype.user
+    SET is_deactivated = 1, id = (SELECT @update_id := id)
+    WHERE id = _userId;
+    END IF;
+    
+    SELECT @update_id as id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `EnableEmployeeAccount`(IN _userId INT(11))
+BEGIN
+	SET sql_safe_updates = 0;
+	SET @update_id := 0;
+    
+	IF _userId IS NOT NULL THEN
+    UPDATE softype.user
+    SET is_deactivated = 0, id = (SELECT @update_id := id)
+    WHERE id = _userId;
+    END IF;
+    
+    SELECT @update_id as id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `ResetEmployeeAccount`(IN _userId INT(11), IN _defaultPassword VARCHAR(255))
+BEGIN
+	SET sql_safe_updates = 0;
+	SET @update_id := 0;
+    
+	IF _userId IS NOT NULL THEN
+    UPDATE softype.user
+    SET password = _defaultPassword, id = (SELECT @update_id := id)
+    WHERE id = _userId;
+    UPDATE softype.user
+    SET is_password_changed = 0 , id = (SELECT @update_id := id)
+    WHERE id = _userId;
+    END IF;
+    
+    SELECT @update_id as id;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveAnnouncementByDate`()
 BEGIN
 	SELECT 
@@ -414,7 +438,8 @@ BEGIN
         concat(emp.firstname, ' ', emp.lastname) as uploadedBy
     FROM softype.company_repository as cr
     JOIN softype.employee as emp ON emp.id = cr.uploadedBy
-    WHERE cr.type = _type;
+    WHERE cr.type = _type
+    ORDER BY cr.created_at DESC;
 END$$
 DELIMITER ;
 
@@ -429,9 +454,9 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
 		dept.name as department_name,
-		deh.department_head as department_headId,
+		deh.id as department_headId,
 		concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        dem.department_manager as department_managerId,
+        dem.id as department_managerId,
         concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
 		emp.firstname as firstname, 
 		emp.middlename as middlename,
@@ -449,6 +474,7 @@ BEGIN
 		emp.profile_img as profile_img,
         emp.isActive as isActive,
 		u.qr_code as qrcode
+
 	FROM softype.employee as emp
     JOIN softype.role as r ON r.id = emp.roleId
     JOIN softype.user as u ON u.employeeId = emp.id
@@ -460,7 +486,9 @@ BEGIN
     LEFT JOIN softype.employee as emp_m ON dem.department_manager = emp_m.id
     LEFT JOIN softype.employee as emp_h ON deh.department_head = emp_h.id
     LEFT JOIN softype.department as dept ON dem.departmentId = dept.id
-    WHERE dept_emp.employeeId IS NOT NULL;
+    WHERE dept_emp.employeeId IS NOT NULL
+        ORDER BY emp.lastname ASC;
+    
 END$$
 DELIMITER ;
 
@@ -472,7 +500,8 @@ BEGIN
 		# dept employees
 		FROM softype.employee as emp
 		LEFT JOIN softype.department_employees as dept_emp ON dept_emp.employeeId = emp.id
-        LEFT JOIN softype.performance_review as emp_pr ON emp_pr.employee_reviewed = emp.id;
+        LEFT JOIN softype.performance_review as emp_pr ON emp_pr.employee_reviewed = emp.id
+		ORDER BY emp_pr.date_reviewed DESC;
 		# dept managers
         #LEFT JOIN softype.department_head ;
          
@@ -484,8 +513,8 @@ DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveDepartmentHeads`()
 BEGIN
 	SELECT
+		emp_h.id as employeeId,
         dept_h.id as department_headId,
-        emp_h.id as employeeId,
 		u.id as userId,
 		u.account_type as accountType,
 		r.position as role,
@@ -509,9 +538,9 @@ BEGIN
 		u.qr_code as department_head_qrcode
 	from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
-    LEFT JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
-    LEFT JOIN softype.role as r ON emp_h.roleId = r.id
-    LEFT JOIN softype.user as u ON emp_h.id = u.employeeId
+    JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+    JOIN softype.role as r ON emp_h.roleId = r.id
+    JOIN softype.user as u ON emp_h.id = u.employeeId
     LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId;
 END$$
 DELIMITER ;
@@ -520,13 +549,14 @@ DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveDepartmentManagers`()
 BEGIN
 	SELECT
-        dept_m.id as managerId,
         emp_m.id as employeeId,
+        dept_m.id as managerId,
 		u.id as userId,
 		u.account_type as accountType,
 		r.position as role,
 		dept.id as department_id,
         dept.name as department_name,
+        dept_h.id as department_headId,
         concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
 		emp_m.firstname as manager_firstname, 
 		emp_m.middlename as manager_middlename,
@@ -545,14 +575,14 @@ BEGIN
 		u.qr_code as manager_qrcode,
         emp_m.profile_img as profile_img
 	from softype.department as dept
-    LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
-    LEFT JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
-    LEFT JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
+	LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
+	JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
+	JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
     LEFT JOIN softype.role as r ON emp_m.roleId = r.id
-    LEFT JOIN softype.user as u ON emp_m.id = u.employeeId
-    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
-	LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId;
+    LEFT JOIN softype.user as u ON emp_m.id = u.employeeId;
+    #LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+	#LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId;
 	#from softype.department as dept
 	#LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
     #LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
@@ -571,6 +601,7 @@ BEGIN
 	SELECT 
 		dept.id as department_id,
         dept.name as department_name,
+        emp_h.id as department_head_employeeId,
         concat(emp_h.firstname,' ', emp_h.lastname) as department_head
         #concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
         #concat(emps.firstname, ' ', emps.lastname) as department_employee
@@ -584,6 +615,23 @@ BEGIN
 	#LEFT JOIN softype.department_employees as dept_emps ON dept_emps.employeeId = emps.id
     #LEFT JOIN softype.employee as emps ON dept_emp_h.employeeId = emps.id
     ORDER BY department_name ASC;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveEmployeeAccounts`()
+BEGIN
+	SELECT
+		u.id as userId,
+		emp.id as employeeId,
+		u.username as employee_username,
+		u.account_type as employee_accountType,
+		u.is_deactivated as isDeactivated,
+        u.is_password_changed as isPasswordChanged,
+		concat(emp.lastname, " ", emp.firstname) as employee_name
+    FROM softype.user as u
+    LEFT JOIN softype.employee as emp ON u.employeeId = emp.id
+    ORDER BY employee_name;
 END$$
 DELIMITER ;
 
@@ -630,7 +678,8 @@ BEGIN
     LEFT JOIN softype.employee as emp_m ON dem.department_manager = emp_m.id
     LEFT JOIN softype.employee as emp_h ON deh.department_head = emp_h.id
     LEFT JOIN softype.department as dept ON dem.departmentId = dept.id
-    WHERE dept.id = _departmentId;
+    WHERE dept.id = _departmentId
+     ORDER BY emp.lastname ASC;
 END$$
 DELIMITER ;
 
@@ -736,9 +785,9 @@ SELECT
 		r.position as role,
 		dept.id as department_id,
 		dept.name as department_name,
-		deh.department_head as department_headId,
+		deh.id as department_headId,
 		concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        dem.department_manager as department_managerId,
+        dem.id as department_managerId,
         concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
 		emp.firstname as firstname, 
 		emp.middlename as middlename,
@@ -800,21 +849,13 @@ BEGIN
 	end if;
     
     if _roleID = 1 then 
-		select "admin";
-    end if;
-    
-     if _roleID = 2 then 
-		select "manager";
-    end if;
-    
-     if _roleID = 3 then 
 		SELECT emp.id AS employee_id, 
        Concat (emp.firstname, "", emp.lastname) AS `name`, 
        `status`, 
        date_from, 
        date_to, 
        reason, 
-       type AS category, 
+       category, 
        Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
        lr.approver AS approver_id 
        FROM   softype.leave_request lr 
@@ -824,8 +865,55 @@ BEGIN
          ON lr.employeeid = emp.id 
        JOIN softype.employee emp1 
          ON lr.approver = emp1.id 
-	  WHERE emp.id = _empId 
-        AND lr.`status` =  _status;
+		WHERE YEAR(lr.created_at) = YEAR(NOW())
+        ORDER BY  lr.created_at desc
+        ;
+    end if;
+    
+     if _roleID = 2 then 
+		SELECT emp.id AS employee_id, 
+       Concat (emp.firstname, "", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+	  WHERE lr.approver= _empId 
+      AND YEAR(lr.created_at) = YEAR(NOW())
+     #   AND lr.`status` =  _status
+        ORDER BY  lr.created_at desc;
+    end if;
+    
+     if _roleID = 3 then 
+		SELECT emp.id AS employee_id, 
+       Concat (emp.firstname, "", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+	  WHERE emp.id = _empId AND
+      YEAR(lr.created_at) = YEAR(NOW())
+        # AND lr.`status` =  _status
+	  ORDER BY  lr.created_at desc;
      end if;
     
     
@@ -838,9 +926,8 @@ BEGIN
 	SELECT 
 		dept.id as department_id,
         dept.name as department_name,
-        concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
-        concat(emps.firstname, ' ', emps.lastname) as department_employee
+        emp_h.id as department_head_employeeId,
+        concat(emp_h.firstname,' ', emp_h.lastname) as department_head
     from softype.department as dept
     LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
     LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
@@ -864,9 +951,9 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
 		dept.name as department_name,
-		deh.department_head as department_headId,
+		deh.id as department_headId,
 		concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-        dem.department_manager as department_managerId,
+        dem.id as department_managerId,
         concat(emp_m.firstname,' ', emp_m.lastname) as department_manager,
 		emp.firstname as firstname, 
 		emp.middlename as middlename,
@@ -890,7 +977,8 @@ BEGIN
     LEFT JOIN softype.employee as emp_m ON dem.department_manager = emp_m.id
     LEFT JOIN softype.employee as emp_h ON deh.department_head = emp_h.id
     LEFT JOIN softype.department as dept ON dem.departmentId = dept.id
-    WHERE dept_emp.id = _department_employeeId;
+    WHERE dept_emp.id = _department_employeeId
+    ORDER BY emp.lastname ;
 END$$
 DELIMITER ;
 
@@ -937,6 +1025,7 @@ BEGIN
 		r.position as role,
 		dept.id as department_id,
         dept.name as department_name,
+        dept_h.id as department_headId,
         concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
 		emp_m.firstname as manager_firstname, 
 		emp_m.middlename as manager_middlename,
@@ -956,8 +1045,8 @@ BEGIN
     JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
     JOIN softype.role as r ON emp_m.roleId = r.id
     JOIN softype.user as u ON emp_m.id = u.employeeId
-    LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
-    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
+    #LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
+    #LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
     WHERE dept_m.id = _managerId;
 END$$
 DELIMITER ;
@@ -1007,6 +1096,23 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedEmployeeAccount`(IN _userId INT(11))
+BEGIN
+	SELECT
+		u.id as userId,
+		emp.id as employeeId,
+		u.username as employee_username,
+		u.account_type as employee_accountType,
+		u.is_deactivated as isDeactivated,
+        u.is_password_changed as isPasswordChanged,
+		concat(emp.lastname, " ", emp.firstname) as employee_name
+    FROM softype.user as u
+    LEFT JOIN softype.employee as emp ON u.employeeId = emp.id
+    WHERE u.id = _userId;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveLimitedMeeting`(IN `_meetingId` INT(11))
 BEGIN
 	SELECT ci.meetingId, m.organizer, ci.memberId, emp.firstname, emp.middlename, emp.lastname, emp.email,
@@ -1035,7 +1141,6 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
@@ -1063,46 +1168,6 @@ BEGIN
 	JOIN softype.employee as emp_reviewed on emp_reviewed.id = pr.employee_reviewed
 	JOIN softype.employee as emp_reviewer ON emp_reviewer.id = pr.reviewer
 	WHERE pr.id = _id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveManagersByDepartment`(IN _departmentId INT(11))
-BEGIN
-	SELECT
-        dept_m.id as managerId,
-        emp_m.id as employeeId,
-		u.id as userId,
-		u.account_type as accountType,
-		r.position as role,
-		dept.id as department_id,
-        dept.name as department_name,
-        concat(emp_h.firstname,' ', emp_h.lastname) as department_head,
-		emp_m.firstname as manager_firstname, 
-		emp_m.middlename as manager_middlename,
-		emp_m.lastname as manager_lastname,
-		emp_m.gender as manager_gender,
-		emp_m.mobileno as manager_mobileno,
-		emp_m.birthdate as manager_birthdate,
-		emp_m.email as manager_email,
-		emp_m.street as manager_street,
-		emp_m.city as manager_city,
-		emp_m.country as manager_country,
-        emp_m.phil_health_no as phil_health_no,
-        emp_m.sss_no as sss_no,
-        emp_m.pag_ibig_no as pag_ibig_no,
-        emp_m.isActive as isActive,
-		u.qr_code as manager_qrcode
-        from softype.department as dept
-    LEFT JOIN softype.department_manager as dept_m ON dept_m.departmentId = dept.id
-    LEFT JOIN softype.department_head as dept_h ON dept_h.departmentId = dept.id
-    LEFT JOIN softype.employee as emp_h ON dept_h.department_head = emp_h.id
-    LEFT JOIN softype.employee as emp_m ON dept_m.department_manager = emp_m.id
-    LEFT JOIN softype.role as r ON emp_m.roleId = r.id
-    LEFT JOIN softype.user as u ON emp_m.id = u.employeeId
-    LEFT JOIN softype.department_employees as dept_emp_m ON dept_m.id = dept_emp_m.department_managerId
-	LEFT JOIN softype.department_employees as dept_emp_h ON dept_h.id = dept_emp_h.department_headId
-    WHERE dept_m.departmentId = _departmentId;
 END$$
 DELIMITER ;
 
@@ -1146,11 +1211,11 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
-    INNER JOIN employee as emp_app ON t.approverId = emp_app.id;
+    INNER JOIN employee as emp_app ON t.approverId = emp_app.id
+    ORDER BY  t.created_at desc;
 END$$
 DELIMITER ;
 
@@ -1171,12 +1236,12 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE t.created_at = date(now());
+    WHERE t.created_at = date(now())
+    ;
 END$$
 DELIMITER ;
 
@@ -1198,12 +1263,12 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE t.employeeId = _employeeId;
+    WHERE t.employeeId = _employeeId
+    ORDER BY  t.created_at desc;
 END$$
 DELIMITER ;
 
@@ -1224,12 +1289,12 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE MONTH(t.created_at) = _month;
+    WHERE MONTH(t.created_at) = _month
+    ORDER BY  t.created_at desc;
 END$$
 DELIMITER ;
 
@@ -1250,12 +1315,12 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE t.status = _status;
+    WHERE t.status = _status
+    ORDER BY  t.created_at desc;
 END$$
 DELIMITER ;
 
@@ -1276,12 +1341,12 @@ BEGIN
         t.resolve_date as resolved_date,
         t.status as status,
         t.remarks as remarks,
-        t.purpose as purpose,
         t.created_at as date_requested
     FROM office_request as t
     INNER JOIN employee as emp ON t.employeeId = emp.id
     INNER JOIN employee as emp_app ON t.approverId = emp_app.id
-    WHERE YEAR(t.created_at) = _year;
+    WHERE YEAR(t.created_at) = _year
+    ORDER BY  t.created_at desc;
 END$$
 DELIMITER ;
 
@@ -1303,7 +1368,8 @@ BEGIN
     FROM softype.employee as emp
     LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
     LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    WHERE pr_emp.employee_reviewed = _id;
+    WHERE pr_emp.employee_reviewed = _id
+    ORDER BY pr_emp.date_reviewed desc;
 END$$
 DELIMITER ;
 
@@ -1326,7 +1392,8 @@ BEGIN
     FROM softype.employee as emp
     LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
     LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    GROUP BY MONTH(pr_emp.date_reviewed);
+    GROUP BY MONTH(pr_emp.date_reviewed)
+    ORDER BY pr_emp.date_reviewed desc;
 END$$
 DELIMITER ;
 
@@ -1348,7 +1415,8 @@ BEGIN
     FROM softype.employee as emp
     LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
     LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    WHERE pr_emp.reviewer = _reviewer;
+    WHERE pr_emp.reviewer = _reviewer
+   ORDER BY pr_emp.date_reviewed desc;
 END$$
 DELIMITER ;
 
@@ -1371,14 +1439,15 @@ BEGIN
     FROM softype.employee as emp
     LEFT JOIN softype.performance_review as pr_emp ON emp.id = pr_emp.employee_reviewed
     LEFT JOIN softype.employee as emp_r ON emp_r.id = pr_emp.reviewer
-    GROUP BY YEAR(pr_emp.date_reviewed);
+    GROUP BY YEAR(pr_emp.date_reviewed)
+    ORDER BY pr_emp.date_reviewed desc;
 END$$
 DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RetrieveUsers`()
 BEGIN
-	SELECT * from `user`;
+	SELECT * from `user` ORDER BY account_type;
 END$$
 DELIMITER ;
 
@@ -1655,7 +1724,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateOfficeRequest`(
     IN `_quantity` INT(11), 
     IN `_price` DOUBLE,
     IN `_total_price` DOUBLE,
-    IN `_purpose` VARCHAR(255),
     IN `_date_needed`DATE,
     IN `_status` INT(11))
 BEGIN
@@ -1681,11 +1749,6 @@ BEGIN
     SET total_price = _total_price , id = (SELECT @update_id := id)
     WHERE id = _office_requestId AND employeeId = _employeeId;
     END IF;
-    IF _purpose IS NOT NULL then
-    UPDATE office_request
-    SET purpose = _purpose , id = (SELECT @update_id := id)
-    WHERE id = _office_requestId AND employeeId = _employeeId;
-    END IF;
 	IF _date_needed IS NOT NULL then
     UPDATE office_request
     SET date_needed = _date_needed , id = (SELECT @update_id := id)
@@ -1697,11 +1760,13 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdatePassword`(
-	IN _password varchar(50)
+	IN _password varchar(255),
+    IN _userID int
 )
 BEGIN
     SET SQL_SAFE_UPDATES = 0;
-	update softype.`user` set `password` = _password;
+	update softype.`user` set `password` = _password where id = _userID;
+    update softype.`user` set `is_password_changed` = 1 where id = _userID;
     select row_count() AS result;
 END$$
 DELIMITER ;
@@ -1736,6 +1801,28 @@ BEGIN
     where 
 		users.username = _username  and users.`password` = _password;
         
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UserGetCurrentPassword`(
+	IN userID int 
+)
+BEGIN
+	select `password` from softype.user where id = userID;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UserGetInfoByEmail`(
+    In _email  varchar(255)
+)
+BEGIN
+	select usr.id as userId 
+    from softype.user usr 
+    join softype.employee emp 
+    on usr.employeeId = emp.id
+    where email = _email;
 END$$
 DELIMITER ;
 
@@ -1775,5 +1862,20 @@ on emp.id = usr.employeeId
    left join softype.role rl
 on emp.roleId = rl.id
    where usr.id = _userID;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `verifyRecoveryCode`(
+	IN _email varchar(255),
+    IN _code varchar(50),
+    IN _remove tinyint(1)
+)
+BEGIN
+   if _remove = 0 then
+	select id  , email , `code` , created_at from softype.account_recovery where email = _email and `code` =  _code ; 
+    else 
+    delete from softype.account_recovery where email = _email and `code` =  _code ; 
+    end if;
 END$$
 DELIMITER ;
