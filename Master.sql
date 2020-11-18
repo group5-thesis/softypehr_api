@@ -310,6 +310,16 @@ BEGIN
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteLeaveRequest`(
+	IN _id int(11)
+)
+BEGIN
+  delete from softype.leave_request where id = _id and `status` = 'pending';
+  select row_count() as success;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteMeeting`(IN `_id` INT(11))
 BEGIN
         SET sql_safe_updates = 0;
@@ -469,6 +479,98 @@ BEGIN
         ORDER BY  lr.created_at asc;
         end if;
     END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `FilterLeaveRequest`(
+	IN _month varchar(20),
+	IN _year int(11),
+	IN _status varchar(255),
+	IN _category varchar(255),
+	IN _employeeId int(11),
+	IN _roleID int(11)
+)
+BEGIN
+    if _roleID = 1 then 
+    
+		SELECT emp.id AS employee_id, 
+        lr.id as id,
+       Concat (emp.firstname, " ", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+		WHERE 
+            (monthname(lr.created_at) = _month  or _month ='All' )
+            and ( year(lr.created_at) = _year or _year = 'All')
+             and (`status` = _status or _status ='All' )
+             and( category = _category or _category = 'All' )
+        ORDER BY  lr.created_at asc
+        ;
+    end if; 
+     if _roleID = 2 then 
+		SELECT emp.id AS employee_id, 
+        lr.id as id,
+       Concat (emp.firstname, "", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+	  WHERE lr.approver= _empId 
+      AND  (monthname(lr.created_at) = _month  or _month ='All' )
+            and ( year(lr.created_at) = _year or _year = 'All')
+             and (`status` = _status or _status ='All' )
+            and( category = _category or _category = 'All' )
+     #   AND lr.`status` =  _status
+        ORDER BY  lr.created_at asc;
+    end if;
+    
+     if _roleID = 3 then 
+		SELECT emp.id AS employee_id, 
+      lr.id as id,
+      Concat (emp.firstname, " ", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+	  WHERE emp.id = _employeeId AND
+         (monthname(lr.created_at) = _month  or _month ='All' )
+            and ( year(lr.created_at) = _year or _year = 'All')
+             and (`status` = _status or _status ='All' )
+            and( category = _category or _category = 'All' )
+	  ORDER BY  lr.created_at asc;
+     end if;
+END$$
 DELIMITER ;
 
 DELIMITER $$
@@ -1007,10 +1109,33 @@ BEGIN
         YEAR(lr.created_at) = YEAR(NOW())
             # AND lr.`status` =  _status
         ORDER BY  lr.created_at desc;
-        end if;
-        
-        
-    END$$
+    end if;
+    
+     if _roleID = 3 then 
+		SELECT emp.id AS employee_id, 
+       Concat (emp.firstname, "", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+	  WHERE emp.id = _empId AND
+      YEAR(lr.created_at) = YEAR(NOW())
+        # AND lr.`status` =  _status
+	  ORDER BY  lr.created_at desc;
+     end if;
+    
+    
+END$$
 DELIMITER ;
 
 DELIMITER $$
@@ -1754,6 +1879,47 @@ BEGIN
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLeaveRequest`(
+	IN _id int(11),
+    IN _status VARCHAR(50),
+    IN _approverID int(11),
+    IN _noOfDays  int(11)
+)
+updateLeave:BEGIN 
+declare empID int;
+declare prevNoOfDays int;
+declare success int;
+declare message varchar(255);
+	update 
+		softype.leave_request 
+    set
+		`status` = _status , remarks=_status , updated_at= now()  , approver = _approverID 
+	where id = _id;
+    
+    if _status = 'approved' then 
+		update softype.leave_request 
+        set `date_from` = now() , date_approved = now()  
+        where id = _id;
+    end if;
+    
+    select employeeId into empID  from softype.leave_request   where id = _id;
+    select remaining_leave into prevNoOfDays from softype.employee where id = empID;
+  
+    if prevNoOfDays-_noOfDays >= 0 then
+      update softype.employee set remaining_leave = prevNoOfDays-_noOfDays  where id = empID;
+	else
+        set success = 0;
+        set message = "Leave cannot be granted.Please contact the administrator";
+        select success , message;
+        leave updateLeave;
+	end if;
+    set success =  row_count() ;
+    set message = "ok";
+    select success , message;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateMeeting`(IN `_meetingId` INT(11), IN `_title` VARCHAR(255), IN `_organizer` INT(11), IN `_category` VARCHAR(255), IN `_description` VARCHAR(255), IN `_set_date` DATE, IN `_time_start` VARCHAR(255), IN `_time_end` VARCHAR(255), IN `_status` VARCHAR(255))
 BEGIN
         SET sql_safe_updates = 0;
@@ -1871,23 +2037,55 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProfileImage`(
+IN _employee_id INT(11),
+IN _path varchar(255)
+)
+BEGIN
+	update softype.employee set profile_img=_path where id = _employee_id;
+    select ROW_COUNT()  as completed;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UserCreateLeaveRequest`(IN `_employeeId` INT(11), IN `_leave_category` VARCHAR(100), IN `_date_from` DATE, IN `_date_to` DATE, IN `_reason` VARCHAR(255), IN `_approver` INT(11))
 BEGIN
-        DECLARE _catId int(11);
-            IF NOT EXISTS(SELECT id FROM softype.`leave_category` WHERE category= _leave_category)
-            THEN
-                INSERT INTO softype.`leave_category` (category) VALUES (_leave_category);
-                SELECT last_insert_id() into _catId ;
-            ELSE	
-                SELECT id FROM softype.`leave_category` WHERE category= _leave_category = _role into _catId;
-        END If;
-        insert into 
-            softype.leave_request
-            (employeeId, leave_categoryId, date_from, date_to, reason, `status`, approver,created_at) 
-        values 
-            (_employeeId, _catId, _date_from, _date_to, _reason, "pending", _approver,now());
-        SELECT * FROM  softype.leave_request WHERE id = (SELECT LAST_INSERT_ID());
-    END$$
+	DECLARE _catId int(11);
+		IF NOT EXISTS(SELECT id FROM softype.`leave_category` WHERE category= _leave_category)
+		THEN
+			INSERT INTO softype.`leave_category` (category) VALUES (_leave_category);
+			SELECT last_insert_id() into _catId ;
+		ELSE	
+			SELECT id FROM softype.`leave_category` WHERE category= _leave_category  into _catId;
+	END If;
+	insert into 
+		softype.leave_request
+		(employeeId, leave_categoryId, date_from, date_to, reason, `status`, approver,created_at) 
+    values 
+    
+		(_employeeId, _catId, _date_from, _date_to, _reason, "pending", _approver,now());
+        
+        
+	 SELECT emp.id AS employee_id, 
+        lr.id as id,
+       Concat (emp.firstname, " ", emp.lastname) AS `name`, 
+       `status`, 
+       date_from, 
+       date_to, 
+       reason, 
+       category, 
+       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
+       lr.approver AS approver_id 
+       FROM   softype.leave_request lr 
+       JOIN softype.leave_category lc 
+         ON lr.leave_categoryid = lc.id 
+       JOIN softype.employee emp 
+         ON lr.employeeid = emp.id 
+       JOIN softype.employee emp1 
+         ON lr.approver = emp1.id 
+	   WHERE 
+          lr.id = (SELECT LAST_INSERT_ID());
+end$$
 DELIMITER ;
 
 DELIMITER $$
@@ -1936,40 +2134,44 @@ DELIMITER ;
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UserGetProfile`(IN `_userID` INT(11))
 BEGIN
-    declare _employeeID int(11);
-    declare _qrCode varchar(50);
-    
-    --  select employeeId, qr_code  into _employeeID , _qrCode from  softype.user where id = _userID;    
-    -- select * , _qrCode as qr_code from  softype.employee  emp where id = _employeeID ;
-    
-    select
-        emp.id as employeeId,
-        usr.id as userId,
-        firstname,
-        middlename,
-        lastname,
-        mobileno,
-        birthdate,
-        gender,
-        street,
-        city,
-        country,
-        email,
-        qr_code ,
-        position ,
-        account_type as roleId,
-        emp.sss_no as sss,
-        emp.pag_ibig_no as pag_ibig_no ,
-        emp.phil_health_no as phil_health_no ,
-        emp.profile_img as profile_img
-    from
-    softype.employee emp
-    join softype.user usr
-    on emp.id = usr.employeeId
-    left join softype.role rl
-    on emp.roleId = rl.id
-    where usr.id = _userID;
-    END$$
+declare _employeeID int(11);
+   declare _qrCode varchar(50);
+ 
+ --  select employeeId, qr_code  into _employeeID , _qrCode from  softype.user where id = _userID;    
+  -- select * , _qrCode as qr_code from  softype.employee  emp where id = _employeeID ;
+   
+   select
+       emp.id as employeeId,
+       usr.id as userId,
+       firstname,
+       middlename,
+       lastname,
+       mobileno,
+       birthdate,
+       gender,
+       street,
+       city,
+       country,
+       email,
+       qr_code ,
+       isActive,
+       position ,
+       is_password_changed,
+       remaining_leave,
+       account_type as roleId,
+       emp.sss_no as sss,
+       emp.pag_ibig_no as pag_ibig_no ,
+       emp.phil_health_no as phil_health_no ,
+       emp.profile_img as profile_img,
+       is_deactivated
+   from
+softype.employee emp
+join softype.user usr
+on emp.id = usr.employeeId
+   left join softype.role rl
+on emp.roleId = rl.id
+   where usr.id = _userID;
+END$$
 DELIMITER ;
 
 DELIMITER $$
