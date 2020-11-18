@@ -21,7 +21,8 @@ class FileController extends Controller
     public function serveImage($filename){
         $path = public_path('images').'/'.$filename;
         if (!File::exists($path)) {
-           abort(404);
+            $path = public_path('static').'/logo-sm.png';
+        // abort(404);
         }
         $file = File::get($path);
         $type = File::mimeType($path);

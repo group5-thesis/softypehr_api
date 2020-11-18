@@ -6,7 +6,9 @@ class Result {
     public static function setError( $exception="" , $message="Somehing went wrong", $statusCode = 500){ 
         $errMessage=$message;
         if (env('IS_DEV')) {
-            $errMessage.=" : " .$exception;
+            if ($exception !='') {
+                $errMessage.=$exception;
+            }
         }
         return response()->json(["error"=>true , "message"=>$errMessage],$statusCode);
     }

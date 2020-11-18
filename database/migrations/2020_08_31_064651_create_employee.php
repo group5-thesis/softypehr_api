@@ -29,8 +29,8 @@ class CreateEmployee extends Migration
             $table->string('phil_health_no')->nullable();
             $table->string('sss_no')->nullable();
             $table->string('pag_ibig_no')->nullable();
-            $table->string('isActive')->default(1);
-            $table->string('remaining_leave')->default(21);
+            $table->integer('isActive')->default(1);
+            $table->integer('remaining_leave')->default(21);
             $table->string('profile_img', 191)->nullable();
         });
     }

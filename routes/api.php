@@ -28,6 +28,9 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
     Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
     Route::post('/filterLeaveRequest', 'LeaveRequestController@filterLeaveRequest');
+    Route::post('/cancel_leave_request', 'LeaveRequestController@cancelLeaveRequest');
+    Route::post('/update_leave_request', 'LeaveRequestController@updateLeaveRequest');
+    Route::get('/checkRemainingLeave/{empID}', 'LeaveRequestController@checkRemainingLeave');
 
     // Meeting
     Route::post('/create_meeting', 'MeetingController@createMeeting');
