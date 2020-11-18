@@ -67,11 +67,11 @@ class EmployeeController extends Controller
                     $lastName = $request->lastname;
                     $username = Str::lower($firstName[0] . $lastName . $employee_id);
                     $defaultPassword = Hash::make('Softype@100');
-                    \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
                     $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
+                    \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
-                        array($username, $defaultPassword, $file, $employee_id, 1)
+                        array($username, $defaultPassword, $file, $employee_id, $request->accountType)
                     );
                 }
                 DB::commit();
