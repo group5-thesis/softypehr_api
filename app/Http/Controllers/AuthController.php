@@ -28,16 +28,20 @@ class AuthController extends Controller
                     $token = self::getToken($username, $password);
                     $access_token = $token;
                     $result->save();
-                    $temp = 'test';
                     $employee = DB::select('call UserGetProfile(?)', array($result->id));
-                    //   $employee = DB::select('call UserGetProfile(?)', array($result->employeeId));
+                    $res = collect($employee)[0];
+                    if ($res->is_deactivated == 1 || $res->isActive != 1) {
+                        return Result::setError('', "Account is inactive.Please contact the Administrator.", 401);
+                    }
                     $response = [];
                     foreach ($employee as $key => $value) {
                         $response = [
                             'access_token' => $access_token,
                             'account_information' => $employee,
                         ];
+                       
                     }
+
                     return Result::setData($response);
                 } else {
                     // error password
@@ -53,89 +57,6 @@ class AuthController extends Controller
         }
 
     }
-
-    public function login1(Request $request)
-    {
-        $email_or_username = $request->input('username_email'); // this the input from front end
-
-        if (filter_var($email_or_username, FILTER_VALIDATE_EMAIL)) { // user sent his email
-            // check if user email exists in database
-            $user_email = User::where('email', '=', $request->input('username_email'))->first();
-
-            if ($user_email) { // email exists in database
-                if (Auth::attempt(['email' => $email_or_username, 'password' => $request->input('password')])) {
-                  // success
-                    $token = self::getToken($request->username_email, $request->password);
-                    $access_token = $token;
-                    $user_email->save();
-                    $temp = 'test';
-                    $employee = DB::select('call RetrieveLimitedEmployee(?)', array($user_email->employeeId));
-                    foreach ($employee as $key => $value) {
-                        $response = ['data' => [
-                            'id' => $user_email->id, 'access_token' => $access_token,
-                            'account_information' => [
-                                'firstname' => $value->firstname,
-                                'middlename' => $value->middlename,
-                                'lastname' => $value->lastname,
-                                'role' => $value->roleId,
-                                'email' => $value->email,
-                                'mobile_no' => $value->mobileno,
-                                'gender' => $value->gender,
-                                'birthdate' => $value->birthdate,
-                                'street' => $value->street,
-                                'city' => $value->city,
-                                'country' => $value->country,
-                            ]
-                        ], 'error' => false, 'message' => 'success'];
-                    }
-                    return response()->json($response, 200);
-                } else {
-                  // error password
-                    $response = ['data' => [], 'error' => true, 'message' => "Password didn't matched!"];
-                    return response()->json($response, 405);
-                }
-            } else {
-               // error: user not found
-                $response = ['data' => [], 'error' => true, 'message' => 'User not found!'];
-                return response()->json($response, 405);
-            }
-
-        } else { // user sent username
-
-            // check if username exists in database
-            $user_username = User::where('username', '=', $request->input('username_email'))->first();
-
-            if ($user_username) { // username exists in database
-                if (Auth::attempt(['username' => $email_or_username, 'password' => $request->input('password')])) {
-                  // success
-                    $token = self::getToken($request->username_email, $request->password);
-                    $access_token = $token;
-                    $user_username->save();
-                    $temp = 'test';
-                    $employee = DB::select('call RetrieveLimitedEmployee(?)', array($user_username->employeeId));
-                    foreach ($employee as $key => $value) {
-                        $response = ['data' => [
-                            'id' => $user_username->id, 'access_token' => $access_token,
-                            'account_information' => [
-                                'firstname' => $value->firstname, 'middlename' => $value->middlename, 'lastname' => $value->lastname, 'role' => $value->roleId, 'email' => $value->email,
-                                'mobile_no' => $value->mobileno, 'gender' => $value->gender, 'birthdate' => $value->birthdate, 'street' => $value->street, 'city' => $value->city, 'country' => $value->country
-                            ]
-                        ], 'error' => false, 'message' => 'success'];
-                    }
-                    return response()->json($response, 200);
-                } else {
-                  // error password
-                    $response = ['data' => [], 'error' => true, 'message' => "Password didn't matched!"];
-                    return response()->json($response, 405);
-                }
-            } else {
-               // error: user not found
-                $response = ['data' => [], 'error' => true, 'message' => 'User not found!'];
-                return response()->json($response, 405);
-            }
-        }
-    }
-
     private function getToken($email_username, $password)
     {
         $token = null;
@@ -165,6 +86,13 @@ class AuthController extends Controller
             if ($user[0]->isExist === 0) {
                 return Result::setError('Email address not found', 401);
             } else {
+                $query = DB::select('call UserGetInfoByEmail(?)' ,[$email]);
+                $results = collect($query);
+                $employees = DB::select("call UserGetProfile(?)", [$results[0]->userId]) ;
+                $employee = collect($employees)[0];
+                if ($employee->is_deactivated == 1 || $employee->isActive != 1) {
+                    return Result::setError('', "Account is inactive.Please contact the Administrator.", 401);
+                }
                 $code = substr(time() , \Str::length(time())-6 ,\Str::length(time()));
                 $addRecoveryCode = DB::select('call AddRecoveryCode(?, ? ,?)', [$email ,$code , now()]);
                 $mail = new MailController();
@@ -183,7 +111,11 @@ class AuthController extends Controller
         try {
             $query = DB::select('call UserGetInfoByEmail(?)' ,[$request->email]);
             $results = collect($query);
-            \Log::info(json_encode($results));
+            $employees = DB::select("call UserGetProfile(?)", [$results[0]->userId]) ;
+            $employee = collect($employees)[0];
+            if ($employee->is_deactivated == 1 || $employee->isActive != 1) {
+                return Result::setError('', "Account is inactive.Please contact the Administrator.", 401);
+            }
             $changePasswordQuery = DB::select('call UpdatePassword(?,?)' ,[Hash::make($request->new_password) , $results[0]->userId]);
             $response = ['result' => 'Password changed successfully.'];
             DB::commit();
@@ -202,6 +134,11 @@ class AuthController extends Controller
         }
         DB::beginTransaction();
         try {
+            $employees = DB::select("call UserGetProfile(?)", [$request->userId]) ;
+            $employee = collect($employees)[0];
+            if ($employee->is_deactivated == 1 || $employee->isActive != 1) {
+                return Result::setError('', "Account is inactive.Please contact the Administrator.", 401);
+            }
             $query = DB::select('call UserGetCurrentPassword(?)' ,[$request->userId]);
             $results = collect($query);
             if (Hash::check($request->current_password, $results[0]->password)) {
@@ -216,6 +153,11 @@ class AuthController extends Controller
             DB::rollback();
             return Result::setError($e->getMessage());
         }
+    }
+
+    public function loginQR(Request $request )
+    {
+       
     }
 
     public function verifyOTP(Request $request)
@@ -240,9 +182,6 @@ class AuthController extends Controller
             // $totalDuration =  $startTime->diff($endTime);//->format('%I');
             $params[2] = 1;
             if (intval($totalDuration) > 10) {
-                \Log::info("created : ".$startTime );
-                \Log::info("now : ".$endTime );
-                \Log::info("expired : ".$totalDuration );
                 $query = DB::select('call verifyRecoveryCode(?,?,?)' ,$params);
                 return Result::setError('' ,  "Invalid Verification Code!" , 401);
             }

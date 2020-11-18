@@ -59,19 +59,46 @@ class LeaveRequestController extends Controller
         }
     }
 
-    public function deleteLeaveRequest(Request $request)
+
+    public function updateLeaveRequest(Request $request)
     {
+        DB::beginTransaction();
         try{ 
-            $leave_request = LeaveRequest::where('id', '=', $request->id)->delete();
-            return  Result::setData($leave_request); 
+            $id = $request->id;
+            $status = $request->status;
+            $approver = $request->approver;
+            $noOfDays =$request->noOfDays;
+            $query = DB::select('call updateLeaveRequest(?,?,?,?)', [$id , $status, $approver,$noOfDays]);
+            $result = collect($query);
+            if ($result[0]->success == 0) {
+                DB::rollback();
+                return  Result::setError("" ,$result[0]->message);
+            }
+            DB::commit();
+            return  Result::setData(["success"=>$result[0]->success]); 
         }catch(\Exception $e){
+            DB::rollback();
+            return  Result::setError($e->getMessage());
+        }
+    }
+    
+    public function cancelLeaveRequest(Request $request)
+    {
+        DB::beginTransaction();
+        try{ 
+            $id = $request->id;
+            $query = DB::select('call deleteLeaveRequest(?)', [$id]);
+            $result = collect($query);
+            DB::commit();
+            return  Result::setData(["success"=>$result[0]->success]); 
+        }catch(\Exception $e){
+            DB::rollback();
             return  Result::setError($e->getMessage());
         }
      
     }
     public function getLeaveRequests(Request $request)
     {
-        // return [];
         try{
             $employeeId = $request->employeeId;
             $roleId = $request->roleId;
@@ -80,8 +107,18 @@ class LeaveRequestController extends Controller
         }catch(\Exception $e){
             return  Result::setError( $e->getMessage());
         }
-             
-        // $leave_request = LeaveRequest::get();
+ }
+
+    public function checkRemainingLeave($empID)
+    {
+        try{
+            $query = DB::select('select remaining_leave from softype.employee where id = ?', [$empID]);
+            $results = collect($query);
+            return  Result::setData( ["remaining_leave" => $results[0]->remaining_leave ]);
+        }catch(\Exception $e){
+            return  Result::setError( $e->getMessage());
+        }
+
     }
 
 

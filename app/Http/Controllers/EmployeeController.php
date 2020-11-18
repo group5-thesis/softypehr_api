@@ -36,8 +36,7 @@ class EmployeeController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $messages = json_encode($validator->messages());
-            return Result::setError($messages, 401);
+            return Result::setError("",$validator->messages()->get('email')[0] ,401);
         } else {
             DB::beginTransaction();
             try {
@@ -68,8 +67,8 @@ class EmployeeController extends Controller
                     $lastName = $request->lastname;
                     $username = Str::lower($firstName[0] . $lastName . $employee_id);
                     $defaultPassword = Hash::make('Softype@100');
-                    $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
                     \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
+                    $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
                         array($username, $defaultPassword, $file, $employee_id, $request->accountType)
@@ -210,12 +209,10 @@ class EmployeeController extends Controller
             } else {
                 DB::rollback();
 
-                return Result::setError("Update failed", 500);
+                return Result::setError("","Update failed", 400);
             }
         } catch (\Exception $e) {
-            return Result::setError($e->getMessage() . ": Something went wrong", 500);
-
-            return Result::setError(null, 401, "Update failed");
+            return Result::setError($e->getMessage());
         }
     // } catch (\Exception $e) {
 
