@@ -51,6 +51,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/close_officeRequest', 'OfficeRequestController@closeOfficeRequestRequest');
     Route::get('/retrieve_officeRequests_by_status/{status}', 'OfficeRequestController@retrieveOfficeRequestsByStatus');
     Route::get('/retrieve_officeRequests_by_employee/{id}', 'OfficeRequestController@retrieveOfficeRequestsByEmployee');
+    Route::get('/retrieve_limited_officeRequest/{id}', 'OfficeRequestController@retrieveLimitedOfficeRequest');
 
     // Auth
     Route::post('/login', 'AuthController@login');
