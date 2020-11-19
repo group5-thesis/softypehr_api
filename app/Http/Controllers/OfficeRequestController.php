@@ -33,7 +33,7 @@ class OfficeRequestController extends Controller
             DB::beginTransaction();
             try {
                 $officeRequest = DB::select(
-                    'call CreateOfficeRequest(?,?,?,?,?,?,?)',
+                    'call CreateOfficeRequest(?,?,?,?,?,?,?,?)',
                     array(
                         Helpers::createTransactionNo("SOFTYPETKT" . $request->employeeId . "_"),
                         $request->employeeId,
@@ -54,23 +54,12 @@ class OfficeRequestController extends Controller
         }
     }
 
-    public function retrieveLimitedOfficeRequest($id)
-    {
-        try {
-            $retrieveOfficeRequest = DB::select('call RetrieveLimitedOfficeRequest(?)', array($id));
-            $result = collect($retrieveOfficeRequest);
-            return Result::setData(['officeRequest_information' => $result]);
-        } catch (\Exception $e) {
-            return Result::setError($e->getMessage(), 500);
-        }
-    }
-
     public function updateOfficeRequest(Request $request) // SP need to update
     {
         DB::beginTransaction();
         try {
             $officeRequest = DB::select(
-                'call UpdateOfficeRequest(?,?,?,?,?,?)',
+                'call UpdateOfficeRequest(?,?,?,?,?,?,?,?,?)',
                 array(
                     $request->officeRequestId,
                     $request->employeeId,
@@ -119,8 +108,6 @@ class OfficeRequestController extends Controller
             return Result::setData(['officeRequest_information' => $result]);
         } catch (\Exception $e) {
             return  Result::setError($e->getMessage());
-
-            // return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -173,7 +160,7 @@ class OfficeRequestController extends Controller
         DB::beginTransaction();
         try {
             $approved_officeRequest = DB::select(
-                'call CloseOfficeRequestRequest(?,?,?)',
+                'call CloseOfficeRequest(?,?,?)',
                 array($request->officeRequestId, $request->employeeId, $request->indicator)
             );
             DB::commit();
@@ -192,6 +179,17 @@ class OfficeRequestController extends Controller
             $employee_officeRequests = DB::select('call RetrieveOfficeRequestsByEmployee(?)', array($id));
             $result = collect($employee_officeRequests);
             return Result::setData(['employee_officeRequest_information' => $result]);
+        } catch (\Exception $e) {
+            return Result::setError($e->getMessage(), 500);
+        }
+    }
+
+    public function retrieveLimitedOfficeRequest($id)
+    {
+        try {
+            $retrieveOfficeRequest = DB::select('call RetrieveLimitedOfficeRequest(?)', array($id));
+            $result = collect($retrieveOfficeRequest);
+            return Result::setData(['officeRequest_information' => $result]);
         } catch (\Exception $e) {
             return Result::setError($e->getMessage(), 500);
         }
