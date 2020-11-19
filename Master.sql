@@ -410,7 +410,8 @@ BEGIN
         reason, 
         category, 
         Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
-        lr.approver AS approver_id 
+        lr.approver AS approver_id,
+        lr.created_at as created_at
         FROM   softype.leave_request lr 
         JOIN softype.leave_category lc 
             ON lr.leave_categoryid = lc.id 
@@ -479,98 +480,6 @@ BEGIN
         ORDER BY  lr.created_at asc;
         end if;
     END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `FilterLeaveRequest`(
-	IN _month varchar(20),
-	IN _year int(11),
-	IN _status varchar(255),
-	IN _category varchar(255),
-	IN _employeeId int(11),
-	IN _roleID int(11)
-)
-BEGIN
-    if _roleID = 1 then 
-    
-		SELECT emp.id AS employee_id, 
-        lr.id as id,
-       Concat (emp.firstname, " ", emp.lastname) AS `name`, 
-       `status`, 
-       date_from, 
-       date_to, 
-       reason, 
-       category, 
-       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
-       lr.approver AS approver_id 
-       FROM   softype.leave_request lr 
-       JOIN softype.leave_category lc 
-         ON lr.leave_categoryid = lc.id 
-       JOIN softype.employee emp 
-         ON lr.employeeid = emp.id 
-       JOIN softype.employee emp1 
-         ON lr.approver = emp1.id 
-		WHERE 
-            (monthname(lr.created_at) = _month  or _month ='All' )
-            and ( year(lr.created_at) = _year or _year = 'All')
-             and (`status` = _status or _status ='All' )
-             and( category = _category or _category = 'All' )
-        ORDER BY  lr.created_at asc
-        ;
-    end if; 
-     if _roleID = 2 then 
-		SELECT emp.id AS employee_id, 
-        lr.id as id,
-       Concat (emp.firstname, "", emp.lastname) AS `name`, 
-       `status`, 
-       date_from, 
-       date_to, 
-       reason, 
-       category, 
-       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
-       lr.approver AS approver_id 
-       FROM   softype.leave_request lr 
-       JOIN softype.leave_category lc 
-         ON lr.leave_categoryid = lc.id 
-       JOIN softype.employee emp 
-         ON lr.employeeid = emp.id 
-       JOIN softype.employee emp1 
-         ON lr.approver = emp1.id 
-	  WHERE lr.approver= _empId 
-      AND  (monthname(lr.created_at) = _month  or _month ='All' )
-            and ( year(lr.created_at) = _year or _year = 'All')
-             and (`status` = _status or _status ='All' )
-            and( category = _category or _category = 'All' )
-     #   AND lr.`status` =  _status
-        ORDER BY  lr.created_at asc;
-    end if;
-    
-     if _roleID = 3 then 
-		SELECT emp.id AS employee_id, 
-      lr.id as id,
-      Concat (emp.firstname, " ", emp.lastname) AS `name`, 
-       `status`, 
-       date_from, 
-       date_to, 
-       reason, 
-       category, 
-       Concat (emp1.firstname, " ", emp1.lastname) AS approver, 
-       lr.approver AS approver_id 
-       FROM   softype.leave_request lr 
-       JOIN softype.leave_category lc 
-         ON lr.leave_categoryid = lc.id 
-       JOIN softype.employee emp 
-         ON lr.employeeid = emp.id 
-       JOIN softype.employee emp1 
-         ON lr.approver = emp1.id 
-	  WHERE emp.id = _employeeId AND
-         (monthname(lr.created_at) = _month  or _month ='All' )
-            and ( year(lr.created_at) = _year or _year = 'All')
-             and (`status` = _status or _status ='All' )
-            and( category = _category or _category = 'All' )
-	  ORDER BY  lr.created_at asc;
-     end if;
-END$$
 DELIMITER ;
 
 DELIMITER $$
@@ -2037,17 +1946,6 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProfileImage`(
-IN _employee_id INT(11),
-IN _path varchar(255)
-)
-BEGIN
-	update softype.employee set profile_img=_path where id = _employee_id;
-    select ROW_COUNT()  as completed;
-END$$
-DELIMITER ;
-
-DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UserCreateLeaveRequest`(IN `_employeeId` INT(11), IN `_leave_category` VARCHAR(100), IN `_date_from` DATE, IN `_date_to` DATE, IN `_reason` VARCHAR(255), IN `_approver` INT(11))
 BEGIN
 	DECLARE _catId int(11);
@@ -2187,4 +2085,19 @@ BEGIN
         delete from softype.account_recovery where email = _email and `code` =  _code ; 
         end if;
     END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` FUNCTION `GetAdmin`() RETURNS int(11)
+BEGIN
+
+DECLARE _approver INT(11);
+    
+	SELECT emp.id into _approver
+	FROM softype.employee as emp
+    LEFT JOIN softype.ticket as t ON emp.id = t.approverId
+    LEFT JOIN softype.user as u ON emp.id = u.employeeId
+    WHERE u.account_type = 1 LIMIT 1;
+RETURN _approver;
+END$$
 DELIMITER ;
