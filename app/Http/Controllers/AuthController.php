@@ -84,7 +84,7 @@ class AuthController extends Controller
             $result = DB::select('call CheckUserEmail(?)', array($email));
             $user = collect($result);
             if ($user[0]->isExist === 0) {
-                return Result::setError('Email address not found', 401);
+                return Result::setError('','Email address not found', 401);
             } else {
                 $query = DB::select('call UserGetInfoByEmail(?)' ,[$email]);
                 $results = collect($query);
@@ -99,14 +99,12 @@ class AuthController extends Controller
                 return $mail->sendEmail($email, $code, 'Account Recovery Code');
             }
         } catch (\Exception $e) {
-            return Result::setError("auth : ".$e->getMessage());
+            return Result::setError($e->getMessage());
         }
     }
 
      public function updatePassword(Request $request)
      {
-        \Log::info("update password");
-
          DB::beginTransaction();
         try {
             $query = DB::select('call UserGetInfoByEmail(?)' ,[$request->email]);
