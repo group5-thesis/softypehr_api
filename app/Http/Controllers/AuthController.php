@@ -84,7 +84,7 @@ class AuthController extends Controller
             $result = DB::select('call CheckUserEmail(?)', array($email));
             $user = collect($result);
             if ($user[0]->isExist === 0) {
-                return Result::setError('Email address not found', 401);
+                return Result::setError('','Email address not found', 401);
             } else {
                 $query = DB::select('call UserGetInfoByEmail(?)' ,[$email]);
                 $results = collect($query);
