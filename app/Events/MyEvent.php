@@ -24,7 +24,7 @@ class MyEvent implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return ['softypeChannel'];
+        return ['SofypeChannel'];
     }
 
     public function broadcastAs()

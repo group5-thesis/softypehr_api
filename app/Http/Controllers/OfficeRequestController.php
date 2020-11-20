@@ -110,6 +110,21 @@ class OfficeRequestController extends Controller
             return  Result::setError($e->getMessage());
         }
     }
+    public function filterOfficeRequests(Request $request)
+    {
+        $payload = [
+            $request->status,
+            $request->month,
+            $request->year,
+        ];
+        try {
+            $retrieveOfficeRequest = DB::select('call FilterOfficeRequests(?,?,?)' ,$payload);
+            $result = collect($retrieveOfficeRequest);
+            return Result::setData(['officeRequest_information' => $result]);
+        } catch (\Exception $e) {
+            return  Result::setError($e->getMessage());
+        }
+    }
 
     public function retrieveOfficeRequestsByDate()
     {

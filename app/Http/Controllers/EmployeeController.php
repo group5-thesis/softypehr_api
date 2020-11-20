@@ -29,7 +29,7 @@ class EmployeeController extends Controller
             'birthdate' => 'required',
             'email' => 'required|unique:employee|email',
             'gender' => 'required',
-            'street' => 'required',
+            // 'street' => 'required',
             'city' => 'required',
             'country' => 'required',
             'role' => 'required',
@@ -40,35 +40,49 @@ class EmployeeController extends Controller
         } else {
             DB::beginTransaction();
             try {
-                $employee = DB::select(
-                    'call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                    array(
-                        $request->firstname,
-                        $request->middlename,
-                        $request->lastname,
-                        $request->mobileno,
-                        $request->gender,
-                        $request->email,
-                        $request->birthdate,
-                        $request->street,
-                        $request->city,
-                        $request->country,
-                        $request->phil_health_no,
-                        $request->sss,
-                        $request->pag_ibig_no,
-                        $request->role
-                    )
+                $payload =  array(
+                    $request->firstname,
+                    $request->middlename,
+                    $request->lastname,
+                    $request->mobileno,
+                    $request->gender,
+                    $request->email,
+                    $request->birthdate,
+                    $request->street,
+                    $request->city,
+                    $request->country,
+                    $request->phil_health_no,
+                    $request->sss,
+                    $request->pag_ibig_no,
+                    $request->role
                 );
+                $employee = DB::select('call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?,?,?,?)', $payload );
                 $result = collect($employee);
                 $employee_id = $result[0]->id;
-
                 if ($employee) {
                     $firstName = $request->firstname;
                     $lastName = $request->lastname;
                     $username = Str::lower($firstName[0] . $lastName . $employee_id);
                     $defaultPassword = Hash::make('Softype@100');
-                    $file = 'qrcode/' . $username . '_' . $employee_id . '.svg';
-                    \QrCode::size(250)->format('svg')->generate(json_encode($result[0]), public_path($file));
+                    $file = 'qrcode/' . $username . '_' . $employee_id ."_".time(). '.svg';
+                    \QrCode::size(250)->format('svg')->generate(json_encode([
+                        "employeeId"=>$result[0]->id,
+                        "username"=>$username,
+                        "firstname"=>$request->firstname,
+                        "middlename"=>$request->middlename,
+                        "lastname"=>$request->lastname,
+                        "mobileno"=>$request->mobileno,
+                        "gender"=>$request->gender,
+                        "email"=>$request->email,
+                        "birthdate"=>$request->birthdate,
+                        "street"=>$request->street,
+                        "city"=>$request->city,
+                        "country"=>$request->country,
+                        "phil_health_no"=>$request->phil_health_no,
+                        "sss"=>$request->sss,
+                        "pag_ibig_no"=>$request->pag_ibig_no,
+                        "role"=>$request->role
+                    ]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
                         array($username, $defaultPassword, $file, $employee_id, $request->accountType)

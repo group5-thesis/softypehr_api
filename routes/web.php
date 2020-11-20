@@ -18,7 +18,7 @@ Route::get('/', function () {
 });
 
 Route::get('/testing', function () {
-    event(new App\Events\MyEvent('Welcome'));
+    event(new App\Events\MyEvent('pusher'));
     return "Event has been sent!";
 });
 
