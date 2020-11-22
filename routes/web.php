@@ -18,7 +18,11 @@ Route::get('/', function () {
 });
 
 Route::get('/testing', function () {
-    event(new App\Events\MyEvent('pusher'));
+    $payload = [
+        "type"=>"error",
+        "data"=>["q"=>],
+    ];
+    event(new App\Events\MyEvent( $payload));
     return "Event has been sent!";
 });
 

@@ -6,6 +6,7 @@ use Mail;
 use App\Models\Result;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 class MailController extends Controller {
     protected $receiver;
@@ -25,23 +26,9 @@ class MailController extends Controller {
        }
    }
  
-//    public function sendEmail($receiver , $content , $subject) {
-//        try{
-//            $this->receiver = $receiver;
-//            $this->subject = $subject;
-//         $data = array('name'=>"Softype");
-//         Mail::send(['text'=>$content], $data, function($message) {
-//            $message->to($this->receiver, 'Softype')->subject($this->subject);
-//            $message->from('softypeapi@gmail.com','Softype');
-//         });
-//         return ['status'=>'success'];
-//        }catch(\Exception $e){
-//         return Result::setError($e->getMessage());
-//        }
-//    }
    public function sendEmail($receiver , $code , $subject) {
         $this->receiver =$receiver;
-        $this->subject =$subject;
+        $this->subject =$suzbject;
        try{
             $path = public_path('mail/mail.html');
             $file = file_get_contents($path);
@@ -69,4 +56,9 @@ class MailController extends Controller {
       });
       echo "Email Sent with attachment. Check your inbox.";
    }
+
+public function sendPushNotification(string $type, string $message)
+{
+    event(new App\Events\MyEvent('pusher'));
+}
 }
