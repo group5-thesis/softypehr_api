@@ -20,7 +20,7 @@ Route::get('/', function () {
 Route::get('/testing', function () {
     $payload = [
         "type"=>"error",
-        "data"=>["q"=>],
+        "data"=>["q"=>"tests"],
     ];
     event(new App\Events\MyEvent( $payload));
     return "Event has been sent!";
