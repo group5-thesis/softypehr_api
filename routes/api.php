@@ -47,7 +47,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::get('/retrieve_officeRequests_by_year/{year}', 'OfficeRequestController@retrieveOfficeRequestsByYear');
     Route::get('/retrieve_officeRequests_by_month/{month}', 'OfficeRequestController@retrieveOfficeRequestsByMonth');
     Route::get('/retrieve_officeRequests_by_date', 'OfficeRequestController@retrieveOfficeRequestsByDate');
-    Route::post('/delete_officeRequest', 'OfficeRequestController@deleteOfficeRequest');
+    Route::post('/delete_officeRequest', 'OfficeRequestController@DeleteOfficeRequest');
     Route::post('/close_officeRequest', 'OfficeRequestController@closeOfficeRequestRequest');
     Route::get('/retrieve_officeRequests_by_status/{status}', 'OfficeRequestController@retrieveOfficeRequestsByStatus');
     Route::get('/retrieve_officeRequests_by_employee/{id}', 'OfficeRequestController@retrieveOfficeRequestsByEmployee');

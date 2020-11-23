@@ -88,7 +88,7 @@ class OfficeRequestController extends Controller
         DB::beginTransaction();
         try {
             $officeRequest = DB::select(
-                'call deleteOfficeRequest(?)',
+                'call DeletOfficeRequest(?)',
                 array($request->id)
             );
             $response = ['error' => false, 'message' => 'success'];
