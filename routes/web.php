@@ -27,7 +27,8 @@ Route::get('/testing', function () {
 });
 
 Route::get('/test', function () {
-    return "server running";
+
+    return "server running" . \Hash::make('Softype@100');
 });
 
 Route::get('/file/{dir}/{path}', 'FileController@downloadFile');
