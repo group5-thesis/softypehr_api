@@ -105,8 +105,6 @@ class AuthController extends Controller
 
      public function updatePassword(Request $request)
      {
-        \Log::info("update password");
-
          DB::beginTransaction();
         try {
             $query = DB::select('call UserGetInfoByEmail(?)' ,[$request->email]);
@@ -118,6 +116,10 @@ class AuthController extends Controller
             }
             $changePasswordQuery = DB::select('call UpdatePassword(?,?)' ,[Hash::make($request->new_password) , $results[0]->userId]);
             $response = ['result' => 'Password changed successfully.'];
+            $mail = new MailController();
+            $mail->SendEmailNotification("PASSWORD_CHANGED" ,[
+                "name"=>$employee->firstname
+            ] );
             DB::commit();
             return Result::setData($response);
         } catch (\Exception $e) {

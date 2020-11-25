@@ -37,8 +37,14 @@ class cronRequestForwarding extends Command
      */
     public function handle()
     {
-        \Log::info("Request handled!");
+        // \Log::info("Request handled!");
+        $results = DB::select('call AutoForwardLeaveRequests()');
+        $forwarded = collect($results)[0]->forwarded;
+        if ($forwarded > 0) {
+            
+        }
         $this->info('Job just started');
+
 
     }
 }
