@@ -58,8 +58,8 @@ class UserController extends Controller
     {
         try {
             DB::beginTransaction();
-            $employee_account = DB::select('call DisableEmployeeAccount(?)', array(
-                $request->userId
+            $employee_account = DB::select('call DisableEmployeeAccount(?, ?)', array(
+                $request->userId, $request->employeeId
             ));
             $result = collect($employee_account);
             $userId = $result[0]->id;
@@ -76,8 +76,8 @@ class UserController extends Controller
     {
         try {
             DB::beginTransaction();
-            $employee_account = DB::select('call EnableEmployeeAccount(?)', array(
-                $request->userId
+            $employee_account = DB::select('call EnableEmployeeAccount(?, ?)', array(
+                $request->userId, $request->employeeId
             ));
             $result = collect($employee_account);
             $userId = $result[0]->id;
