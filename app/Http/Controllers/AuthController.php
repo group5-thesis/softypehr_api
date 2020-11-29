@@ -118,7 +118,8 @@ class AuthController extends Controller
             $response = ['result' => 'Password changed successfully.'];
             $mail = new MailController();
             $mail->SendEmailNotification("PASSWORD_CHANGED" ,[
-                "name"=>$employee->firstname
+                "name"=>$employee->firstname,
+                "receiver"=>$request->email
             ] );
             DB::commit();
             return Result::setData($response);
