@@ -4,6 +4,8 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Http\Controllers\MailController;
+
 
 class Kernel extends ConsoleKernel
 {
@@ -14,6 +16,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         //
+        \App\Console\Commands\cronRequestForwarding::class,
     ];
 
     /**
@@ -24,6 +27,15 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('forwardRequest:send')
+        // ->dailyAt('13:00')
+        ->everyMinute()
+        ->before(function () {
+            \Log::info("Request started!");
+        })
+        ->after(function () {
+            \Log::info("Request done!");
+        });
         // $schedule->command('inspire')->hourly();
     }
 

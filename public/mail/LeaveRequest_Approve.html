@@ -167,9 +167,9 @@
                                                                                             <div>
                                                                                             <center>
                                                                                                 <div style="font-family: inherit; text-align: inherit"><span
-                                                                                                        style="font-size: 24px; font-family: verdana,geneva,sans-serif"><strong>&nbsp;Your Leave Request has been &nbsp;&nbsp;aprroved by:
+                                                                                                        style="font-size: 24px; font-family: verdana,geneva,sans-serif"><strong>&nbsp;Your Leave Request has been &nbsp;&nbsp;{{status}} by:
                                                                                                             &nbsp;<br>
-                                                                                                            APPROVED_BY</strong></span></div>
+                                                                                                            {{approver}}</strong></span></div>
                                                                                             </center>
 
                                                                                                 <div>&nbsp;</div>
@@ -196,15 +196,16 @@
                                                                                                         this code.This
                                                                                                         code is one
                                                                                                         time use only. -->
-                                                                                                        Leave Request Starts on DATE_FROM and ends on DATE_TO.
+                                                                                                        Leave Request Starts on {{date_from}} and ends {{date_dto}}.
                                                                                                     </span></div>
                                                                                                 </center>
                                                                                             </div><br>
-
                                                                                             <center>
-                                                                                                <div><small>
+                                                                                                <div>
+                                                                                                    <small>
                                                                                                     Note: Span of days in your Leave Request must be followed, Enjoy!
-                                                                                                </small></div>
+                                                                                                </small>
+                                                                                            </div>
                                                                                             </center>
                                                                                             <br>
         </div>
