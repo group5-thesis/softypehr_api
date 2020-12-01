@@ -69,6 +69,9 @@ class DepartmentController extends Controller
             );
             $result = collect($department);
             $department_id = $result[0]->id;
+            $department_head = DB::select('call UpdateDepartmentHead(?,?,?)', array(
+                $request->department_head_pk_id, $request->departmentId, $request->departmentHeadId
+            ));
             DB::commit();
             $response = $this->retrieveLimitedDepartment($department_id);
             return $response;

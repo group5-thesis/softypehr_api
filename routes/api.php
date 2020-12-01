@@ -71,7 +71,6 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/update_file', 'FileController@updateFile');
     Route::get('/image/{filename}', 'FileController@serveImage');
 
-
     // Employee
     Route::post('/create_employee', 'EmployeeController@createEmployee');
     Route::get('/retrieve_employees', 'EmployeeController@retrieveEmployees');
@@ -84,7 +83,6 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/retrieve_employee_profile', 'EmployeeController@retrieveEmployeeProfile');
     Route::post('/retrieve_employee_limited', 'EmployeeController@retrieveEmployeeLimited');
     Route::get('/getProfile', 'EmployeeController@retrieveEmployeeProfile');
-
 
     // Department
     Route::post('/add_department', 'DepartmentController@addDepartment'); // in adding the department, dept_head also added
