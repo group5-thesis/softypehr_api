@@ -2,19 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use App\Models\Employee;
-use App\Models\Account;
-use Illuminate\Support\Str;
+use App\Http\Controllers\FileController;
+use App\Models\Result;
 use DB;
 use Exception;
-use App\Http\Controllers\AccountController;
-use App\Http\Controllers\FileController;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Redirect;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Result;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 // use QrCode;
 
@@ -36,11 +31,11 @@ class EmployeeController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return Result::setError("",$validator->messages()->get('email')[0] ,401);
+            return Result::setError("", $validator->messages()->get('email')[0], 401);
         } else {
             DB::beginTransaction();
             try {
-                $payload =  array(
+                $payload = array(
                     $request->firstname,
                     $request->middlename,
                     $request->lastname,
@@ -54,9 +49,9 @@ class EmployeeController extends Controller
                     $request->phil_health_no,
                     $request->sss,
                     $request->pag_ibig_no,
-                    $request->role
+                    $request->role,
                 );
-                $employee = DB::select('call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?,?,?,?)', $payload );
+                $employee = DB::select('call CreateEmployee(?,?,?,?,?,?,?,?,?,?,?,?,?,?)', $payload);
                 $result = collect($employee);
                 $employee_id = $result[0]->id;
                 if ($employee) {
@@ -64,24 +59,24 @@ class EmployeeController extends Controller
                     $lastName = $request->lastname;
                     $username = Str::lower($firstName[0] . $lastName . $employee_id);
                     $defaultPassword = Hash::make('Softype@100');
-                    $file = 'qrcode/' . $username . '_' . $employee_id ."_".time(). '.svg';
+                    $file = 'qrcode/' . $username . '_' . $employee_id . "_" . time() . '.svg';
                     \QrCode::size(250)->format('svg')->generate(json_encode([
-                        "employeeId"=>$result[0]->id,
-                        "username"=>$username,
-                        "firstname"=>$request->firstname,
-                        "middlename"=>$request->middlename,
-                        "lastname"=>$request->lastname,
-                        "mobileno"=>$request->mobileno,
-                        "gender"=>$request->gender,
-                        "email"=>$request->email,
-                        "birthdate"=>$request->birthdate,
-                        "street"=>$request->street,
-                        "city"=>$request->city,
-                        "country"=>$request->country,
-                        "phil_health_no"=>$request->phil_health_no,
-                        "sss"=>$request->sss,
-                        "pag_ibig_no"=>$request->pag_ibig_no,
-                        "role"=>$request->role
+                        "employeeId" => $result[0]->id,
+                        "username" => $username,
+                        "firstname" => $request->firstname,
+                        "middlename" => $request->middlename,
+                        "lastname" => $request->lastname,
+                        "mobileno" => $request->mobileno,
+                        "gender" => $request->gender,
+                        "email" => $request->email,
+                        "birthdate" => $request->birthdate,
+                        "street" => $request->street,
+                        "city" => $request->city,
+                        "country" => $request->country,
+                        "phil_health_no" => $request->phil_health_no,
+                        "sss" => $request->sss,
+                        "pag_ibig_no" => $request->pag_ibig_no,
+                        "role" => $request->role,
                     ]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
@@ -169,7 +164,7 @@ class EmployeeController extends Controller
                     $request->sss,
                     $request->pag_ibig_no,
                     $request->isActive,
-                    $request->roleId
+                    $request->roleId,
                 )
             );
             $result = collect($updated_employee);
@@ -222,20 +217,85 @@ class EmployeeController extends Controller
                 return $this->retrieveLimitedEmployee($employee_id);
             } else {
                 DB::rollback();
-
-                return Result::setError("","Update failed", 400);
+                return Result::setError("", "Update failed", 400);
             }
         } catch (\Exception $e) {
             return Result::setError($e->getMessage());
         }
-    // } catch (\Exception $e) {
-
-    //     return Result::setError($e->getMessage());
-
-
-    //     return Result::setError($e->getMessage());
-
         DB::rollback();
+    }
+
+    public function _array_contains($array, $entry)
+    {
+        $index = 0;
+        foreach ($array as $compare) {
+            if ($compare['id'] == $entry) {
+                return $index;
+            }
+            ++$index;
+        }
+        return -1;
+    }
+
+    public function getChartData()
+    {
+        try {
+            $query = DB::select('call GetDataForChart()');
+            $results = collect($query);
+            $departments = [];
+            foreach ($results as $head) {
+                $data = [
+                    "id" => $head->headId,
+                    "name" => $head->departmentHead,
+                    "title" => $head->deptHeadPosition,
+                ];
+                $manager = [
+                    'id' => $head->managerId,
+                    'name' => $head->departmentManager,
+                    'title' => $head->managerPosition,
+                ];
+                $employee = [
+                    'id' => $head->employeeId,
+                    'name' => $head->employee,
+                    'title' => $head->employeePosition,
+                ];
+
+                $isExist = $this->_array_contains($departments, $head->headId);
+                //echo $head->departmentManager."<br/> \n"; 
+                if ($isExist < 0) {
+                    if ($head->managerId != null) {
+                            //echo "1  <br/> \n"; 
+                        if ($head->employee != null) {
+                            $manager['children'] = [$employee];
+                        }
+                        $data['children'] = [$manager];
+                    }
+                    
+                    array_push($departments, $data);
+                } else {
+                    //echo "2  <br/> \n"; 
+                    if ($head->managerId != null) {
+                        //echo "3  <br/> \n"; 
+                        $managerExist = $this->_array_contains($departments[$isExist]['children'], $head->managerId);
+                        if ($managerExist != -1) {
+                            //echo "4  <br/> \n"; 
+                            if ($head->employee != null) {
+                                if (!key_exists("children" ,$departments[$isExist]['children'][$managerExist] )) {
+                                    $departments[$isExist]['children'][$managerExist]['children'] =[];
+                                }
+                                array_push($departments[$isExist]['children'][$managerExist]['children'], $employee);
+                            }
+                        }else{    
+                            array_push($departments[$isExist]['children'] , $manager);   
+                        }
+                    }
+                }
+            }
+            return Result::setData(['chartData' => $departments]);
+        } catch (\Exception $e) {
+            return Result::setError($e);
+        }
+
     }
 // }
 

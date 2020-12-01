@@ -83,6 +83,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/retrieve_employee_profile', 'EmployeeController@retrieveEmployeeProfile');
     Route::post('/retrieve_employee_limited', 'EmployeeController@retrieveEmployeeLimited');
     Route::get('/getProfile', 'EmployeeController@retrieveEmployeeProfile');
+    Route::get('/fetchChartData', 'EmployeeController@getChartData');
 
     // Department
     Route::post('/add_department', 'DepartmentController@addDepartment'); // in adding the department, dept_head also added
