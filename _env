@@ -26,10 +26,10 @@ REDIS_PASSWORD=null
 REDIS_PORT=6379
 
 MAIL_MAILER=smtp
-MAIL_HOST=smtp.gmail.com
+MAIL_HOST=mail.softype.xyz
 MAIL_PORT=587
-MAIL_USERNAME=softypeapi@gmail.com
-MAIL_PASSWORD=$0ftypePH
+MAIL_USERNAME=systemmail@softype.xyz
+MAIL_PASSWORD=Softype2020!
 MAIL_ENCRYPTION=tls     
 MAIL_FROM_ADDRESS=softypeapi@gmail.com
 MAIL_FROM_NAME=Softype%20Mail%20Service
