@@ -40,7 +40,7 @@ Route::get('/test', function () {
     ];
 
     $mail = new MailController();
-    $mail->SendEmailNotification("RESOLVED_LEAVE_REQUEST", $payload);
+    return $mail->SendEmailNotification("RESOLVED_LEAVE_REQUEST", $payload);
     $mail->SendEmailNotification("RESOLVED_OFFICE_REQUEST", $payload);
     $mail->SendEmailNotification("PASSWORD_RESET", $payload);
     $mail->SendEmailNotification("PASSWORD_CHANGED", $payload);
