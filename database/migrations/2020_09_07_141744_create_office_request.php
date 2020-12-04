@@ -27,7 +27,7 @@ class CreateOfficeRequest extends Migration
             $table->string('purpose');
             $table->date('date_needed');
             $table->integer('status')->default(1); // default for status 1 === Open 0 === Close
-            $table->string('remarks');
+            $table->string('remarks')->nullable();
             // $table->timestamps()->default(Carbon::now());
             $table->date('created_at')->default(Carbon::now());
         });
