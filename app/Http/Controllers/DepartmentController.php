@@ -40,7 +40,7 @@ class DepartmentController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                return Result::setError("Something went wrong", 500);
+                 return Result::setError($e->getMessage());
             }
         }
     }
@@ -56,7 +56,7 @@ class DepartmentController extends Controller
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -84,7 +84,7 @@ class DepartmentController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -95,7 +95,7 @@ class DepartmentController extends Controller
             $result = collect($department);
             return Result::setData(["department" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -106,7 +106,7 @@ class DepartmentController extends Controller
             $result = collect($department);
             return Result::setData(["departments" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -117,7 +117,7 @@ class DepartmentController extends Controller
             $result = collect($department_head);
             return Result::setData(["department_heads" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -128,7 +128,7 @@ class DepartmentController extends Controller
             $result = collect($department_managers);
             return Result::setData(["department_managers" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -141,7 +141,7 @@ class DepartmentController extends Controller
             $result = collect($department_managers);
             return Result::setData(["department_managers" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 }

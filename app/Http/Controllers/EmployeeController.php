@@ -116,7 +116,6 @@ class EmployeeController extends Controller
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
 
-            return Result::setError("Something went wrong", 500);
 
             return Result::setError($e->getMessage());
 

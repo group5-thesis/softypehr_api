@@ -22,7 +22,7 @@ class DepartmentHeadController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -43,7 +43,7 @@ class DepartmentHeadController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -60,7 +60,7 @@ class DepartmentHeadController extends Controller
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( "Something went wrong" , 500) ;
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -75,7 +75,7 @@ class DepartmentHeadController extends Controller
             MailController::sendPushNotification('EmployeeUpdateNotification');
             return Result::setData(["department_head_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -88,7 +88,7 @@ class DepartmentHeadController extends Controller
             $result = collect($department_heads);
             return Result::setData(["department_head_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError( "Something went wrong" , 500) ;
+             return Result::setError($e->getMessage());
         }
     }
 }

@@ -48,7 +48,7 @@ class PerformanceReviewController extends Controller
                 return $response;
             } catch (\Exception $e) {
                 DB::rollBack();
-                return Result::setError("Something went wrong", 500);
+                return Result::setError($e->getMessage());
             }
         }
     }
@@ -60,7 +60,7 @@ class PerformanceReviewController extends Controller
             $result = collect($performance_reviews);
             return Result::setData(["performance_review_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -74,7 +74,7 @@ class PerformanceReviewController extends Controller
             $result = collect($performance_review);
             return Result::setData(["performance_review_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -89,7 +89,7 @@ class PerformanceReviewController extends Controller
             $result = collect($performance_review);
             return Result::setData(["performance_review_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -103,7 +103,7 @@ class PerformanceReviewController extends Controller
             $result = collect($employe_performance);
             return Result::setData(["performance_review_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -116,7 +116,7 @@ class PerformanceReviewController extends Controller
             $result = collect($employe_performance);
             return Result::setData(["performance_review_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -129,7 +129,7 @@ class PerformanceReviewController extends Controller
             $result = collect($employe_performance);
             return Result::setData(["performance_review_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -143,7 +143,7 @@ class PerformanceReviewController extends Controller
             $result = collect($employe_performance);
             return Result::setData(["performance_review_information" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 }
