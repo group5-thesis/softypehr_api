@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Result;
 use Mail;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-
+use App\Events\MyEvent;
 class MailController extends Controller
 {
     protected $receiver;
@@ -119,13 +119,13 @@ class MailController extends Controller
             return Result::setError($e->getMessage());
         }
     }
-    public static function sendPushNotification(string $type, string $data=null)
+    public static function sendPushNotification(string $type, $data=null)
     {
         $payload =[
             "type"=>$type,
             "data"=>$data
         ];
 
-        event(new App\Events\MyEvent($payload));
+        event(new MyEvent($payload));
     }
 }
