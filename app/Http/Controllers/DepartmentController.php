@@ -72,6 +72,9 @@ class DepartmentController extends Controller
             $department_head = DB::select('call UpdateDepartmentHead(?,?,?)', array(
                 $request->department_head_pk_id, $request->departmentId, $request->departmentHeadId
             ));
+
+            // $deleted_dept_head = DB::select('call DeleteDepartmentHead(?)', array($request->department_head_pk_id));
+
             DB::commit();
             $response = $this->retrieveLimitedDepartment($department_id);
             return $response;

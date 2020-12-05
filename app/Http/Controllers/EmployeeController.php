@@ -261,32 +261,32 @@ class EmployeeController extends Controller
                 ];
 
                 $isExist = $this->_array_contains($departments, $head->headId);
-                //echo $head->departmentManager."<br/> \n"; 
+                //echo $head->departmentManager."<br/> \n";
                 if ($isExist < 0) {
                     if ($head->managerId != null) {
-                            //echo "1  <br/> \n"; 
+                            //echo "1  <br/> \n";
                         if ($head->employee != null) {
                             $manager['children'] = [$employee];
                         }
                         $data['children'] = [$manager];
                     }
-                    
+
                     array_push($departments, $data);
                 } else {
-                    //echo "2  <br/> \n"; 
+                    //echo "2  <br/> \n";
                     if ($head->managerId != null) {
-                        //echo "3  <br/> \n"; 
+                        //echo "3  <br/> \n";
                         $managerExist = $this->_array_contains($departments[$isExist]['children'], $head->managerId);
                         if ($managerExist != -1) {
-                            //echo "4  <br/> \n"; 
+                            //echo "4  <br/> \n";
                             if ($head->employee != null) {
                                 if (!key_exists("children" ,$departments[$isExist]['children'][$managerExist] )) {
                                     $departments[$isExist]['children'][$managerExist]['children'] =[];
                                 }
                                 array_push($departments[$isExist]['children'][$managerExist]['children'], $employee);
                             }
-                        }else{    
-                            array_push($departments[$isExist]['children'] , $manager);   
+                        }else{
+                            array_push($departments[$isExist]['children'] , $manager);
                         }
                     }
                 }

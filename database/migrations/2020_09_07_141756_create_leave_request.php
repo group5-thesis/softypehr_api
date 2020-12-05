@@ -23,7 +23,7 @@ class CreateLeaveRequest extends Migration
             $table->string('status');
             $table->integer('approver');
             $table->string('date_approved')->nullable();
-            $table->string('remarks');
+            $table->string('remarks')->nullable();
             $table->timestamps();
         });
     }
