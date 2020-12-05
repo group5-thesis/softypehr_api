@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use DB;
 use App\Models\Result;
+use App\Http\Controllers\MailController;
+
 
 class DepartmentHeadController extends Controller
 {
@@ -16,6 +18,7 @@ class DepartmentHeadController extends Controller
             $department_head = DB::select('call AddDepartmentHead(?,?)', array($department_id, $department_headId));
             $result = collect($department_head);
             $department_head_id = $result[0]->id;
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
@@ -36,6 +39,7 @@ class DepartmentHeadController extends Controller
             $employee_id = $result[0]->id;
             DB::commit();
             $response = $this->retrieveLimitedDepartmentHead($employee_id);
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
@@ -68,6 +72,7 @@ class DepartmentHeadController extends Controller
                 array($id)
             );
             $result = collect($department_head);
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             return Result::setData(["department_head_information" => $result]);
         } catch (\Exception $e) {
             return Result::setError( "Something went wrong" , 500) ;

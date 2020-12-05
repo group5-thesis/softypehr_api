@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use DB;
 use App\Models\Result;
+use App\Http\Controllers\MailController;
 
 
 class DepartmentEmployeeController extends Controller
@@ -32,6 +33,7 @@ class DepartmentEmployeeController extends Controller
                 $result = collect($employee);
                 $department_employeeId = $result[0]->id;
                 DB::commit();
+                MailController::sendPushNotification('EmployeeUpdateNotification');
                 $response = $this->retrieveLimitedDepartmentEmployee($department_employeeId);
                 return $response;
             } catch (\Exception $e) {
@@ -51,6 +53,7 @@ class DepartmentEmployeeController extends Controller
             );
             $response = ['error' => false, 'message' => 'success'];
             DB::commit();
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
@@ -94,6 +97,7 @@ class DepartmentEmployeeController extends Controller
             DB::commit();
             $result = collect($updated_department_employee);
             $department_employeeId = $result[0]->id;
+            MailController::sendPushNotification('EmployeeUpdateNotification');        
             $response = $this->retrieveLimitedDepartmentEmployee($department_employeeId);
             return $response;
         } catch (\Exception $e) {

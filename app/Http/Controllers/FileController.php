@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\View;
 use App\Http\Controllers\Controller;
 use App\Models\Result;
 use DB;
+use App\Http\Controllers\MailController;
+
 
 class FileController extends Controller
 {
@@ -114,6 +116,7 @@ class FileController extends Controller
             $result = collect($_file);
             $file_id = $result[0]->id;
             DB::commit();
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             return  Result::setData(["success"=>true]);
         }catch(\Exception $e){
             DB::rollback();
@@ -138,6 +141,7 @@ class FileController extends Controller
             DB::beginTransaction();
             $deleted_files = DB::select('call DeleteFile(?)', array($id));
             $response = ['error' => false, 'message' => 'success'];
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();

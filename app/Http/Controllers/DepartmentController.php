@@ -7,6 +7,7 @@ use DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\DepartmentHeadController;
 use App\Models\Result;
+use App\Http\Controllers\MailController;
 
 class DepartmentController extends Controller
 {
@@ -34,6 +35,7 @@ class DepartmentController extends Controller
                 $departmentId = $result[0]->id;
                 DepartmentHeadController::addDepartmentHead($departmentId, $request->department_head);
                 DB::commit();
+                MailController::sendPushNotification('EmployeeUpdateNotification');
                 $response = $this->retrieveLimitedDepartment($departmentId);
                 return $response;
             } catch (\Exception $e) {
@@ -50,6 +52,7 @@ class DepartmentController extends Controller
             $department = DB::select('call DeleteDepartment(?)', array($request->id));
             $response = ['error' => false, 'message' => 'success'];
             DB::commit();
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
@@ -72,6 +75,7 @@ class DepartmentController extends Controller
             $department_head = DB::select('call UpdateDepartmentHead(?,?,?)', array(
                 $request->department_head_pk_id, $request->departmentId, $request->departmentHeadId
             ));
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             DB::commit();
             $response = $this->retrieveLimitedDepartment($department_id);
             return $response;

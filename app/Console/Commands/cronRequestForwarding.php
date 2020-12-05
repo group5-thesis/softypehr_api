@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 class cronRequestForwarding extends Command
 {
@@ -39,10 +40,7 @@ class cronRequestForwarding extends Command
     {
         // \Log::info("Request handled!");
         $results = DB::select('call AutoForwardLeaveRequests()');
-        $forwarded = collect($results)[0]->forwarded;
-        if ($forwarded > 0) {
-            
-        }
+        // $forwarded = collect($results)[0]->forwarded;
         $this->info('Job just started');
 
 

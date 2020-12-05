@@ -8,10 +8,23 @@ use Illuminate\Support\Facades\Validator;
 use App\Helpers\Helpers;
 use DB;
 use App\Models\Result;
+use App\Http\Controllers\MailController;
 
 
 class OfficeRequestController extends Controller
 {
+    protected $mailController;
+    public function __construct(Type $var = null)
+    {
+        $this->mailController = new MailController();
+    }
+    protected $payload = [
+        "receiver" => "",
+        "name" => "",
+        "approver" => "",
+        "status" => "",
+        "forwarded" => false,
+    ];
     public function createOfficeRequest(Request $request) // SP need to update
     {
         $validator = Validator::make($request->all(), [
@@ -46,6 +59,7 @@ class OfficeRequestController extends Controller
                     )
                 );
                 $response = $this->retrieveLimitedOfficeRequest($officeRequest[0]->id);
+                MailController::sendPushNotification('NewOfficeRequestNotification');
                 DB::commit();
                 return  $response;
             }catch(\Exception $e){
@@ -75,6 +89,17 @@ class OfficeRequestController extends Controller
             $result = collect($officeRequest);
             $officeRequest_id = $result[0]->id;
             DB::commit();
+            $employeeDetails = collect(DB::select('select email , concat(firstname , " " , lastname)  as name from employee where id', [$request->employeeId]))[0];
+            $ticketDetails = collect(DB::select('select  transaction_no from office_request where id', [$request->officeRequestId]))[0];
+
+            $this->payload["receiver"] = $employeeDetails->email;
+            $this->payload["name"] = $employeeDetails->name;
+            $this->payload["ticketNo"] = $ticketDetails->transaction_no;
+            
+            $this->mailController->SendEmailNotification("RESOLVED_OFFICE_REQUEST", $this->payload);
+            MailController::sendPushNotification('CLosedOfficeRequestNotification' ,[
+                "employeeId"=>$request->employeeId
+            ]);            
             $response = $this->retrieveLimitedOfficeRequest($request->officeRequest_id);
             return $response;
         } catch (\Exception $e) {
@@ -93,6 +118,10 @@ class OfficeRequestController extends Controller
             );
             $response = ['error' => false, 'message' => 'success'];
             DB::commit();
+            $requestDetails = collect(DB::select('select  employeeId from office_request where id', [$request->id]))[0];
+            MailController::sendPushNotification('CLosedOfficeRequestNotification' ,[
+                "employeeId"=>$requestDetails->employeeId
+            ]); 
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
