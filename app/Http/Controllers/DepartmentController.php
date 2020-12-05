@@ -76,6 +76,9 @@ class DepartmentController extends Controller
                 $request->department_head_pk_id, $request->departmentId, $request->departmentHeadId
             ));
             MailController::sendPushNotification('EmployeeUpdateNotification');
+
+            // $deleted_dept_head = DB::select('call DeleteDepartmentHead(?)', array($request->department_head_pk_id));
+
             DB::commit();
             $response = $this->retrieveLimitedDepartment($department_id);
             return $response;
