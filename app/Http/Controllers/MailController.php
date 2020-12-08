@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MyEvent;
 use App\Http\Controllers\Controller;
 use App\Models\Result;
 use Mail;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
-use App\Events\MyEvent;
+
 class MailController extends Controller
 {
     protected $receiver;
@@ -37,14 +37,32 @@ class MailController extends Controller
     public function sendEmailNotice($receiver)
     {
         $this->receiver = $receiver;
-        $this->subject = $subject;
         try {
             $path = public_path('mail/Disabled_Account.html');
             $file = file_get_contents($path);
-            $this->html =$file;
+            $this->html = $file;
             Mail::send([], [], function ($message) {
                 $message->to($this->receiver)
                     ->subject("Account Suspension Notification")
+                    ->from('softypeapi@gmail.com', 'Softype Mail Service')
+                    ->setBody($this->html, 'text/html');
+            });
+            return Result::setData(['status' => 'success']);
+        } catch (\Exception $e) {
+            \Log::info("mail : " . $e->getMessage());
+            return Result::setError($e->getMessage());
+        }
+    }
+    public function sendEmailWelcome($receiver)
+    {
+        $this->receiver = $receiver;
+        try {
+            $path = public_path('mail/GenericMessage.html');
+            $content = file_get_contents($path);
+            $this->html = str_replace("{{MESSAGE}}", "Welcome back! ,<br/>    Your account has been <b>Enabled</b>.", $content);
+            Mail::send([], [], function ($message) {
+                $message->to($this->receiver)
+                    ->subject("Account Enabled Notification")
                     ->from('softypeapi@gmail.com', 'Softype Mail Service')
                     ->setBody($this->html, 'text/html');
             });
@@ -104,7 +122,7 @@ class MailController extends Controller
                 default:
                     break;
             }
-            
+
             $this->html = str_replace("{{url}}", "<a href='" . env('FRONTEND_URL') . "'> View in app now.</a>", $this->html);
 
             Mail::send([], [], function ($message) {
@@ -119,11 +137,11 @@ class MailController extends Controller
             return Result::setError($e->getMessage());
         }
     }
-    public static function sendPushNotification(string $type, $data=null)
+    public static function sendPushNotification(string $type, $data = null)
     {
-        $payload =[
-            "type"=>$type,
-            "data"=>$data
+        $payload = [
+            "type" => $type,
+            "data" => $data,
         ];
 
         event(new MyEvent($payload));

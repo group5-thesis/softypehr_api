@@ -48,4 +48,4 @@ MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
 MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
 
 IS_DEV=true
-FRONTEND_URL=http://localhost:9000 
+FRONTEND_URL=https://softype-employee-portal.netlify.app

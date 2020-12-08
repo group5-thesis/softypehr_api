@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     protected $mailController;
+    protected $payload = [
+        "receiver" => "",
+        "name" => "",
+        "approver" => "",
+        "status" => "",
+        "forwarded" => false,
+    ];
     public function __construct(Type $var = null)
     {
         $this->mailController = new MailController();
@@ -55,7 +62,6 @@ class UserController extends Controller
                 "userId" => $userId,
             ]);
             MailController::sendPushNotification('EmployeeUpdateNotification');
-
             $response = $this->retrieveLimitedEmployeeAccount($userId);
             return $response;
         } catch (\Exception $e) {
@@ -100,6 +106,9 @@ class UserController extends Controller
             $result = collect($employee_account);
             $userId = $result[0]->id;
             DB::commit();
+            $employee = DB::select('call UserGetProfile(?)', array($userId));
+            $res = collect($employee)[0];
+            $mailController->sendEmailWelcome($res->email);
             MailController::sendPushNotification('EmployeeUpdateNotification');
             $response = $this->retrieveLimitedEmployeeAccount($userId);
             return $response;
