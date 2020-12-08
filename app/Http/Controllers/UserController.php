@@ -82,7 +82,7 @@ class UserController extends Controller
             DB::commit();
             $employee = DB::select('call UserGetProfile(?)', array($userId));
             $res = collect($employee)[0];
-            $mailController->sendEmailNotice($res->email);
+            $this->mailController->sendEmailNotice($res->email);
             MailController::sendPushNotification('ResetPasswordNotification', [
                 "userId" => $userId,
             ]);
@@ -108,7 +108,7 @@ class UserController extends Controller
             DB::commit();
             $employee = DB::select('call UserGetProfile(?)', array($userId));
             $res = collect($employee)[0];
-            $mailController->sendEmailWelcome($res->email);
+            $this->mailController->sendEmailWelcome($res->email);
             MailController::sendPushNotification('EmployeeUpdateNotification');
             $response = $this->retrieveLimitedEmployeeAccount($userId);
             return $response;
