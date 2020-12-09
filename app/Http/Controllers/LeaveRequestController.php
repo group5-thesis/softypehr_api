@@ -59,7 +59,10 @@ class LeaveRequestController extends Controller
                 $this->payload['name'] = collect($leave_request)[0]->name;
                 // send email
                 $this->mailController->SendEmailNotification("NEW_LEAVE_REQUEST", $this->payload);
-
+                MailController::sendPushNotification('NewLeaveRequestNotification' , [
+                    'approver'=>$request->approverId,
+                    'employeeId'=>$request->employeeID
+                ]);
                 return Result::setData($leave_request);
             } catch (\Exception $e) {
                 DB::rollback();
@@ -104,6 +107,10 @@ class LeaveRequestController extends Controller
             $this->payload["status"] = $request->status ;
             $this->mailController->SendEmailNotification("RESOLVED_LEAVE_REQUEST", $this->payload);
             DB::commit();
+            MailController::sendPushNotification('UpdateLeaveRequestNotification' , [
+                'approver'=>$approver,
+                'employeeId'=>$request->employeeId
+            ]);
             return Result::setData(["success" => $result[0]->success]);
         } catch (\Exception $e) {
             DB::rollback();
@@ -116,9 +123,15 @@ class LeaveRequestController extends Controller
         DB::beginTransaction();
         try {
             $id = $request->id;
+            $employeeDetails = collect(DB::select('select employeeId , approver from leave_request where id', [$id]))[0];
+            
             $query = DB::select('call deleteLeaveRequest(?)', [$id]);
             $result = collect($query);
             DB::commit();
+            MailController::sendPushNotification('CancelledLeaveRequestNotification' ,[
+                "approver"=>$employeeDetails->approver,
+                "employeeId"=>$employeeDetails->employeeId,
+            ]);
             return Result::setData(["success" => $result[0]->success]);
         } catch (\Exception $e) {
             DB::rollback();

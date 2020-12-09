@@ -7,6 +7,7 @@ use DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\DepartmentHeadController;
 use App\Models\Result;
+use App\Http\Controllers\MailController;
 
 class DepartmentController extends Controller
 {
@@ -34,11 +35,12 @@ class DepartmentController extends Controller
                 $departmentId = $result[0]->id;
                 DepartmentHeadController::addDepartmentHead($departmentId, $request->department_head);
                 DB::commit();
+                MailController::sendPushNotification('EmployeeUpdateNotification');
                 $response = $this->retrieveLimitedDepartment($departmentId);
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                return Result::setError("Something went wrong", 500);
+                 return Result::setError($e->getMessage());
             }
         }
     }
@@ -50,10 +52,11 @@ class DepartmentController extends Controller
             $department = DB::select('call DeleteDepartment(?)', array($request->id));
             $response = ['error' => false, 'message' => 'success'];
             DB::commit();
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -72,6 +75,7 @@ class DepartmentController extends Controller
             $department_head = DB::select('call UpdateDepartmentHead(?,?,?)', array(
                 $request->department_head_pk_id, $request->departmentId, $request->departmentHeadId
             ));
+            MailController::sendPushNotification('EmployeeUpdateNotification');
 
             // $deleted_dept_head = DB::select('call DeleteDepartmentHead(?)', array($request->department_head_pk_id));
 
@@ -80,7 +84,7 @@ class DepartmentController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -91,7 +95,7 @@ class DepartmentController extends Controller
             $result = collect($department);
             return Result::setData(["department" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -102,7 +106,7 @@ class DepartmentController extends Controller
             $result = collect($department);
             return Result::setData(["departments" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -113,7 +117,7 @@ class DepartmentController extends Controller
             $result = collect($department_head);
             return Result::setData(["department_heads" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -124,7 +128,7 @@ class DepartmentController extends Controller
             $result = collect($department_managers);
             return Result::setData(["department_managers" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 
@@ -137,7 +141,7 @@ class DepartmentController extends Controller
             $result = collect($department_managers);
             return Result::setData(["department_managers" => $result]);
         } catch (\Exception $e) {
-            return Result::setError("Something went wrong", 500);
+             return Result::setError($e->getMessage());
         }
     }
 }

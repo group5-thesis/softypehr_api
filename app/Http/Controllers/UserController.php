@@ -2,15 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use App\User;
-use Illuminate\Support\Facades\Hash;
-use DB;
+use App\Http\Controllers\MailController;
 use App\Models\Result;
+use App\User;
+use DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    protected $mailController;
+    protected $payload = [
+        "receiver" => "",
+        "name" => "",
+        "approver" => "",
+        "status" => "",
+        "forwarded" => false,
+    ];
+    public function __construct(Type $var = null)
+    {
+        $this->mailController = new MailController();
+    }
 
     public function createEmployeeAccount($data)
     {
@@ -19,7 +31,7 @@ class UserController extends Controller
                 'username' => $data['username'],
                 'password' => Hash::make($data['password']), // default password is Softype@100
                 'qr_code' => $data['qr_code'],
-                'employeeId' => $data['employeeId']
+                'employeeId' => $data['employeeId'],
             ]
         );
     }
@@ -41,11 +53,15 @@ class UserController extends Controller
             DB::beginTransaction();
             $default_password = Hash::make("Softype@100");
             $employee_account = DB::select('call ResetEmployeeAccount(?,?)', array(
-                $request->userId, $default_password
+                $request->userId, $default_password,
             ));
             $result = collect($employee_account);
             $userId = $result[0]->id;
             DB::commit();
+            MailController::sendPushNotification('ResetPasswordNotification', [
+                "userId" => $userId,
+            ]);
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             $response = $this->retrieveLimitedEmployeeAccount($userId);
             return $response;
         } catch (\Exception $e) {
@@ -59,11 +75,18 @@ class UserController extends Controller
         try {
             DB::beginTransaction();
             $employee_account = DB::select('call DisableEmployeeAccount(?, ?)', array(
-                $request->userId, $request->employeeId
+                $request->userId, $request->employeeId,
             ));
             $result = collect($employee_account);
             $userId = $result[0]->id;
             DB::commit();
+            $employee = DB::select('call UserGetProfile(?)', array($userId));
+            $res = collect($employee)[0];
+            $this->mailController->sendEmailNotice($res->email);
+            MailController::sendPushNotification('ResetPasswordNotification', [
+                "userId" => $userId,
+            ]);
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             $response = $this->retrieveLimitedEmployeeAccount($userId);
             return $response;
         } catch (\Exception $e) {
@@ -74,14 +97,19 @@ class UserController extends Controller
 
     public function enableEmployeeAccount(Request $request)
     {
+        // EmployeeUpdateNotification
         try {
             DB::beginTransaction();
             $employee_account = DB::select('call EnableEmployeeAccount(?, ?)', array(
-                $request->userId, $request->employeeId
+                $request->userId, $request->employeeId,
             ));
             $result = collect($employee_account);
             $userId = $result[0]->id;
             DB::commit();
+            $employee = DB::select('call UserGetProfile(?)', array($userId));
+            $res = collect($employee)[0];
+            $this->mailController->sendEmailWelcome($res->email);
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             $response = $this->retrieveLimitedEmployeeAccount($userId);
             return $response;
         } catch (\Exception $e) {

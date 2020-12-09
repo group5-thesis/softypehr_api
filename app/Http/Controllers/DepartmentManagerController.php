@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\MailController;
+use App\Models\Result;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use DB;
-use App\Models\Result;
 
 class DepartmentManagerController extends Controller
 {
@@ -14,7 +15,7 @@ class DepartmentManagerController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'department_manager' => 'required',
-            'departmentId' => 'required'
+            'departmentId' => 'required',
         ]);
         if ($validator->fails()) {
             $messages = json_encode($validator->messages());
@@ -31,11 +32,12 @@ class DepartmentManagerController extends Controller
                 $result = collect($employee);
                 $employee_id = $result[0]->id;
                 DB::commit();
+                MailController::sendPushNotification('EmployeeUpdateNotification');
                 $response = $this->retrieveLimitedDepartmentManager($employee_id);
                 return $response;
             } catch (\Exception $e) {
                 DB::rollback();
-                return Result::setError( $e->getMessage() , 500) ;
+                return Result::setError($e->getMessage(), 500);
             }
         }
     }
@@ -55,7 +57,7 @@ class DepartmentManagerController extends Controller
             return $response;
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( $e->getMessage() , 500) ;
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -66,10 +68,11 @@ class DepartmentManagerController extends Controller
             $deleted_manager = DB::select('call DeleteDepartmentManager(?)', array($request->id));
             $response = ['error' => false, 'message' => 'success'];
             DB::commit();
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
-            return Result::setError( $e->getMessage() , 500) ;
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -83,7 +86,7 @@ class DepartmentManagerController extends Controller
             $result = collect($department_manager);
             return Result::setData(['department_manager_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( $e->getMessage() , 500) ;
+            return Result::setError($e->getMessage(), 500);
         }
     }
 
@@ -96,7 +99,7 @@ class DepartmentManagerController extends Controller
             $result = collect($department_managers);
             return Result::setData(['department_manager_information' => $result]);
         } catch (\Exception $e) {
-            return Result::setError( $e->getMessage() , 500) ;
+            return Result::setError($e->getMessage(), 500);
         }
     }
 }

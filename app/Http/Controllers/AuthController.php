@@ -157,12 +157,6 @@ class AuthController extends Controller
             return Result::setError($e->getMessage());
         }
     }
-
-    public function loginQR(Request $request )
-    {
-       
-    }
-
     public function verifyOTP(Request $request)
     {
         $params = [$request->email , $request->OTP ,0 ];

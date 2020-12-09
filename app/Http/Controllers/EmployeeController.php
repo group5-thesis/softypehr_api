@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Http\Controllers\MailController;
 
 // use QrCode;
 
@@ -59,29 +60,31 @@ class EmployeeController extends Controller
                     $lastName = $request->lastname;
                     $username = Str::lower($firstName[0] . $lastName . $employee_id);
                     $defaultPassword = Hash::make('Softype@100');
-                    $file = 'qrcode/' . $username . '_' . $employee_id . "_" . time() . '.svg';
-                    \QrCode::size(250)->format('svg')->generate(json_encode([
-                        "employeeId" => $result[0]->id,
-                        "username" => $username,
-                        "firstname" => $request->firstname,
-                        "middlename" => $request->middlename,
-                        "lastname" => $request->lastname,
-                        "mobileno" => $request->mobileno,
-                        "gender" => $request->gender,
-                        "email" => $request->email,
-                        "birthdate" => $request->birthdate,
-                        "street" => $request->street,
-                        "city" => $request->city,
-                        "country" => $request->country,
-                        "phil_health_no" => $request->phil_health_no,
-                        "sss" => $request->sss,
-                        "pag_ibig_no" => $request->pag_ibig_no,
-                        "role" => $request->role,
-                    ]), public_path($file));
+                    // $file = 'qrcode/' . $username . '_' . $employee_id . "_" . time() . '.svg';
+                    // \QrCode::size(250)->format('svg')->generate(json_encode([
+                    //     "employeeId" => $result[0]->id,
+                    //     "username" => $username,
+                    //     "firstname" => $request->firstname,
+                    //     "middlename" => $request->middlename,
+                    //     "lastname" => $request->lastname,
+                    //     "mobileno" => $request->mobileno,
+                    //     "gender" => $request->gender,
+                    //     "email" => $request->email,
+                    //     "birthdate" => $request->birthdate,
+                    //     "street" => $request->street,
+                    //     "city" => $request->city,
+                    //     "country" => $request->country,
+                    //     "phil_health_no" => $request->phil_health_no,
+                    //     "sss" => $request->sss,
+                    //     "pag_ibig_no" => $request->pag_ibig_no,
+                    //     "role" => $request->role,
+                    // ]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
-                        array($username, $defaultPassword, $file, $employee_id, $request->accountType)
-                    );
+                        array($username, $defaultPassword, 'qrcode', $employee_id, $request->accountType)
+                       );
+                    MailController::sendPushNotification('EmployeeUpdateNotification');
+
                 }
                 DB::commit();
                 $response = $this->retrieveLimitedEmployee($employee_id);
@@ -113,7 +116,6 @@ class EmployeeController extends Controller
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
 
-            return Result::setError("Something went wrong", 500);
 
             return Result::setError($e->getMessage());
 
@@ -169,7 +171,9 @@ class EmployeeController extends Controller
             );
             $result = collect($updated_employee);
             $employee_id = $result[0]->id;
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             $response = $this->retrieveLimitedEmployee($employee_id);
+
             DB::commit();
             return $response;
         } catch (\Exception $e) {
@@ -185,6 +189,7 @@ class EmployeeController extends Controller
             $deleted_employee = DB::select('call DeleteEmployee(?)', array($id));
             $response = ['error' => false, 'message' => 'success'];
             DB::commit();
+            MailController::sendPushNotification('EmployeeUpdateNotification');
             return Result::setData($response);
         } catch (\Exception $e) {
             DB::rollback();
@@ -214,6 +219,7 @@ class EmployeeController extends Controller
             $result = collect($query);
             if ($result[0]->completed > 0) {
                 DB::commit();
+                MailController::sendPushNotification('EmployeeUpdateNotification');
                 return $this->retrieveLimitedEmployee($employee_id);
             } else {
                 DB::rollback();
