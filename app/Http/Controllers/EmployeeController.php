@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\MailController;
 use App\Models\Result;
 use DB;
 use Exception;
@@ -10,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use App\Http\Controllers\MailController;
 
 // use QrCode;
 
@@ -81,8 +81,8 @@ class EmployeeController extends Controller
                     // ]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
-                        array($username, $defaultPassword, 'qrcode7', $employee_id, $request->accountType)
-                       );
+                        array($username, $defaultPassword, "qr_".time() , $employee_id, $request->accountType)
+                    );
                     MailController::sendPushNotification('EmployeeUpdateNotification');
 
                 }
@@ -115,7 +115,6 @@ class EmployeeController extends Controller
             $result = collect($employee);
             return Result::setData(['employee_information' => $result]);
         } catch (\Exception $e) {
-
 
             return Result::setError($e->getMessage());
 
@@ -270,7 +269,7 @@ class EmployeeController extends Controller
                 //echo $head->departmentManager."<br/> \n";
                 if ($isExist < 0) {
                     if ($head->managerId != null) {
-                            //echo "1  <br/> \n";
+                        //echo "1  <br/> \n";
                         if ($head->employee != null) {
                             $manager['children'] = [$employee];
                         }
@@ -286,13 +285,13 @@ class EmployeeController extends Controller
                         if ($managerExist != -1) {
                             //echo "4  <br/> \n";
                             if ($head->employee != null) {
-                                if (!key_exists("children" ,$departments[$isExist]['children'][$managerExist] )) {
-                                    $departments[$isExist]['children'][$managerExist]['children'] =[];
+                                if (!key_exists("children", $departments[$isExist]['children'][$managerExist])) {
+                                    $departments[$isExist]['children'][$managerExist]['children'] = [];
                                 }
                                 array_push($departments[$isExist]['children'][$managerExist]['children'], $employee);
                             }
-                        }else{
-                            array_push($departments[$isExist]['children'] , $manager);
+                        } else {
+                            array_push($departments[$isExist]['children'], $manager);
                         }
                     }
                 }
