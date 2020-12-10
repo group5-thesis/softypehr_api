@@ -81,7 +81,7 @@ class EmployeeController extends Controller
                     // ]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
-                        array($username, $defaultPassword, 'qrcode', $employee_id, $request->accountType)
+                        array($username, $defaultPassword, 'qrcode7', $employee_id, $request->accountType)
                        );
                     MailController::sendPushNotification('EmployeeUpdateNotification');
 
