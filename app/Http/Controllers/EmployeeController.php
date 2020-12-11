@@ -213,14 +213,13 @@ class EmployeeController extends Controller
             DB::beginTransaction();
             $file = $request->file;
             $employee_id = $request->employee_id;
-            $user_id = $request->user_id;
             $imageName = FileController::store($file);
             $query = DB::select("call UpdateProfileImage(?,?)", array($employee_id, $imageName));
             $result = collect($query);
             if ($result[0]->completed > 0) {
                 DB::commit();
                 MailController::sendPushNotification('EmployeeUpdateNotification');
-                return $this->retrieveEmployeeProfile($user_id);
+                return $this->retrieveEmployeeProfile($request);
             } else {
                 DB::rollback();
                 return Result::setError("", "Update failed", 400);
