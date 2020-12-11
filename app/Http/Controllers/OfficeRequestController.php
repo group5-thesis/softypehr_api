@@ -59,7 +59,9 @@ class OfficeRequestController extends Controller
                     )
                 );
                 $response = $this->retrieveLimitedOfficeRequest($officeRequest[0]->id);
-                MailController::sendPushNotification('NewOfficeRequestNotification');
+                MailController::sendPushNotification('NewOfficeRequestNotification',[
+                    "employeeId"=> $request->employeeId
+                ]);
                 DB::commit();
                 return  $response;
             }catch(\Exception $e){
