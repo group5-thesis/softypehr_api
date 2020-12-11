@@ -41,6 +41,7 @@ class MailController extends Controller
             $path = public_path('mail/Disabled_Account.html');
             $file = file_get_contents($path);
             $this->html = $file;
+            $this->html = str_replace("{{url}}", "<a href='" . env('FRONTEND_URL') . "'> View in app now.</a>", $this->html);
             Mail::send([], [], function ($message) {
                 $message->to($this->receiver)
                     ->subject("Account Suspension Notification")
@@ -60,6 +61,7 @@ class MailController extends Controller
             $path = public_path('mail/GenericMessage.html');
             $content = file_get_contents($path);
             $this->html = str_replace("{{MESSAGE}}", "Welcome back! ,<br/>    Your account has been <b>Enabled</b>.", $content);
+            $this->html = str_replace("{{url}}", "<a href='" . env('FRONTEND_URL') . "'> View in app now.</a>", $this->html);
             Mail::send([], [], function ($message) {
                 $message->to($this->receiver)
                     ->subject("Account Enabled Notification")
