@@ -17,7 +17,7 @@ class CreateUser extends Migration
             $table->id()->autoIncrement();
             $table->string('username');
             $table->string('password');
-            $table->string('qr_code')->unique();
+            $table->string('qr_code');
             $table->integer('account_type');
             $table->integer('is_deactivated')->default(0);
             $table->integer('is_password_changed')->default(0);

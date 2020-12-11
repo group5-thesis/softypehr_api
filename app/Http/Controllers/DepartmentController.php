@@ -49,7 +49,7 @@ class DepartmentController extends Controller
     {
         DB::beginTransaction();
         try {
-            $department = DB::select('call DeleteDepartment(?)', array($request->id));
+            $department = DB::select('call DeleteDepartment(?, ?)', array($request->id, $request->headId));
             $response = ['error' => false, 'message' => 'success'];
             DB::commit();
             MailController::sendPushNotification('EmployeeUpdateNotification');
