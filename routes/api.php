@@ -28,7 +28,7 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/create_request_leave', 'LeaveRequestController@createLeaveRequest');
     Route::post('/getLeaveRequest', 'LeaveRequestController@getLeaveRequests');
     Route::post('/filterLeaveRequest', 'LeaveRequestController@filterLeaveRequest');
-    Route::post('/cancel_leave_request', 'LeaveRequestController@cancelLeaveRequest');
+    Route::post('/cancel_leave_reque5127.0.0.1st', 'LeaveRequestController@cancelLeaveRequest');
     Route::post('/update_leave_request', 'LeaveRequestController@updateLeaveRequest');
     Route::get('/checkRemainingLeave/{empID}', 'LeaveRequestController@checkRemainingLeave');
 
@@ -130,13 +130,12 @@ Route::group(['middleware' => 'api-header'], function () {
     Route::post('/disable_employee_account', 'UserController@disableEmployeeAccount');
     Route::get('/retrieve_limited_employee_account', 'UserController@retrieveLimitedEmployeeAccount');
     Route::post('/enable_employee_account', 'UserController@enableEmployeeAccount');
-
 });
 
 // this routes are needed with jwt token, you need first to login before executing this routes
 Route::group(['middleware' => ['jwt.auth', 'api-header']], function () {
 
-     // all routes to protected resources are registered here
+    // all routes to protected resources are registered here
 
     Route::get('sendbasicemail', 'MailController@basic_email');
     Route::get('sendhtmlemail', 'MailController@html_email');

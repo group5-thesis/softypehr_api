@@ -31,8 +31,9 @@ class EmployeeController extends Controller
             'role' => 'required',
         ]);
 
+
         if ($validator->fails()) {
-            return Result::setError("", $validator->messages()->get('email')[0], 401);
+            return Result::setError("", null, 401);
         } else {
             DB::beginTransaction();
             try {
@@ -60,31 +61,11 @@ class EmployeeController extends Controller
                     $lastName = $request->lastname;
                     $username = Str::lower($firstName[0] . $lastName . $employee_id);
                     $defaultPassword = Hash::make('Softype@100');
-                    // $file = 'qrcode/' . $username . '_' . $employee_id . "_" . time() . '.svg';
-                    // \QrCode::size(250)->format('svg')->generate(json_encode([
-                    //     "employeeId" => $result[0]->id,
-                    //     "username" => $username,
-                    //     "firstname" => $request->firstname,
-                    //     "middlename" => $request->middlename,
-                    //     "lastname" => $request->lastname,
-                    //     "mobileno" => $request->mobileno,
-                    //     "gender" => $request->gender,
-                    //     "email" => $request->email,
-                    //     "birthdate" => $request->birthdate,
-                    //     "street" => $request->street,
-                    //     "city" => $request->city,
-                    //     "country" => $request->country,
-                    //     "phil_health_no" => $request->phil_health_no,
-                    //     "sss" => $request->sss,
-                    //     "pag_ibig_no" => $request->pag_ibig_no,
-                    //     "role" => $request->role,
-                    // ]), public_path($file));
                     DB::select(
                         'call CreateEmployeeAccount(?,?,?,?,?)',
-                        array($username, $defaultPassword, "qr_".time() , $employee_id, $request->accountType)
+                        array($username, $defaultPassword, "qr_" . time(), $employee_id, $request->accountType)
                     );
                     MailController::sendPushNotification('EmployeeUpdateNotification');
-
                 }
                 DB::commit();
                 $response = $this->retrieveLimitedEmployee($employee_id);
@@ -105,7 +86,6 @@ class EmployeeController extends Controller
         } catch (\Exception $e) {
             return Result::setError($e->getMessage());
         }
-
     }
 
     public function retrieveLimitedEmployee($id)
@@ -117,7 +97,6 @@ class EmployeeController extends Controller
         } catch (\Exception $e) {
 
             return Result::setError($e->getMessage());
-
         }
     }
 
@@ -201,7 +180,6 @@ class EmployeeController extends Controller
         try {
             $employee = DB::select('call UserGetProfile(?)', array($request->userId));
             return Result::setData($employee);
-
         } catch (\Exception $e) {
             return Result::setError($e->getMessage());
         }
@@ -300,8 +278,7 @@ class EmployeeController extends Controller
         } catch (\Exception $e) {
             return Result::setError($e);
         }
-
     }
-// }
+    // }
 
 }

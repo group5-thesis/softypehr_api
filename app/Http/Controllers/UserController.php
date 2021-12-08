@@ -19,7 +19,7 @@ class UserController extends Controller
         "status" => "",
         "forwarded" => false,
     ];
-    public function __construct(Type $var = null)
+    public function __construct()
     {
         $this->mailController = new MailController();
     }
